@@ -8,6 +8,7 @@ namespace FPC
     {
         private GameInputActions _inputActions;
         private CharacterController _characterController;
+        private Animator _animator;
         private float _moveSpeed;
         [Header("Move")]
         [SerializeField] private float walkSpeed;
@@ -31,6 +32,7 @@ namespace FPC
         [SerializeField] private Vector3 crouchingCenter;
         [SerializeField] private Vector3 standingCenter;
         [SerializeField] private bool isCrouching;
+        private static readonly int IsWalking = Animator.StringToHash("isWalking");
 
         private void Awake()
         {
@@ -38,7 +40,7 @@ namespace FPC
             
             _inputActions = new GameInputActions();
             _characterController = GetComponent<CharacterController>();
-
+            _animator = GetComponent<Animator>();
             _inputActions.Player.Sprint.performed += _ => SprintPressed();
             _inputActions.Player.Sprint.canceled += _ => SprintReleased();
             _inputActions.Player.Crouch.performed += _ => CrouchPressed();
@@ -51,6 +53,7 @@ namespace FPC
             Sprint();
             Jump();
             Crouch();
+            AnimationController();
         }
 
         private void Gravity()
@@ -164,6 +167,17 @@ namespace FPC
         {
             _inputActions.Disable();
         }
-        
+        // Animation controller
+        private void AnimationController()
+        {
+            if (_inputActions.Player.Move.inProgress)
+            {
+                _animator.SetBool("isWalking", true);
+            }
+            else
+            {
+                _animator.SetBool("isWalking", false);
+            }
+        }
     }
 }
