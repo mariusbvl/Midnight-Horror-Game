@@ -6,7 +6,7 @@ namespace FPC
     {
         [SerializeField] private FirstPersonController fpc;
         [HideInInspector]public Animator animator;
-        private bool _wasGrounded;
+        private bool _inAir;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
         private static readonly int IsWalkingForward = Animator.StringToHash("isWalkingForward");
         private static readonly int IsWalkingBackwards = Animator.StringToHash("isWalkingBackwards");
@@ -29,7 +29,8 @@ namespace FPC
         {
             WalkingAnimationController();
             RunningAnimationController();
-            JumpingAnimationController();
+            IdleJumpingAnimationController();
+            MovingJumpingAnimationController();
             CrouchAnimationController();
         }
 
@@ -47,35 +48,50 @@ namespace FPC
                 animator.SetBool(IsCrouching, false);
             }
         }
-        
-        
-        
-        private void JumpingAnimationController(){
-            if (fpc.inputActions.Player.Jump.triggered && fpc.isGrounded)
+
+
+        private void MovingJumpingAnimationController()
+        {
+            if (fpc.inputActions.Player.Move.inProgress && fpc.inputActions.Player.Jump.triggered && !_inAir)
             {
                 animator.SetTrigger(Jump);
+                _inAir = true;
             }
-            if(!_wasGrounded && fpc.isGrounded)
+
+            if (_inAir && fpc.isGrounded)
             {
                 animator.SetTrigger(Landed);
+                _inAir = false;
             }
-            _wasGrounded = fpc.isGrounded;
+        }
+        
+        private void IdleJumpingAnimationController(){
+            if (!fpc.inputActions.Player.Move.inProgress && fpc.inputActions.Player.Jump.triggered && !_inAir)
+            {
+                animator.SetTrigger(Jump);
+                _inAir = true;
+            }
+
+            if (_inAir && fpc.isGrounded)
+            {
+                animator.SetTrigger(Landed);
+                _inAir = false;
+            }
         }
         private void RunningAnimationController()
         {
-                if (fpc.inputActions.Player.Move.inProgress && fpc.inputActions.Player.Sprint.inProgress)
-                {
-                    animator.SetBool(IsRunning, true);
-                }
-                else
-                {
-                    animator.SetBool(IsRunning, false);
-                }
+            if (fpc.inputActions.Player.Move.inProgress && fpc.inputActions.Player.Sprint.inProgress)
+            {
+                animator.SetBool(IsRunning, true);
+            }
+            else
+            {
+                animator.SetBool(IsRunning, false);
+            }
         }
         
         private void WalkingAnimationController()
         {
-            
             if (fpc.inputActions.Player.Move.inProgress)
             {
                 WalkingDirection();

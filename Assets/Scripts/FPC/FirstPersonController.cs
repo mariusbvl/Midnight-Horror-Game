@@ -24,6 +24,8 @@ namespace FPC
         [SerializeField] private float sprintSpeed;
         [SerializeField] private bool isSprinting;
         [Header("Crouch")]
+        [SerializeField]private Transform playerMesh;
+        [SerializeField] private Transform cameraTransform;
         [SerializeField] private float crouchSpeed;
         [SerializeField] private float crouchTime;
         [SerializeField] private float standHeight;
@@ -76,10 +78,10 @@ namespace FPC
         {
             if (!isCrouching)
             {
-                if (inputActions.Player.Jump.triggered && isGrounded && canJump)
+                if (inputActions.Player.Jump.triggered && isGrounded)
                 {
                     _velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-                    StartCoroutine(JumpCooldown());
+                    
                 }
             }
         }
@@ -137,19 +139,46 @@ namespace FPC
         private IEnumerator CrouchStand()
         {
             float timeElapsed = 0;
+            //PlayerMesh
+            float startPMeshYTransform= isCrouching ? -1f
+                : -0.25f;
+            float targetPMeshYTransform = isCrouching ? -0.25f : -1f;
+            //Camera
+            float startCameraYTransform = isCrouching ? 0.75f : 1.25f;
+            float targetCameraYTransform = isCrouching ? 1.25f : 0.75f;
+            //CharacterController
             float targetHeight = isCrouching ? crouchHeight : standHeight;
             float currentHeight = _characterController.height;
             Vector3 targetCenter = isCrouching ? crouchingCenter : standingCenter;
             Vector3 currentCenter = _characterController.center;
             while (timeElapsed < crouchTime)
             {
+                //PlayerMesh
+                Vector3 playerMeshPosition = playerMesh.localPosition;
+                playerMeshPosition.y = Mathf.Lerp(startPMeshYTransform, targetPMeshYTransform, timeElapsed/crouchTime);
+                playerMesh.localPosition = playerMeshPosition;
+                //Camera
+                Vector3 cameraPosition = cameraTransform.localPosition;
+                cameraPosition.y = Mathf.Lerp(startCameraYTransform, targetCameraYTransform, timeElapsed / crouchTime);
+                cameraTransform.localPosition = cameraPosition;
+                //Character Controller
                 _characterController.height = Mathf.Lerp(currentHeight, targetHeight, timeElapsed/crouchTime);
                 _characterController.center = Vector3.Lerp(currentCenter, targetCenter, timeElapsed/crouchTime);
+                
                 timeElapsed += Time.deltaTime;
                 yield return null; 
             }
+            //Character Controller
             _characterController.height = targetHeight;
             _characterController.center = targetCenter;
+            //Player Mesh
+            Vector3 finalMeshPosition = playerMesh.localPosition;
+            finalMeshPosition.y = targetPMeshYTransform;
+            playerMesh.localPosition = finalMeshPosition;
+            //Camera
+            Vector3 finalCameraPosition = cameraTransform.localPosition;
+            finalCameraPosition.y = targetCameraYTransform;
+            cameraTransform.localPosition = finalCameraPosition;
         }
         
         private void SprintPressed()
