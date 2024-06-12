@@ -239,6 +239,7 @@ GameObject:
   - component: {fileID: 313263212}
   - component: {fileID: 313263211}
   - component: {fileID: 313263210}
+  - component: {fileID: 313263214}
   - component: {fileID: 313263213}
   m_Layer: 0
   m_Name: Player
@@ -259,7 +260,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0da61a62a504e346a20a8e28b27fcc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 6
+  _moveSpeed: 0
+  walkSpeed: 4
+  move: {x: 0, y: 0}
   gravity: -9.81
   jumpHeight: 1.5
   ground: {fileID: 1312874368}
@@ -268,9 +271,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   isGrounded: 0
-  sprintSpeed: 10
+  canJump: 0
+  sprintSpeed: 8
   isSprinting: 0
-  crouchSpeed: 3
+  crouchSpeed: 2
   crouchTime: 0.25
   standHeight: 2
   crouchHeight: 1
@@ -342,6 +346,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &313263214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313263209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3479f8e5c63dcb34fb11f439c072a6a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fpc: {fileID: 313263210}
+  animator: {fileID: 0}
 --- !u!1 &333168642
 GameObject:
   m_ObjectHideFlags: 0
@@ -1343,7 +1361,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 993545820}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cubes
   m_TagString: Untagged
   m_Icon: {fileID: 0}

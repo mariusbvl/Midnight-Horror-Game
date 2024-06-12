@@ -1,26 +1,25 @@
 using System.Collections;
 using UnityEngine;
 
-
 namespace FPC
 {
     public class FirstPersonController : MonoBehaviour
     {
-        private GameInputActions _inputActions;
+        [HideInInspector]public GameInputActions inputActions;
         private CharacterController _characterController;
-        private Animator _animator;
-        private float _moveSpeed;
+        public float _moveSpeed;
         [Header("Move")]
         [SerializeField] private float walkSpeed;
         private Vector3 _velocity;
-        private Vector2 _move;
+        [HideInInspector]public Vector2 move;
         [Header("Jump")]
         [SerializeField] private float gravity = -9.81f;
         [SerializeField] private float jumpHeight = 2f;
         [SerializeField] private Transform ground;
         [SerializeField] private float distanceToGround = 0.4f;
         [SerializeField] private LayerMask groundMask;
-        [SerializeField] private bool isGrounded;
+        [SerializeField] public bool isGrounded;
+        [HideInInspector]public bool canJump;
         [Header("Sprint")]
         [SerializeField] private float sprintSpeed;
         [SerializeField] private bool isSprinting;
@@ -31,19 +30,17 @@ namespace FPC
         [SerializeField] private float crouchHeight;
         [SerializeField] private Vector3 crouchingCenter;
         [SerializeField] private Vector3 standingCenter;
-        [SerializeField] private bool isCrouching;
-        private static readonly int IsWalking = Animator.StringToHash("isWalking");
+        [SerializeField] public bool isCrouching;
 
         private void Awake()
         {
             _moveSpeed = walkSpeed;
-            
-            _inputActions = new GameInputActions();
+            canJump = true;
+            inputActions = new GameInputActions();
             _characterController = GetComponent<CharacterController>();
-            _animator = GetComponent<Animator>();
-            _inputActions.Player.Sprint.performed += _ => SprintPressed();
-            _inputActions.Player.Sprint.canceled += _ => SprintReleased();
-            _inputActions.Player.Crouch.performed += _ => CrouchPressed();
+            inputActions.Player.Sprint.performed += _ => SprintPressed();
+            inputActions.Player.Sprint.canceled += _ => SprintReleased();
+            inputActions.Player.Crouch.performed += _ => CrouchPressed();
         }
 
         private void Update()
@@ -53,7 +50,6 @@ namespace FPC
             Sprint();
             Jump();
             Crouch();
-            AnimationController();
         }
 
         private void Gravity()
@@ -70,9 +66,9 @@ namespace FPC
 
         private void PlayerMovement()
         {
-            _move = _inputActions.Player.Move.ReadValue<Vector2>();
+            move = inputActions.Player.Move.ReadValue<Vector2>();
             var transform1 = transform;
-            Vector3 movement = (_move.y * transform1.forward) + (_move.x * transform1.right);
+            Vector3 movement = (move.y * transform1.forward) + (move.x * transform1.right);
             _characterController.Move(movement * (_moveSpeed * Time.deltaTime));
         }
 
@@ -80,22 +76,37 @@ namespace FPC
         {
             if (!isCrouching)
             {
-                if (_inputActions.Player.Jump.triggered && isGrounded)
+                if (inputActions.Player.Jump.triggered && isGrounded && canJump)
                 {
                     _velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    StartCoroutine(JumpCooldown());
                 }
             }
         }
-
+        
+        private IEnumerator JumpCooldown()
+        {
+            canJump = false;  
+            yield return new WaitForSeconds(2);  
+            canJump = true;  
+        }
         private void Sprint()
         {
-            if (isSprinting && isGrounded)
+            if (move.y > 0)
             {
-                _moveSpeed = sprintSpeed;
+                if (isSprinting && isGrounded)
+                {
+                    _moveSpeed = sprintSpeed;
+                }
+                else if (!isSprinting && isGrounded)
+                {
+                        _moveSpeed = walkSpeed;
+                }
             }
-            else if(!isSprinting && isGrounded)
+            else
             {
-                _moveSpeed = walkSpeed;
+                //_moveSpeed = walkSpeed;
+                //isSprinting = false;
             }
         }
 
@@ -103,12 +114,12 @@ namespace FPC
         {
             if (isGrounded)
             {
-                if (_inputActions.Player.Crouch.triggered && isCrouching)
+                if (inputActions.Player.Crouch.triggered && isCrouching)
                 {
                     StartCoroutine(CrouchStand());
                 }
             }
-            if (_inputActions.Player.Crouch.triggered && !isCrouching)
+            if (inputActions.Player.Crouch.triggered && !isCrouching)
             {
                 StartCoroutine(CrouchStand());
             }
@@ -160,24 +171,12 @@ namespace FPC
         }
         private void OnEnable()
         {
-            _inputActions.Enable();
+            inputActions.Enable();
         }
 
         private void OnDisable()
         {
-            _inputActions.Disable();
-        }
-        // Animation controller
-        private void AnimationController()
-        {
-            if (_inputActions.Player.Move.inProgress)
-            {
-                _animator.SetBool("isWalking", true);
-            }
-            else
-            {
-                _animator.SetBool("isWalking", false);
-            }
+            inputActions.Disable();
         }
     }
 }
