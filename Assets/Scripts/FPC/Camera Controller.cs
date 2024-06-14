@@ -28,7 +28,7 @@ namespace FPC
             float mouseX = _mouseLook.x * cameraSensitivity * Time.deltaTime;
             float mouseY = _mouseLook.y * cameraSensitivity * Time.deltaTime;
             _xRotation -= mouseY;
-            _xRotation = Mathf.Clamp(_xRotation, -90f, 90);
+            _xRotation = Mathf.Clamp(_xRotation, -80f, 80);
             transform.localRotation = Quaternion.Euler(_xRotation, 0, 0);
             playerBody.Rotate(Vector3.up * mouseX);
         }

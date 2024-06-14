@@ -5,9 +5,9 @@ namespace FPC
     public class HeadBobController : MonoBehaviour
     {
         [SerializeField] private bool enableBob = true;
-        
-        [SerializeField, Range(0, 0.1f)] public float amplitude = 0.005f;
-        [SerializeField, Range(0, 30)] public float frequency = 10f;
+
+        [SerializeField, Range(0, 0.1f)] public float amplitude;
+        [SerializeField, Range(0, 30)] public float frequency;
 
         [SerializeField] private new Transform camera;
         [SerializeField] private Transform cameraHolder;
