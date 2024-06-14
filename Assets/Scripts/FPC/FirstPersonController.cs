@@ -8,6 +8,7 @@ namespace FPC
         [HideInInspector]public GameInputActions inputActions;
         private CharacterController _characterController;
         public float _moveSpeed;
+        [SerializeField] private HeadBobController headBob;
         [Header("Move")]
         [SerializeField] private float walkSpeed;
         private Vector3 _velocity;
@@ -112,10 +113,14 @@ namespace FPC
                 if (isSprinting && isGrounded)
                 {
                     _moveSpeed = sprintSpeed;
+                    headBob.amplitude = 0.01f;
+                    headBob.frequency = 20f;
                 }
                 else if (!isSprinting && isGrounded)
                 {
-                        _moveSpeed = walkSpeed;
+                    _moveSpeed = walkSpeed;
+                    headBob.amplitude = 0.005f;
+                    headBob.frequency = 10f;
                 }
             }
             else
