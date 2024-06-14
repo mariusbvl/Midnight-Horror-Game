@@ -157,8 +157,8 @@ namespace FPC
                 : -0.25f;
             float targetPMeshYTransform = isCrouching ? -0.25f : -1f;
             //Camera
-            float startCameraYTransform = isCrouching ? 0.75f : 1.25f;
-            float targetCameraYTransform = isCrouching ? 1.25f : 0.75f;
+            //float startCameraYTransform = isCrouching ? 0.75f : 1.25f;
+            //float targetCameraYTransform = isCrouching ? 1.25f : 0.75f;
             //CharacterController
             float targetHeight = isCrouching ? crouchHeight : standHeight;
             float currentHeight = _characterController.height;
@@ -171,9 +171,9 @@ namespace FPC
                 playerMeshPosition.y = Mathf.Lerp(startPMeshYTransform, targetPMeshYTransform, timeElapsed/crouchTime);
                 playerMesh.localPosition = playerMeshPosition;
                 //Camera
-                Vector3 cameraPosition = cameraTransform.localPosition;
-                cameraPosition.y = Mathf.Lerp(startCameraYTransform, targetCameraYTransform, timeElapsed / crouchTime);
-                cameraTransform.localPosition = cameraPosition;
+                //Vector3 cameraPosition = cameraTransform.localPosition;
+                //cameraPosition.y = Mathf.Lerp(startCameraYTransform, targetCameraYTransform, timeElapsed / crouchTime);
+                //cameraTransform.localPosition = cameraPosition;
                 //Character Controller
                 _characterController.height = Mathf.Lerp(currentHeight, targetHeight, timeElapsed/crouchTime);
                 _characterController.center = Vector3.Lerp(currentCenter, targetCenter, timeElapsed/crouchTime);
@@ -189,9 +189,9 @@ namespace FPC
             finalMeshPosition.y = targetPMeshYTransform;
             playerMesh.localPosition = finalMeshPosition;
             //Camera
-            Vector3 finalCameraPosition = cameraTransform.localPosition;
-            finalCameraPosition.y = targetCameraYTransform;
-            cameraTransform.localPosition = finalCameraPosition;
+            //Vector3 finalCameraPosition = cameraTransform.localPosition;
+            //finalCameraPosition.y = targetCameraYTransform;
+           // cameraTransform.localPosition = finalCameraPosition;
         }
         
         private void SprintPressed()
