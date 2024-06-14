@@ -6,18 +6,23 @@ namespace FPC
     {
         [SerializeField] private FirstPersonController fpc;
         [HideInInspector]public Animator animator;
-        private bool _inAir;
+        private bool _inAirIdle;
+        private bool _inAirMoving;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
         private static readonly int IsWalkingForward = Animator.StringToHash("isWalkingForward");
         private static readonly int IsWalkingBackwards = Animator.StringToHash("isWalkingBackwards");
         private static readonly int IsStrafingRight = Animator.StringToHash("isStrafingRight");
         private static readonly int IsStrafingLeft = Animator.StringToHash("isStrafingLeft");
         private static readonly int IsRunning = Animator.StringToHash("isRunning");
-        private static readonly int Jump = Animator.StringToHash("Jump");
-        private static readonly int Landed = Animator.StringToHash("Landed");
         private static readonly int Crouch = Animator.StringToHash("Crouch");
         private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
         private static readonly int Stand = Animator.StringToHash("Stand");
+        private static readonly int MovingJump = Animator.StringToHash("MovingJump");
+        private static readonly int MovingLanded = Animator.StringToHash("MovingLanded");
+        private static readonly int IdleJump = Animator.StringToHash("IdleJump");
+        private static readonly int IdleLanded = Animator.StringToHash("IdleLanded");
+        private static readonly int InAirMoving = Animator.StringToHash("inAirMoving");
+        private static readonly int InAirIdle = Animator.StringToHash("inAirIdle");
 
 
         void Awake()
@@ -52,30 +57,38 @@ namespace FPC
 
         private void MovingJumpingAnimationController()
         {
-            if (fpc.inputActions.Player.Move.inProgress && fpc.inputActions.Player.Jump.triggered && !_inAir)
+            
+            if (fpc.inputActions.Player.Move.inProgress && !fpc.isJumpIdle)
             {
-                animator.SetTrigger(Jump);
-                _inAir = true;
-            }
-
-            if (_inAir && fpc.isGrounded)
-            {
-                animator.SetTrigger(Landed);
-                _inAir = false;
+                _inAirMoving = fpc.isInAir;
+                if (_inAirMoving)
+                {
+                    animator.SetBool(InAirMoving,true);
+                    animator.SetTrigger(MovingJump);
+                }
+                else
+                {
+                    animator.SetBool(InAirMoving,false);
+                    animator.SetTrigger(MovingLanded);
+                }
             }
         }
         
-        private void IdleJumpingAnimationController(){
-            if (!fpc.inputActions.Player.Move.inProgress && fpc.inputActions.Player.Jump.triggered && !_inAir)
+        private void IdleJumpingAnimationController()
+        {
+            if (!fpc.inputActions.Player.Move.inProgress && !_inAirMoving)
             {
-                animator.SetTrigger(Jump);
-                _inAir = true;
-            }
-
-            if (_inAir && fpc.isGrounded)
-            {
-                animator.SetTrigger(Landed);
-                _inAir = false;
+                _inAirIdle = fpc.isInAir;
+                if (_inAirIdle)
+                {
+                    animator.SetBool(InAirIdle, true);
+                    animator.SetTrigger(IdleJump);
+                }
+                else
+                {
+                    animator.SetBool(InAirIdle, false);
+                    animator.SetTrigger(IdleLanded);
+                }
             }
         }
         private void RunningAnimationController()

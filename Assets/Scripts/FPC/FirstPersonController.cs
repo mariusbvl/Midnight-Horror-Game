@@ -19,7 +19,8 @@ namespace FPC
         [SerializeField] private float distanceToGround = 0.4f;
         [SerializeField] private LayerMask groundMask;
         [SerializeField] public bool isGrounded;
-        [HideInInspector]public bool canJump;
+        [HideInInspector]public bool isInAir;
+        [HideInInspector]public bool isJumpIdle;
         [Header("Sprint")]
         [SerializeField] private float sprintSpeed;
         [SerializeField] private bool isSprinting;
@@ -37,7 +38,6 @@ namespace FPC
         private void Awake()
         {
             _moveSpeed = walkSpeed;
-            canJump = true;
             inputActions = new GameInputActions();
             _characterController = GetComponent<CharacterController>();
             inputActions.Player.Sprint.performed += _ => SprintPressed();
@@ -76,21 +76,34 @@ namespace FPC
 
         private void Jump()
         {
-            if (!isCrouching)
+            if (move.y > 0 || !inputActions.Player.Move.inProgress)
             {
-                if (inputActions.Player.Jump.triggered && isGrounded)
+                if (!isCrouching)
                 {
-                    _velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-                    
+                    isJumpIdle = !inputActions.Player.Move.inProgress;
+                    if (inputActions.Player.Jump.triggered && isGrounded && !isInAir)
+                    {
+                        _velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    }
+                }
+                if (!isGrounded && !isInAir)
+                {
+                    isInAir = true;
+                    Debug.Log($"After jump: {isInAir}");
+                }
+                if (isGrounded && isInAir)
+                {
+                    isInAir = false;
+                    Debug.Log($"After landing: {isInAir}");
                 }
             }
         }
         
         private IEnumerator JumpCooldown()
         {
-            canJump = false;  
+            
             yield return new WaitForSeconds(2);  
-            canJump = true;  
+            
         }
         private void Sprint()
         {
