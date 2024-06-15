@@ -114,13 +114,13 @@ namespace FPC
                 if (isSprinting && isGrounded)
                 {
                     moveSpeed = sprintSpeed;
-                    headBob.amplitude = 0.01f;
+                    headBob.amplitude = 0.0016f;
                     headBob.frequency = 20f;
                 }
                 else if (!isSprinting && isGrounded)
                 {
                     moveSpeed = walkSpeed;
-                    headBob.amplitude = 0.005f;
+                    headBob.amplitude = 0.0008f;
                     headBob.frequency = 10f;
                 }
             }

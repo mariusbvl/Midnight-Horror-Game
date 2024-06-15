@@ -9,7 +9,8 @@ namespace FPC
         [SerializeField] private Transform playerBody;
         private Vector2 _mouseLook;
         private float _xRotation;
-    
+        [SerializeField] private float raycastDistance;
+        
         private GameInputActions _inputActions;
         private void Awake()
         {
@@ -20,6 +21,7 @@ namespace FPC
         private void Update()
         {
             Look();
+            CursorRayCast();
         }
 
         private void Look()
@@ -32,7 +34,18 @@ namespace FPC
             transform.localRotation = Quaternion.Euler(_xRotation, 0, 0);
             playerBody.Rotate(Vector3.up * mouseX);
         }
-
+        
+        private void CursorRayCast(){
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out var raycastHit, raycastDistance))
+            {
+                if (raycastHit.collider.gameObject.CompareTag("Battery"))
+                {
+                    print("MiauMiau");
+                }
+            }
+        }
+        
         private void OnEnable()
         {
             _inputActions.Enable();

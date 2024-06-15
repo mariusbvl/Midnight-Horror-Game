@@ -41,7 +41,7 @@ namespace FPC
         
         private void ResetPosition(){
             if(camera.localPosition == _startPos) return;
-            camera.localPosition = Vector3.Lerp(camera.localPosition, _startPos, 1 * Time.deltaTime);
+            camera.localPosition = Vector3.Lerp(camera.localPosition, _startPos, 3 * Time.deltaTime);
         }
         private Vector3 FootStepMotion()
         {
