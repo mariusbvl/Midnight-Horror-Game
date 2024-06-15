@@ -1,13 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
+
 namespace FPC
 {
     public class FirstPersonController : MonoBehaviour
     {
         [HideInInspector]public GameInputActions inputActions;
         private CharacterController _characterController;
-        public float _moveSpeed;
+        public float moveSpeed;
         [SerializeField] private HeadBobController headBob;
         [Header("Move")]
         [SerializeField] private float walkSpeed;
@@ -38,7 +39,7 @@ namespace FPC
 
         private void Awake()
         {
-            _moveSpeed = walkSpeed;
+            moveSpeed = walkSpeed;
             inputActions = new GameInputActions();
             _characterController = GetComponent<CharacterController>();
             inputActions.Player.Sprint.performed += _ => SprintPressed();
@@ -72,7 +73,7 @@ namespace FPC
             move = inputActions.Player.Move.ReadValue<Vector2>();
             var transform1 = transform;
             Vector3 movement = (move.y * transform1.forward) + (move.x * transform1.right);
-            _characterController.Move(movement * (_moveSpeed * Time.deltaTime));
+            _characterController.Move(movement * (moveSpeed * Time.deltaTime));
         }
 
         private void Jump()
@@ -90,12 +91,12 @@ namespace FPC
                 if (!isGrounded && !isInAir)
                 {
                     isInAir = true;
-                    Debug.Log($"After jump: {isInAir}");
+                    //Debug.Log($"After jump: {isInAir}");
                 }
                 if (isGrounded && isInAir)
                 {
                     isInAir = false;
-                    Debug.Log($"After landing: {isInAir}");
+                    //Debug.Log($"After landing: {isInAir}");
                 }
             }
         }
@@ -112,13 +113,13 @@ namespace FPC
             {
                 if (isSprinting && isGrounded)
                 {
-                    _moveSpeed = sprintSpeed;
+                    moveSpeed = sprintSpeed;
                     headBob.amplitude = 0.01f;
                     headBob.frequency = 20f;
                 }
                 else if (!isSprinting && isGrounded)
                 {
-                    _moveSpeed = walkSpeed;
+                    moveSpeed = walkSpeed;
                     headBob.amplitude = 0.005f;
                     headBob.frequency = 10f;
                 }
@@ -146,11 +147,11 @@ namespace FPC
 
             if (isCrouching)
             {
-                _moveSpeed = crouchSpeed;
+                moveSpeed = crouchSpeed;
             }
             else if (!isSprinting && isCrouching)
             {
-                _moveSpeed = walkSpeed;
+                moveSpeed = walkSpeed;
             }
         }
         
@@ -162,8 +163,8 @@ namespace FPC
                 : -0.25f;
             float targetPMeshYTransform = isCrouching ? -0.25f : -1f;
             //Camera
-            //float startCameraYTransform = isCrouching ? 0.75f : 1.25f;
-            //float targetCameraYTransform = isCrouching ? 1.25f : 0.75f;
+            float startCameraYTransform = isCrouching ? 0.75f : 1.1f;
+            float targetCameraYTransform = isCrouching ? 1.1f : 0.75f;
             //CharacterController
             float targetHeight = isCrouching ? crouchHeight : standHeight;
             float currentHeight = _characterController.height;
@@ -176,9 +177,9 @@ namespace FPC
                 playerMeshPosition.y = Mathf.Lerp(startPMeshYTransform, targetPMeshYTransform, timeElapsed/crouchTime);
                 playerMesh.localPosition = playerMeshPosition;
                 //Camera
-                //Vector3 cameraPosition = cameraTransform.localPosition;
-                //cameraPosition.y = Mathf.Lerp(startCameraYTransform, targetCameraYTransform, timeElapsed / crouchTime);
-                //cameraTransform.localPosition = cameraPosition;
+                Vector3 cameraPosition = cameraTransform.localPosition;
+                cameraPosition.y = Mathf.Lerp(startCameraYTransform, targetCameraYTransform, timeElapsed / crouchTime);
+                cameraTransform.localPosition = cameraPosition;
                 //Character Controller
                 _characterController.height = Mathf.Lerp(currentHeight, targetHeight, timeElapsed/crouchTime);
                 _characterController.center = Vector3.Lerp(currentCenter, targetCenter, timeElapsed/crouchTime);
@@ -194,9 +195,9 @@ namespace FPC
             finalMeshPosition.y = targetPMeshYTransform;
             playerMesh.localPosition = finalMeshPosition;
             //Camera
-            //Vector3 finalCameraPosition = cameraTransform.localPosition;
-            //finalCameraPosition.y = targetCameraYTransform;
-           // cameraTransform.localPosition = finalCameraPosition;
+            Vector3 finalCameraPosition = cameraTransform.localPosition;
+            finalCameraPosition.y = targetCameraYTransform;
+            cameraTransform.localPosition = finalCameraPosition;
         }
         
         private void SprintPressed()

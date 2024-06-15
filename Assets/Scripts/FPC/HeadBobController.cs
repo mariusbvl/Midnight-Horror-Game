@@ -4,7 +4,7 @@ namespace FPC
 {
     public class HeadBobController : MonoBehaviour
     {
-        [SerializeField] private bool enableBob = true;
+        [SerializeField] public bool enableBob = true;
 
         [SerializeField, Range(0, 0.1f)] public float amplitude;
         [SerializeField, Range(0, 30)] public float frequency;
