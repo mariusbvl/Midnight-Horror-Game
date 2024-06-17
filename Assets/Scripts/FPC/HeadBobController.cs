@@ -12,7 +12,7 @@ namespace FPC
         [SerializeField] private new Transform camera;
         [SerializeField] private Transform cameraHolder;
 
-        private float _toggleSpeed = 3f;
+        private readonly float _toggleSpeed = 3f;
         private Vector3 _startPos;
         private CharacterController _controller;
         void Awake()
@@ -27,7 +27,8 @@ namespace FPC
         }
         private void CheckMotion()
         {
-            float speed = new Vector3(_controller.velocity.x, 0, _controller.velocity.z).magnitude;
+            var velocity = _controller.velocity;
+            float speed = new Vector3(velocity.x, 0, velocity.z).magnitude;
 
             ResetPosition();
             if(speed < _toggleSpeed) return;
@@ -53,8 +54,9 @@ namespace FPC
 
         private Vector3 FocusTarget()
         {
-            Vector3 pos = new Vector3(transform.position.x, transform.position.y + cameraHolder.localPosition.y,
-                transform.position.z);
+            var position = transform.position;
+            Vector3 pos = new Vector3(position.x, position.y + cameraHolder.localPosition.y,
+                position.z);
             pos += cameraHolder.forward * 15f;
             return pos;
         }

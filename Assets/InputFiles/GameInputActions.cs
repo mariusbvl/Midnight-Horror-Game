@@ -89,6 +89,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ChangeItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""4cb28a82-3b21-48d8-ab57-bb608981b8cb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -276,6 +285,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
                     ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b3ae0cf0-2dd0-4276-a196-2bc686c1186d"",
+                    ""path"": ""<Mouse>/Scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""ChangeItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -810,6 +830,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_AltInteract = m_Player.FindAction("AltInteract", throwIfNotFound: true);
+        m_Player_ChangeItem = m_Player.FindAction("ChangeItem", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -890,6 +911,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Crouch;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_AltInteract;
+    private readonly InputAction m_Player_ChangeItem;
     public struct PlayerActions
     {
         private @GameInputActions m_Wrapper;
@@ -901,6 +923,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @AltInteract => m_Wrapper.m_Player_AltInteract;
+        public InputAction @ChangeItem => m_Wrapper.m_Player_ChangeItem;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -931,6 +954,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @AltInteract.started += instance.OnAltInteract;
             @AltInteract.performed += instance.OnAltInteract;
             @AltInteract.canceled += instance.OnAltInteract;
+            @ChangeItem.started += instance.OnChangeItem;
+            @ChangeItem.performed += instance.OnChangeItem;
+            @ChangeItem.canceled += instance.OnChangeItem;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -956,6 +982,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @AltInteract.started -= instance.OnAltInteract;
             @AltInteract.performed -= instance.OnAltInteract;
             @AltInteract.canceled -= instance.OnAltInteract;
+            @ChangeItem.started -= instance.OnChangeItem;
+            @ChangeItem.performed -= instance.OnChangeItem;
+            @ChangeItem.canceled -= instance.OnChangeItem;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1118,6 +1147,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         void OnCrouch(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnAltInteract(InputAction.CallbackContext context);
+        void OnChangeItem(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

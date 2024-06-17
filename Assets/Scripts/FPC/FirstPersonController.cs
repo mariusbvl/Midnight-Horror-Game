@@ -101,12 +101,6 @@ namespace FPC
             }
         }
         
-        private IEnumerator JumpCooldown()
-        {
-            
-            yield return new WaitForSeconds(2);  
-            
-        }
         private void Sprint()
         {
             if (move.y > 0)
