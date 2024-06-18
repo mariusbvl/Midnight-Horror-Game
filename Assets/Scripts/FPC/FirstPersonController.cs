@@ -6,6 +6,7 @@ namespace FPC
 {
     public class FirstPersonController : MonoBehaviour
     {
+        public static FirstPersonController Instance { get; private set; }
         [HideInInspector]public GameInputActions inputActions;
         private CharacterController _characterController;
         public float moveSpeed;
@@ -36,9 +37,15 @@ namespace FPC
         [SerializeField] private Vector3 crouchingCenter;
         [SerializeField] private Vector3 standingCenter;
         [SerializeField] public bool isCrouching;
+        [Header("Hide")] 
+        [SerializeField] public bool isHiden;
 
         private void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
             moveSpeed = walkSpeed;
             inputActions = new GameInputActions();
             _characterController = GetComponent<CharacterController>();

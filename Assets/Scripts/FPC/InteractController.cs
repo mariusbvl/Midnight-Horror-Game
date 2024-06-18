@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using UnityEngine.Serialization;
+
 
 namespace FPC
 {
@@ -20,16 +20,41 @@ namespace FPC
         [Header("Corpse")] 
         [SerializeField]private TMP_Text corpsesFoundText;
         private GameObject _currentCorpse;
-        public GameObject[] _foundCorpses;
+        public GameObject[] foundCorpses;
         private float _nrOfCorpses;
         private bool _corpseOnHover;
         public float fadeDuration = 1.0f;
+
+        [Header("HideInLocker")] 
+        [SerializeField] private GameObject playerMesh;
+        [SerializeField] private GameObject player;
+        [SerializeField] private GameObject hands;
+        [SerializeField] private GameObject camHolder;
+        private CameraController _cameraController;
+        private CharacterController _characterController;
+        public GameObject currentLockerDoor;
+        public GameObject currentLocker;
+        public GameObject currentDoorPivot;
+        public GameObject currentHideCameraPoint;
+        public GameObject currentFrontOfTheLockerPoint;
+        private bool _lockerDoorOnHover;
+        //Locker Door Variables
+        public float doorOpeningDuration = 0.5f;
+        private Quaternion _closedRotation;
+        private Quaternion _openRotation;
+        private bool _isDoorPositionSet;
+        private bool _isOpen;
+        //Moving into locker
+        private Coroutine transitionCoroutine;
+        public float transitionDuration = 1.0f;
         void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
             }
+            _characterController = GetComponent<CharacterController>();
+            _cameraController = camHolder.GetComponent<CameraController>();
             nrOfBatteries = 3;
             batteryText.text = nrOfBatteries + "/5";
             _inputActions = new GameInputActions();
@@ -71,6 +96,41 @@ namespace FPC
                         _corpseOnHover = false;
                         _currentCorpse = null;
                     }
+                }else{rayCastDistance = 1.2f;}
+                
+                if(rayCastHit.collider.gameObject.CompareTag("LockerDoor"))
+                {
+                    _lockerDoorOnHover = true;
+                    currentLockerDoor = rayCastHit.collider.gameObject;
+                    currentDoorPivot = currentLockerDoor.transform.parent.gameObject;
+                    currentLocker = currentDoorPivot.transform.parent.gameObject;
+                    Transform hideCameraPointTransform = currentLocker.transform.Find("HideCameraPoint");
+                    if (hideCameraPointTransform != null)
+                    {
+                        currentHideCameraPoint = hideCameraPointTransform.gameObject;
+                    }
+                    Transform inFrontOfTheLockerTransform = currentLocker.transform.Find("InFrontOfTheLockerPoint");
+                    if (inFrontOfTheLockerTransform != null)
+                    {
+                        currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
+                    }
+                    if (currentDoorPivot != null && !_isDoorPositionSet)
+                    {
+                        _closedRotation = currentDoorPivot.transform.rotation;
+                        var eulerAngles = currentDoorPivot.transform.eulerAngles;
+                        _openRotation = Quaternion.Euler(eulerAngles.x, eulerAngles.y + 90f, eulerAngles.z);
+                        _isDoorPositionSet = true;
+                    }
+                    print("LockerDoor");
+                }
+                else 
+                {
+                    _lockerDoorOnHover = false;
+                    currentLockerDoor = null;
+                    currentDoorPivot = null;
+                    currentLocker = null;
+                    currentHideCameraPoint = null;
+                    _isDoorPositionSet = false;
                 }
             }
         }
@@ -79,6 +139,71 @@ namespace FPC
         {
             InteractWithBattery();
             PhotoCorpse();
+            HideInLocker();
+        }
+        
+        private void HideInLocker()
+        {
+            if (_lockerDoorOnHover)
+            {
+                ToggleDoor();
+                _characterController.enabled = false;
+                _cameraController.enabled = false;
+                playerMesh.SetActive(false);
+                hands.SetActive(false);
+                player.transform.position = currentFrontOfTheLockerPoint.transform.position;
+                player.transform.rotation = currentFrontOfTheLockerPoint.transform.rotation;
+                transitionCoroutine = StartCoroutine(SmoothTransitionCoroutine());
+                ToggleDoor();
+            }
+        }
+        IEnumerator SmoothTransitionCoroutine()
+        {
+            float elapsedTime = 0f;
+
+            Vector3 initialPosition = player.transform.position;
+            Quaternion initialRotation = player.transform.rotation;
+
+            while (elapsedTime < transitionDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = elapsedTime / transitionDuration;
+
+                // Smoothly move the position
+                transform.position = Vector3.Lerp(initialPosition, currentHideCameraPoint.transform.position, t);
+
+                // Smoothly rotate towards the target rotation
+                transform.rotation = Quaternion.Slerp(initialRotation, currentHideCameraPoint.transform.rotation, t);
+
+                yield return null; // Wait until the next frame
+            }
+
+            // Ensure the final position and rotation match exactly
+            transform.position = currentHideCameraPoint.transform.position;
+            transform.rotation = currentHideCameraPoint.transform.rotation;
+        }
+        private void ToggleDoor()
+        {
+            if (currentDoorPivot != null)
+            {
+                StartCoroutine(_isOpen ? RotateDoor(_closedRotation) : RotateDoor(_openRotation));
+                _isOpen = !_isOpen;
+                Debug.Log("Door state toggled. isOpen: " + _isOpen);
+            }
+        }
+        private IEnumerator RotateDoor(Quaternion targetRotation)
+        {
+            Quaternion startRotation = currentDoorPivot.transform.rotation;
+            float timeElapsed = 0f;
+
+            while (timeElapsed < doorOpeningDuration)
+            {
+                currentDoorPivot.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, timeElapsed / doorOpeningDuration);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            currentDoorPivot.transform.rotation = targetRotation; // Ensure final rotation is set
         }
         private void InteractWithBattery()
         {
@@ -102,7 +227,7 @@ namespace FPC
         }
         private bool IsCorpseAlreadyFound(GameObject corpse)
         {
-            foreach (GameObject foundCorpse in _foundCorpses)
+            foreach (GameObject foundCorpse in foundCorpses)
             {
                 if (foundCorpse == corpse)
                 {
@@ -111,15 +236,16 @@ namespace FPC
             }
             return false;
         }
-        public void AddGameObject(GameObject obj)
+
+        private void AddGameObject(GameObject obj)
         {
-            GameObject[] newArray = new GameObject[_foundCorpses.Length + 1];
-            for (int i = 0; i < _foundCorpses.Length; i++)
+            GameObject[] newArray = new GameObject[foundCorpses.Length + 1];
+            for (int i = 0; i < foundCorpses.Length; i++)
             {
-                newArray[i] = _foundCorpses[i];
+                newArray[i] = foundCorpses[i];
             }
-            newArray[_foundCorpses.Length] = obj;
-            _foundCorpses = newArray;
+            newArray[foundCorpses.Length] = obj;
+            foundCorpses = newArray;
             Debug.Log(obj.name + " has been added to the array.");
         }
         private IEnumerator FadeText()
