@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Serialization;
@@ -16,6 +17,13 @@ namespace FPC
         private GameObject _battery;
         private bool _batteryOnHover;
         [HideInInspector] public float nrOfBatteries;
+        [Header("Corpse")] 
+        [SerializeField]private TMP_Text corpsesFoundText;
+        private GameObject _currentCorpse;
+        public GameObject[] _foundCorpses;
+        private float _nrOfCorpses;
+        private bool _corpseOnHover;
+        public float fadeDuration = 1.0f;
         void Awake()
         {
             if (Instance == null)
@@ -46,6 +54,23 @@ namespace FPC
                 else
                 {
                     _batteryOnHover = false;
+                    _battery = null;
+                }
+
+                if (FlashlightAndCameraController.Instance.recordingImage.activeSelf)
+                {
+                    rayCastDistance = 3;
+                    if (rayCastHit.collider.gameObject.CompareTag("Corpse"))
+                    {
+                        _corpseOnHover = true;
+                        _currentCorpse = rayCastHit.collider.gameObject;
+                        print("Corpse");
+                    }
+                    else
+                    {
+                        _corpseOnHover = false;
+                        _currentCorpse = null;
+                    }
                 }
             }
         }
@@ -53,6 +78,7 @@ namespace FPC
         private void Interact()
         {
             InteractWithBattery();
+            PhotoCorpse();
         }
         private void InteractWithBattery()
         {
@@ -64,6 +90,63 @@ namespace FPC
             }
         }
         
+        private void PhotoCorpse()
+        {
+            if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
+            {
+                AddGameObject(_currentCorpse);
+                _nrOfCorpses++;
+                corpsesFoundText.text = _nrOfCorpses + "/5";
+                StartCoroutine(FadeText());
+            }
+        }
+        private bool IsCorpseAlreadyFound(GameObject corpse)
+        {
+            foreach (GameObject foundCorpse in _foundCorpses)
+            {
+                if (foundCorpse == corpse)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void AddGameObject(GameObject obj)
+        {
+            GameObject[] newArray = new GameObject[_foundCorpses.Length + 1];
+            for (int i = 0; i < _foundCorpses.Length; i++)
+            {
+                newArray[i] = _foundCorpses[i];
+            }
+            newArray[_foundCorpses.Length] = obj;
+            _foundCorpses = newArray;
+            Debug.Log(obj.name + " has been added to the array.");
+        }
+        private IEnumerator FadeText()
+        {
+            corpsesFoundText.gameObject.SetActive(true);
+            yield return StartCoroutine(Fade(0f, 1f));
+            yield return new WaitForSeconds(2.0f);
+            yield return StartCoroutine(Fade(1f, 0f));
+            corpsesFoundText.gameObject.SetActive(false);
+        }
+
+        private IEnumerator Fade(float startAlpha, float endAlpha)
+        {
+            float elapsedTime = 0f;
+            Color color = corpsesFoundText.color;
+            while (elapsedTime < fadeDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(startAlpha, endAlpha, elapsedTime / fadeDuration);
+                color.a = alpha;
+                corpsesFoundText.color = color;
+                yield return null;
+            }
+            
+            color.a = endAlpha;
+            corpsesFoundText.color = color;
+        }
         private void OnEnable()
         {
             _inputActions.Enable();

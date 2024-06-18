@@ -7,6 +7,7 @@ namespace FPC
 {
     public class FlashlightAndCameraController : MonoBehaviour
     {
+        public static FlashlightAndCameraController Instance {get; private set; }
         private GameInputActions _inputActions;
 
         [Header("Flashlight")] 
@@ -21,10 +22,14 @@ namespace FPC
         [Header("Camera")] 
         [SerializeField] private GameObject handCamera;
         [SerializeField] private GameObject modelCamera;
-        [SerializeField] private GameObject recordingImage;
+        [SerializeField] public GameObject recordingImage;
         private bool _isCameraOn;
         void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
             _inputActions = new GameInputActions();
             consumeSlider.value = 100f;
             _isFlashlightOn = false;
@@ -41,7 +46,7 @@ namespace FPC
             SwitchCamera();
             ConsumeBattery();
         }
-
+        
         private void CheckIfHasBattery()
         {
             if (consumeSlider.value == 0)
@@ -97,6 +102,8 @@ namespace FPC
         {
             _isFlashlightOn = false;
             _isCameraOn = false;
+            flashlight.SetActive(false);
+            recordingImage.SetActive(false);
             if (modelCamera.activeSelf && !modelFlashlight.activeSelf)
             {
                 modelCamera.SetActive(false);
