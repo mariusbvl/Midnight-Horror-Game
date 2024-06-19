@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using TMPro.Examples;
 using UnityEngine;
 using UnityEngine.UI;
 namespace FPC
@@ -13,17 +11,17 @@ namespace FPC
         [Header("Flashlight")] 
         [SerializeField] private GameObject handFlashlight;
         [SerializeField] private GameObject modelFlashlight;
-        [SerializeField] private GameObject flashlight;
+        [SerializeField] public GameObject flashlight;
         [SerializeField] private Slider consumeSlider;
-        private bool _isFlashlightOn;
-        private bool _canConsumeBattery;
+        [HideInInspector]public bool isFlashlightOn;
+        [HideInInspector]public bool canConsumeBattery;
         private bool _isConsumingBattery;
         private Coroutine _batteryCoroutine;
         [Header("Camera")] 
         [SerializeField] private GameObject handCamera;
         [SerializeField] private GameObject modelCamera;
         [SerializeField] public GameObject recordingImage;
-        private bool _isCameraOn;
+        [HideInInspector]public bool isCameraOn;
         void Awake()
         {
             if (Instance == null)
@@ -32,8 +30,8 @@ namespace FPC
             }
             _inputActions = new GameInputActions();
             consumeSlider.value = 100f;
-            _isFlashlightOn = false;
-            _isCameraOn = false;
+            isFlashlightOn = false;
+            isCameraOn = false;
             _inputActions.Player.AltInteract.performed += _ => ChangeFlashlightBool();
             _inputActions.Player.AltInteract.performed += _ => ChangeCameraBool();
             _inputActions.Player.ChangeItem.performed += _ => ScrollCameraAndFlashlight();
@@ -56,23 +54,23 @@ namespace FPC
                     InteractController.Instance.nrOfBatteries--;
                     InteractController.Instance.batteryText.text = InteractController.Instance.nrOfBatteries + "/5";
                     consumeSlider.value = 100f; 
-                    _canConsumeBattery = true;
+                    canConsumeBattery = true;
                 }
                 else
                 {
-                    _canConsumeBattery = false;
+                    canConsumeBattery = false;
                 }
                
             }
             else
             {
-                _canConsumeBattery = true;
+                canConsumeBattery = true;
             }
         }
-        private void ConsumeBattery()
+        public void ConsumeBattery()
         {
             CheckIfHasBattery();
-            if (flashlight.activeSelf && _canConsumeBattery)
+            if (flashlight.activeSelf && canConsumeBattery)
             {
                 if (!_isConsumingBattery)
                 {
@@ -100,8 +98,8 @@ namespace FPC
         }
          private void ScrollCameraAndFlashlight()
         {
-            _isFlashlightOn = false;
-            _isCameraOn = false;
+            isFlashlightOn = false;
+            isCameraOn = false;
             flashlight.SetActive(false);
             recordingImage.SetActive(false);
             if (modelCamera.activeSelf && !modelFlashlight.activeSelf)
@@ -121,21 +119,14 @@ namespace FPC
         
         private void SwitchFlashlight()
         {
-            if (_canConsumeBattery)
-            {
-                flashlight.SetActive(_isFlashlightOn);
-            }
-            else
-            {
-                flashlight.SetActive(false);
-            }
+            flashlight.SetActive(canConsumeBattery && isFlashlightOn);
         }
 
         private void ChangeFlashlightBool()
         {
             if (handFlashlight.activeSelf && modelFlashlight.activeSelf)
             {
-                _isFlashlightOn = !_isFlashlightOn;
+                isFlashlightOn = !isFlashlightOn;
             }
         }
 
@@ -143,15 +134,15 @@ namespace FPC
         {
             if (modelCamera.activeSelf)
             {
-                handCamera.SetActive(!_isCameraOn);
-                recordingImage.SetActive(_isCameraOn);
+                handCamera.SetActive(!isCameraOn);
+                recordingImage.SetActive(isCameraOn);
             }
         }
         private void ChangeCameraBool()
         {
             if (modelCamera.activeSelf)
             {
-                _isCameraOn = !_isCameraOn;
+                isCameraOn = !isCameraOn;
             }
         }
         private void OnEnable()

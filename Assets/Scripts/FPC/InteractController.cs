@@ -12,6 +12,7 @@ namespace FPC
         private GameInputActions _inputActions;
         [SerializeField] private Camera mainCamera;
         [SerializeField] private float rayCastDistance;
+        public bool isInteracting; 
         [Header("Battery")]
         [SerializeField] public TMP_Text batteryText;
         private GameObject _battery;
@@ -32,11 +33,14 @@ namespace FPC
         [SerializeField] private GameObject camHolder;
         private CameraController _cameraController;
         private CharacterController _characterController;
+        private FlashlightAndCameraController _flashlightAndCameraController;
+        private HeadBobController _headBobController;
         public GameObject currentLockerDoor;
         public GameObject currentLocker;
         public GameObject currentDoorPivot;
         public GameObject currentHideCameraPoint;
         public GameObject currentFrontOfTheLockerPoint;
+        public GameObject currentExitPointLockerPoint;
         private bool _lockerDoorOnHover;
         //Locker Door Variables
         public float doorOpeningDuration = 0.5f;
@@ -45,7 +49,7 @@ namespace FPC
         private bool _isDoorPositionSet;
         private bool _isOpen;
         //Moving into locker
-        private Coroutine transitionCoroutine;
+        private Coroutine _transitionCoroutine;
         public float transitionDuration = 1.0f;
         void Awake()
         {
@@ -55,6 +59,8 @@ namespace FPC
             }
             _characterController = GetComponent<CharacterController>();
             _cameraController = camHolder.GetComponent<CameraController>();
+            _flashlightAndCameraController = GetComponent<FlashlightAndCameraController>();
+            _headBobController = GetComponent<HeadBobController>();
             nrOfBatteries = 3;
             batteryText.text = nrOfBatteries + "/5";
             _inputActions = new GameInputActions();
@@ -67,6 +73,21 @@ namespace FPC
             CursorRayCast();
         }
         private void CursorRayCast(){
+            if (!isInteracting)
+            {
+                _batteryOnHover = false;
+                _battery = null;
+                _corpseOnHover = false;
+                _currentCorpse = null;
+                _lockerDoorOnHover = false;
+                currentLockerDoor = null;
+                currentDoorPivot = null;
+                currentLocker = null;
+                currentHideCameraPoint = null;
+                currentFrontOfTheLockerPoint = null;
+                currentExitPointLockerPoint = null;
+                _isDoorPositionSet = false;
+            }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
             {
@@ -74,12 +95,6 @@ namespace FPC
                 {
                     _batteryOnHover = true;
                     _battery = rayCastHit.collider.gameObject;
-                    print("battery");
-                }
-                else
-                {
-                    _batteryOnHover = false;
-                    _battery = null;
                 }
 
                 if (FlashlightAndCameraController.Instance.recordingImage.activeSelf)
@@ -89,12 +104,6 @@ namespace FPC
                     {
                         _corpseOnHover = true;
                         _currentCorpse = rayCastHit.collider.gameObject;
-                        print("Corpse");
-                    }
-                    else
-                    {
-                        _corpseOnHover = false;
-                        _currentCorpse = null;
                     }
                 }else{rayCastDistance = 1.2f;}
                 
@@ -114,6 +123,11 @@ namespace FPC
                     {
                         currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
                     }
+                    Transform exitLockerPointTransform = currentLocker.transform.Find("ExitLockerPoint");
+                    if (exitLockerPointTransform != null)
+                    {
+                        currentExitPointLockerPoint= exitLockerPointTransform.gameObject;
+                    }
                     if (currentDoorPivot != null && !_isDoorPositionSet)
                     {
                         _closedRotation = currentDoorPivot.transform.rotation;
@@ -121,74 +135,108 @@ namespace FPC
                         _openRotation = Quaternion.Euler(eulerAngles.x, eulerAngles.y + 90f, eulerAngles.z);
                         _isDoorPositionSet = true;
                     }
-                    print("LockerDoor");
-                }
-                else 
-                {
-                    _lockerDoorOnHover = false;
-                    currentLockerDoor = null;
-                    currentDoorPivot = null;
-                    currentLocker = null;
-                    currentHideCameraPoint = null;
-                    _isDoorPositionSet = false;
                 }
             }
         }
 
         private void Interact()
         {
-            InteractWithBattery();
-            PhotoCorpse();
-            HideInLocker();
-        }
-        
-        private void HideInLocker()
-        {
-            if (_lockerDoorOnHover)
+            if (!isInteracting)
             {
-                ToggleDoor();
+                InteractWithBattery();
+                PhotoCorpse();
+                StartCoroutine(HideInLocker());
+                StartCoroutine(ExitLocker());
+            }
+        }
+
+
+        private IEnumerator ExitLocker()
+        {
+            if (_lockerDoorOnHover && FirstPersonController.Instance.isHiden)
+            {
+                isInteracting= true;
+                player.transform.position = currentHideCameraPoint.transform.position;
+                player.transform.rotation = currentHideCameraPoint.transform.rotation;
+                yield return StartCoroutine(ToggleDoor());
+                yield return StartCoroutine(SmoothTransitionCoroutine());
+                yield return _characterController.enabled = true;
+                yield return _cameraController.enabled = true;
+                _flashlightAndCameraController.enabled = true;
+                _headBobController.enabled = true;
+                playerMesh.SetActive(true);
+                hands.SetActive(true);
+                yield return StartCoroutine(ToggleDoor());
+                yield return FirstPersonController.Instance.isHiden = false;
+                yield return isInteracting= false;
+            }
+        }
+        private IEnumerator HideInLocker()
+        {
+            if (_lockerDoorOnHover && !FirstPersonController.Instance.isHiden)
+            {
+                isInteracting = true;
                 _characterController.enabled = false;
                 _cameraController.enabled = false;
+                _flashlightAndCameraController.enabled = false;
+                FlashlightAndCameraController.Instance.isFlashlightOn = false;
+                FlashlightAndCameraController.Instance.isCameraOn = false;
+                FlashlightAndCameraController.Instance.flashlight.SetActive(false);
+                FlashlightAndCameraController.Instance.recordingImage.SetActive(false);
+                FlashlightAndCameraController.Instance.ConsumeBattery();
+                _headBobController.enabled = false;
                 playerMesh.SetActive(false);
                 hands.SetActive(false);
                 player.transform.position = currentFrontOfTheLockerPoint.transform.position;
                 player.transform.rotation = currentFrontOfTheLockerPoint.transform.rotation;
-                transitionCoroutine = StartCoroutine(SmoothTransitionCoroutine());
-                ToggleDoor();
+                yield return StartCoroutine(ToggleDoor());
+
+                yield return StartCoroutine(SmoothTransitionCoroutine());
+
+                yield return StartCoroutine(ToggleDoor());
+                yield return FirstPersonController.Instance.isHiden = true;
+                yield return isInteracting= false;
             }
         }
-        IEnumerator SmoothTransitionCoroutine()
+
+        private IEnumerator SmoothTransitionCoroutine()
         {
             float elapsedTime = 0f;
 
             Vector3 initialPosition = player.transform.position;
             Quaternion initialRotation = player.transform.rotation;
-
+            Vector3 targetPosition = FirstPersonController.Instance.isHiden
+                ? currentExitPointLockerPoint.transform.position
+                : currentHideCameraPoint.transform.position;
+            Quaternion targetRotation = FirstPersonController.Instance.isHiden
+                ? currentExitPointLockerPoint.transform.rotation
+                : currentHideCameraPoint.transform.rotation;
             while (elapsedTime < transitionDuration)
             {
                 elapsedTime += Time.deltaTime;
                 float t = elapsedTime / transitionDuration;
 
                 // Smoothly move the position
-                transform.position = Vector3.Lerp(initialPosition, currentHideCameraPoint.transform.position, t);
+                transform.position = Vector3.Lerp(initialPosition, targetPosition, t);
 
                 // Smoothly rotate towards the target rotation
-                transform.rotation = Quaternion.Slerp(initialRotation, currentHideCameraPoint.transform.rotation, t);
+                transform.rotation = Quaternion.Slerp(initialRotation, targetRotation, t);
 
                 yield return null; // Wait until the next frame
             }
 
             // Ensure the final position and rotation match exactly
-            transform.position = currentHideCameraPoint.transform.position;
-            transform.rotation = currentHideCameraPoint.transform.rotation;
+            var transform1 = transform;
+            transform1.position = targetPosition;
+            transform1.rotation = targetRotation;
         }
-        private void ToggleDoor()
+
+        private IEnumerator ToggleDoor()
         {
             if (currentDoorPivot != null)
             {
-                StartCoroutine(_isOpen ? RotateDoor(_closedRotation) : RotateDoor(_openRotation));
+                yield return StartCoroutine(RotateDoor(_isOpen ? _closedRotation : _openRotation));
                 _isOpen = !_isOpen;
-                Debug.Log("Door state toggled. isOpen: " + _isOpen);
             }
         }
         private IEnumerator RotateDoor(Quaternion targetRotation)
@@ -246,7 +294,6 @@ namespace FPC
             }
             newArray[foundCorpses.Length] = obj;
             foundCorpses = newArray;
-            Debug.Log(obj.name + " has been added to the array.");
         }
         private IEnumerator FadeText()
         {
