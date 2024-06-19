@@ -51,6 +51,9 @@ namespace FPC
         //Moving into locker
         private Coroutine _transitionCoroutine;
         public float transitionDuration = 1.0f;
+        [Header("SimpleDoor")] 
+        private bool isSimpleDoorOnHover;
+        private GameObject _currentSimpleDoor;
         void Awake()
         {
             if (Instance == null)
@@ -87,6 +90,8 @@ namespace FPC
                 currentFrontOfTheLockerPoint = null;
                 currentExitPointLockerPoint = null;
                 _isDoorPositionSet = false;
+                isSimpleDoorOnHover = false;
+                _currentSimpleDoor = null;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -136,6 +141,21 @@ namespace FPC
                         _isDoorPositionSet = true;
                     }
                 }
+
+                if (rayCastHit.collider.gameObject.CompareTag("SimpleDoor"))
+                {
+                    isSimpleDoorOnHover = true;
+                    _currentSimpleDoor = rayCastHit.collider.gameObject;
+                    currentDoorPivot = _currentSimpleDoor.transform.parent.gameObject;
+                    if (currentDoorPivot != null && !_isDoorPositionSet)
+                    {
+                        _closedRotation = currentDoorPivot.transform.rotation;
+                        var eulerAngles = currentDoorPivot.transform.eulerAngles;
+                        _openRotation = Quaternion.Euler(eulerAngles.x, eulerAngles.y - 90f, eulerAngles.z);
+                        _isDoorPositionSet = true;
+                    }
+                    print("SimpleDoor");
+                }
             }
         }
 
@@ -147,10 +167,19 @@ namespace FPC
                 PhotoCorpse();
                 StartCoroutine(HideInLocker());
                 StartCoroutine(ExitLocker());
+                StartCoroutine(OpenCloseSimpleDoor());
             }
         }
 
-
+        private IEnumerator OpenCloseSimpleDoor()
+        {
+            if (isSimpleDoorOnHover)
+            {
+                isInteracting = true;
+                yield return StartCoroutine(ToggleDoor());
+                isInteracting = false;
+            }
+        }
         private IEnumerator ExitLocker()
         {
             if (_lockerDoorOnHover && FirstPersonController.Instance.isHiden)
@@ -168,7 +197,7 @@ namespace FPC
                 hands.SetActive(true);
                 yield return StartCoroutine(ToggleDoor());
                 yield return FirstPersonController.Instance.isHiden = false;
-                yield return isInteracting= false;
+                yield return isInteracting = false;
             }
         }
         private IEnumerator HideInLocker()

@@ -30,6 +30,8 @@ namespace FPC
             _xRotation = Mathf.Clamp(_xRotation, -80f, 80);
             transform.localRotation = Quaternion.Euler(_xRotation, 0, 0);
             playerBody.Rotate(Vector3.up * mouseX);
+            //Debug.Log($"MouseX: {mouseX}");
+            //Debug.Log($"MouseY: {mouseY}");
         }
         
         
