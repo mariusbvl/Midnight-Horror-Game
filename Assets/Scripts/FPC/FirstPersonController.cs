@@ -134,29 +134,33 @@ namespace FPC
 
         private void Crouch()
         {
-            if (isGrounded)
+            if (!isHiden)
             {
-                if (inputActions.Player.Crouch.triggered && isCrouching)
+                if (isGrounded)
+                {
+                    if (inputActions.Player.Crouch.triggered && isCrouching)
+                    {
+                        StartCoroutine(CrouchStand());
+                    }
+                }
+
+                if (inputActions.Player.Crouch.triggered && !isCrouching)
                 {
                     StartCoroutine(CrouchStand());
                 }
-            }
-            if (inputActions.Player.Crouch.triggered && !isCrouching)
-            {
-                StartCoroutine(CrouchStand());
-            }
 
-            if (isCrouching)
-            {
-                moveSpeed = crouchSpeed;
-            }
-            else if (!isSprinting && isCrouching)
-            {
-                moveSpeed = walkSpeed;
+                if (isCrouching)
+                {
+                    moveSpeed = crouchSpeed;
+                }
+                else if (!isSprinting && isCrouching)
+                {
+                    moveSpeed = walkSpeed;
+                }
             }
         }
         
-        private IEnumerator CrouchStand()
+        public IEnumerator CrouchStand()
         {
             float timeElapsed = 0;
             //PlayerMesh
@@ -214,9 +218,12 @@ namespace FPC
             isSprinting = false;
         }
 
-        private void CrouchPressed()
+        public void CrouchPressed()
         {
-            isCrouching = !isCrouching;
+            if (!isHiden)
+            {
+                isCrouching = !isCrouching;
+            }
         }
         private void OnEnable()
         {

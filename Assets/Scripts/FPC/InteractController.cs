@@ -176,6 +176,14 @@ namespace FPC
             if (_lockerDoorOnHover && !FirstPersonController.Instance.isHiden)
             {
                 isInteracting = true;
+                if (FirstPersonController.Instance.isCrouching)
+                {
+                    FirstPersonController.Instance.CrouchPressed();
+                    AnimationController.Instance.animator.SetTrigger("Stand");
+                    AnimationController.Instance.animator.SetBool("isCrouching", false);
+                    yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
+                }
+                
                 _characterController.enabled = false;
                 _cameraController.enabled = false;
                 _flashlightAndCameraController.enabled = false;

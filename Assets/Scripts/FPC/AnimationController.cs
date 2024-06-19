@@ -4,6 +4,7 @@ namespace FPC
 {
     public class AnimationController : MonoBehaviour
     {
+        public static AnimationController Instance {get; private set; }
         [SerializeField] private FirstPersonController fpc;
         [HideInInspector]public Animator animator;
         private bool _inAirIdle;
@@ -27,6 +28,10 @@ namespace FPC
 
         void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
             animator = GetComponent<Animator>();
         }
         
