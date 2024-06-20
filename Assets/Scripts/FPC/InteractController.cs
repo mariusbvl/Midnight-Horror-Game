@@ -47,13 +47,34 @@ namespace FPC
         private Quaternion _closedRotation;
         private Quaternion _openRotation;
         private bool _isDoorPositionSet;
-        private bool _isOpen;
+        private bool _isLockerDoorOpen;
         //Moving into locker
         private Coroutine _transitionCoroutine;
         public float transitionDuration = 1.0f;
         [Header("SimpleDoor")] 
-        private bool isSimpleDoorOnHover;
+        private bool _isSimpleDoorOnHover;
         private GameObject _currentSimpleDoor;
+        private GameObject _currentSimpleDoorOpenPivot;
+        private GameObject _currentSimpleDoorClosedPivot;
+        private Quaternion _simpleDoorOpenRotation;
+        private Quaternion _simpleDoorCloseRotation;
+        private bool _isSimpleDoorOpen;
+        [Header("KeyLockedDoor")] 
+        [SerializeField] private TMP_Text lockedText;
+        private bool _isKeyLockedDoorOnHover;
+        private GameObject _currentKeyDoor;
+        private TMP_Text _doorIdComponent;
+        private string _doorIdText;
+        private int _doorIdInt;
+        private GameObject _currentKeyDoorOpenPivot;
+        private Quaternion _keyDoorOpenRotation;
+        [Header("Key")] 
+        public bool[] keysPicked;
+        private bool _isKeyOnHover;
+        private TMP_Text _idTextComponent;
+        private string _idText;
+        private int _idInt;
+        private GameObject _key;
         void Awake()
         {
             if (Instance == null)
@@ -84,14 +105,23 @@ namespace FPC
                 _currentCorpse = null;
                 _lockerDoorOnHover = false;
                 currentLockerDoor = null;
+                
+                
                 currentDoorPivot = null;
                 currentLocker = null;
                 currentHideCameraPoint = null;
                 currentFrontOfTheLockerPoint = null;
                 currentExitPointLockerPoint = null;
                 _isDoorPositionSet = false;
-                isSimpleDoorOnHover = false;
+                _isSimpleDoorOnHover = false;
                 _currentSimpleDoor = null;
+
+                _isKeyOnHover = false;
+                _key = null;
+                
+                _currentKeyDoor = null;
+                _currentKeyDoorOpenPivot = null;
+                _isKeyLockedDoorOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -144,21 +174,58 @@ namespace FPC
 
                 if (rayCastHit.collider.gameObject.CompareTag("SimpleDoor"))
                 {
-                    isSimpleDoorOnHover = true;
+                    _isSimpleDoorOnHover = true;
                     _currentSimpleDoor = rayCastHit.collider.gameObject;
                     currentDoorPivot = _currentSimpleDoor.transform.parent.gameObject;
-                    if (currentDoorPivot != null && !_isDoorPositionSet)
+                    GameObject simpleDoor = currentDoorPivot.transform.parent.gameObject;
+                    Transform currentSimpleDoorOpenPivotTransform = simpleDoor.transform.Find("openDoor");
+                    if (currentSimpleDoorOpenPivotTransform != null)
                     {
-                        _closedRotation = currentDoorPivot.transform.rotation;
-                        var eulerAngles = currentDoorPivot.transform.eulerAngles;
-                        _openRotation = Quaternion.Euler(eulerAngles.x, eulerAngles.y - 90f, eulerAngles.z);
-                        _isDoorPositionSet = true;
+                        _currentSimpleDoorOpenPivot= currentSimpleDoorOpenPivotTransform.gameObject;
                     }
+                    Transform currentSimpleDoorClosePivotTransform = simpleDoor.transform.Find("closedDoor");
+                    if (currentSimpleDoorClosePivotTransform != null)
+                    {
+                        _currentSimpleDoorClosedPivot= currentSimpleDoorClosePivotTransform.gameObject;
+                    }
+                    _simpleDoorOpenRotation = _currentSimpleDoorOpenPivot.transform.rotation;
+                    _simpleDoorCloseRotation = _currentSimpleDoorClosedPivot.transform.rotation;
                     print("SimpleDoor");
+                }
+
+                if (rayCastHit.collider.gameObject.CompareTag("KeyLockedDoor"))
+                {
+                    _isKeyLockedDoorOnHover = true;
+                    _currentKeyDoor = rayCastHit.collider.gameObject;
+                    currentDoorPivot = _currentKeyDoor.transform.parent.gameObject;
+                    GameObject keyDoor = currentDoorPivot.transform.parent.gameObject;
+                    Transform currentKeyDoorOpenPivotTransform = keyDoor.transform.Find("openDoor");
+                    if (currentKeyDoorOpenPivotTransform != null)
+                    {
+                        _currentKeyDoorOpenPivot = currentKeyDoorOpenPivotTransform.gameObject;
+                    }
+                    _keyDoorOpenRotation = _currentKeyDoorOpenPivot.transform.rotation;
+                    _doorIdComponent = keyDoor.GetComponentInChildren<TMP_Text>();
+                    _doorIdText = _doorIdComponent.text;
+                    if (int.TryParse(_doorIdText, out int doorInt))
+                    {
+                        _doorIdInt = doorInt;
+                    }
+                    print("LockedDoor");
+                }
+                if (rayCastHit.collider.gameObject.CompareTag("Key"))
+                { 
+                    _isKeyOnHover = true;
+                    _key = rayCastHit.collider.gameObject;
+                    _idTextComponent = _key.GetComponentInChildren<TMP_Text>();
+                    _idText = _idTextComponent.text;
+                    if (int.TryParse(_idText, out int idInt))
+                    {
+                        _idInt = idInt;
+                    }
                 }
             }
         }
-
         private void Interact()
         {
             if (!isInteracting)
@@ -168,15 +235,43 @@ namespace FPC
                 StartCoroutine(HideInLocker());
                 StartCoroutine(ExitLocker());
                 StartCoroutine(OpenCloseSimpleDoor());
+                PickKey();
+                StartCoroutine(OpenDoorWithKey());
             }
         }
-
+        
+        private IEnumerator OpenDoorWithKey()
+        {
+            if (_isKeyLockedDoorOnHover)
+            {
+                Debug.Log($"Door status: {keysPicked[_doorIdInt]}");
+                if (keysPicked[_doorIdInt])
+                {
+                    isInteracting = true;
+                    yield return StartCoroutine(OpenKeyDoor());
+                    isInteracting = false;
+                }
+                else
+                {
+                    yield return StartCoroutine(FadeText(lockedText));
+                }
+            }
+        }
+        
+        private void PickKey()
+        {
+            if (_isKeyOnHover)
+            {
+                keysPicked[_idInt] = true;
+                Destroy(_key);
+            }
+        }
         private IEnumerator OpenCloseSimpleDoor()
         {
-            if (isSimpleDoorOnHover)
+            if (_isSimpleDoorOnHover)
             {
                 isInteracting = true;
-                yield return StartCoroutine(ToggleDoor());
+                yield return StartCoroutine(ToggleSimpleDoor());
                 isInteracting = false;
             }
         }
@@ -239,7 +334,6 @@ namespace FPC
         private IEnumerator SmoothTransitionCoroutine()
         {
             float elapsedTime = 0f;
-
             Vector3 initialPosition = player.transform.position;
             Quaternion initialRotation = player.transform.rotation;
             Vector3 targetPosition = FirstPersonController.Instance.isHiden
@@ -252,28 +346,41 @@ namespace FPC
             {
                 elapsedTime += Time.deltaTime;
                 float t = elapsedTime / transitionDuration;
-
-                // Smoothly move the position
+                
                 transform.position = Vector3.Lerp(initialPosition, targetPosition, t);
-
-                // Smoothly rotate towards the target rotation
+                
                 transform.rotation = Quaternion.Slerp(initialRotation, targetRotation, t);
 
-                yield return null; // Wait until the next frame
+                yield return null; 
             }
-
-            // Ensure the final position and rotation match exactly
             var transform1 = transform;
             transform1.position = targetPosition;
             transform1.rotation = targetRotation;
         }
 
+        private IEnumerator OpenKeyDoor()
+        {
+            if (currentDoorPivot != null)
+            {
+                yield return StartCoroutine(RotateDoor(_keyDoorOpenRotation));
+            }
+        }
+        
+        private IEnumerator ToggleSimpleDoor()
+        {
+            if (currentDoorPivot != null)
+            {
+                yield return StartCoroutine(RotateDoor(_isSimpleDoorOpen ? _simpleDoorCloseRotation : _simpleDoorOpenRotation));
+                _isSimpleDoorOpen = !_isSimpleDoorOpen;
+            }
+        }
+        
         private IEnumerator ToggleDoor()
         {
             if (currentDoorPivot != null)
             {
-                yield return StartCoroutine(RotateDoor(_isOpen ? _closedRotation : _openRotation));
-                _isOpen = !_isOpen;
+                yield return StartCoroutine(RotateDoor(_isLockerDoorOpen ? _closedRotation : _openRotation));
+                _isLockerDoorOpen = !_isLockerDoorOpen;
             }
         }
         private IEnumerator RotateDoor(Quaternion targetRotation)
@@ -288,7 +395,7 @@ namespace FPC
                 yield return null;
             }
 
-            currentDoorPivot.transform.rotation = targetRotation; // Ensure final rotation is set
+            currentDoorPivot.transform.rotation = targetRotation; 
         }
         private void InteractWithBattery()
         {
@@ -307,7 +414,7 @@ namespace FPC
                 AddGameObject(_currentCorpse);
                 _nrOfCorpses++;
                 corpsesFoundText.text = _nrOfCorpses + "/5";
-                StartCoroutine(FadeText());
+                StartCoroutine(FadeText(corpsesFoundText));
             }
         }
         private bool IsCorpseAlreadyFound(GameObject corpse)
@@ -332,25 +439,25 @@ namespace FPC
             newArray[foundCorpses.Length] = obj;
             foundCorpses = newArray;
         }
-        private IEnumerator FadeText()
+        private IEnumerator FadeText(TMP_Text text)
         {
-            corpsesFoundText.gameObject.SetActive(true);
-            yield return StartCoroutine(Fade(0f, 1f));
+            text.gameObject.SetActive(true);
+            yield return StartCoroutine(Fade(0f, 1f, text));
             yield return new WaitForSeconds(2.0f);
-            yield return StartCoroutine(Fade(1f, 0f));
-            corpsesFoundText.gameObject.SetActive(false);
+            yield return StartCoroutine(Fade(1f, 0f, text));
+            text.gameObject.SetActive(false);
         }
 
-        private IEnumerator Fade(float startAlpha, float endAlpha)
+        private IEnumerator Fade(float startAlpha, float endAlpha, TMP_Text text)
         {
             float elapsedTime = 0f;
-            Color color = corpsesFoundText.color;
+            Color color = text.color;
             while (elapsedTime < fadeDuration)
             {
                 elapsedTime += Time.deltaTime;
                 float alpha = Mathf.Lerp(startAlpha, endAlpha, elapsedTime / fadeDuration);
                 color.a = alpha;
-                corpsesFoundText.color = color;
+                text.color = color;
                 yield return null;
             }
             

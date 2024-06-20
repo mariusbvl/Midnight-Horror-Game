@@ -8,6 +8,8 @@ TagManager:
   - Corpse
   - LockerDoor
   - SimpleDoor
+  - KeyLockedDoor
+  - Key
   layers:
   - Default
   - TransparentFX
