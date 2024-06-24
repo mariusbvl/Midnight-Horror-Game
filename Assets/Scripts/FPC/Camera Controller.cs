@@ -24,8 +24,8 @@ namespace FPC
         private void Look()
         {
             _mouseLook = _inputActions.Player.Look.ReadValue<Vector2>();
-            float mouseX = _mouseLook.x * cameraSensitivity * Time.deltaTime;
-            float mouseY = _mouseLook.y * cameraSensitivity * Time.deltaTime;
+            float mouseX = _mouseLook.x * cameraSensitivity ;
+            float mouseY = _mouseLook.y * cameraSensitivity ;
             _xRotation -= mouseY;
             _xRotation = Mathf.Clamp(_xRotation, -80f, 80);
             transform.localRotation = Quaternion.Euler(_xRotation, 0, 0);

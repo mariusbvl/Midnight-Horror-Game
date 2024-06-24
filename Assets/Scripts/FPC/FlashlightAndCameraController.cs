@@ -92,7 +92,7 @@ namespace FPC
         {
             while (true)
             {
-                consumeSlider.value -= 25f;
+                consumeSlider.value -= 0.5f;
                 yield return new WaitForSeconds(2f);
             }
         }
