@@ -14,15 +14,23 @@ namespace EnemyScripts
         public float walkSpeed, runSpeed, minIdleTime, maxIdleTime;
         private float _idleTime;
         public bool isWalking, isRunning;
-        public Transform aiTransform;
+        public Transform playerTransform;
         private Transform _currentDestination;
+        private Vector3 _lastKnownPosition;
         private Vector3 _destination;
         private int _randNum, _randNum2;
         private int _destinationsAmount;
-        //Raycast
-        public Vector3 rayCastOffset;
-        public float sightDistance;
+        public bool isChasing;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
+        private static readonly int IsRunning = Animator.StringToHash("isRunning");
+        [Header("Enemy FOV")]
+        public float radius;
+        [Range(0, 360)] public float angle;
+        public GameObject playerRef;
+        public LayerMask targetMask;
+        public LayerMask obsructionMask;
+        public bool canSeePlayer;
+        
 
         private void Start()
         {
@@ -30,12 +38,17 @@ namespace EnemyScripts
             _destinationsAmount = destinations.Count;
             SetNewDestination();
             isWalking = true;
+            playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+            //FOV
+            playerRef = GameObject.FindGameObjectWithTag("Player");
+            StartCoroutine(FOVRoutine());
         }
 
         private void Update()
         {
             aiAnimator.SetBool(IsWalking, isWalking);
-            CheckForPlayer();
+            aiAnimator.SetBool(IsRunning, isRunning);
+            StartChase();
             if (isWalking)
             {
                 if (aiNavMesh.remainingDistance <= aiNavMesh.stoppingDistance && !aiNavMesh.pathPending)
@@ -44,21 +57,106 @@ namespace EnemyScripts
                 }
             }
         }
-
-
-        private void CheckForPlayer()
-        {
-            Vector3 aiDirection = (aiTransform.position - transform.position).normalized;
-            RaycastHit hit;
-            Debug.DrawRay(transform.position + rayCastOffset, aiDirection * sightDistance, Color.red);
-            if (Physics.Raycast(transform.position + rayCastOffset, aiDirection, out hit, sightDistance))
+        
+        private void StartChase(){
+            if (canSeePlayer)
             {
-                if (hit.collider.gameObject.CompareTag("Player"))
+                isWalking = false;
+                isRunning = true;
+                isChasing = true;
+            }
+
+            if (isChasing)
+            {
+                Chase();
+            }
+        }
+
+        private void Chase()
+        {
+            if (isChasing)
+            {
+                var position = playerTransform.position;
+                _destination = position;
+                aiNavMesh.SetDestination(_destination);
+                Vector3 direction = position - gameObject.transform.position;
+                direction.y = 0;
+                gameObject.transform.rotation = Quaternion.LookRotation(direction);
+                aiNavMesh.speed = runSpeed;
+                if (!canSeePlayer)
                 {
-                    Debug.Log("Player on raycast");
+                    _lastKnownPosition = playerTransform.position;
+                    StartCoroutine(ReturnToLastKnownPosition());
+                    isChasing = false;
                 }
             }
         }
+        private IEnumerator ReturnToLastKnownPosition()
+        {
+            aiNavMesh.SetDestination(_lastKnownPosition);
+            while (Vector3.Distance(gameObject.transform.position, _lastKnownPosition) > aiNavMesh.stoppingDistance)
+            {
+                yield return null;
+            }
+            isWalking = true;
+            isRunning = false;
+            StopCoroutine(StayIdle());
+            yield return StartCoroutine(StayIdle());
+            if (!canSeePlayer)
+            {
+                StartCoroutine(ReturnToPatrol());
+            }
+            else
+            {
+                StartChase();
+            }
+        }
+        private IEnumerator ReturnToPatrol()
+        {
+            SetNewDestination();
+            yield return null;
+        }
+        private void CheckForPlayer()
+        {
+            Collider[] rangeChecks = Physics.OverlapSphere(transform.position, radius, targetMask);
+            if (rangeChecks.Length != 0)
+            {
+                Transform target = rangeChecks[0].transform;
+                Vector3 directionToTarget = (target.position - transform.position).normalized;
+                if (Vector3.Angle(transform.forward , directionToTarget) < angle / 2)
+                {
+                    float distanceToTarget = Vector3.Distance(transform.position, target.position);
+                    if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obsructionMask))
+                    {
+                        canSeePlayer = true;
+                    }
+                    else
+                    {
+                        canSeePlayer = false;
+                    }
+                }
+                else
+                {
+                    canSeePlayer = false;
+                }
+            }
+            else if(canSeePlayer)
+            {
+                canSeePlayer = false;
+            }
+        }
+
+        private IEnumerator FOVRoutine()
+        {
+            WaitForSeconds wait = new WaitForSeconds(0.2f);
+            while (true)
+            {
+                yield return wait;
+                CheckForPlayer();
+            }
+        }
+        
+        
         private void SetNewDestination()
         {
             int newDestinationIndex;

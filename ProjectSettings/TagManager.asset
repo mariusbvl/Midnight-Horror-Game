@@ -10,6 +10,7 @@ TagManager:
   - SimpleDoor
   - KeyLockedDoor
   - Key
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -18,8 +19,8 @@ TagManager:
   - Water
   - UI
   - Ground
-  - 
-  - 
+  - EnemyTarget
+  - EnemyObstruction
   - 
   - 
   - 

@@ -35,12 +35,12 @@ namespace FPC
         private CharacterController _characterController;
         private FlashlightAndCameraController _flashlightAndCameraController;
         private HeadBobController _headBobController;
-        public GameObject currentLockerDoor;
-        public GameObject currentLocker;
-        public GameObject currentDoorPivot;
-        public GameObject currentHideCameraPoint;
-        public GameObject currentFrontOfTheLockerPoint;
-        public GameObject currentExitPointLockerPoint;
+        private GameObject _currentLockerDoor;
+        private GameObject _currentLocker;
+        private GameObject _currentDoorPivot;
+        private GameObject _currentHideCameraPoint;
+        private GameObject _currentFrontOfTheLockerPoint;
+        private GameObject _currentExitPointLockerPoint;
         private bool _lockerDoorOnHover;
         //Locker Door Variables
         public float doorOpeningDuration = 0.5f;
@@ -104,14 +104,14 @@ namespace FPC
                 _corpseOnHover = false;
                 _currentCorpse = null;
                 _lockerDoorOnHover = false;
-                currentLockerDoor = null;
+                _currentLockerDoor = null;
                 
                 
-                currentDoorPivot = null;
-                currentLocker = null;
-                currentHideCameraPoint = null;
-                currentFrontOfTheLockerPoint = null;
-                currentExitPointLockerPoint = null;
+                _currentDoorPivot = null;
+                _currentLocker = null;
+                _currentHideCameraPoint = null;
+                _currentFrontOfTheLockerPoint = null;
+                _currentExitPointLockerPoint = null;
                 _isDoorPositionSet = false;
                 _isSimpleDoorOnHover = false;
                 _currentSimpleDoor = null;
@@ -145,28 +145,28 @@ namespace FPC
                 if(rayCastHit.collider.gameObject.CompareTag("LockerDoor"))
                 {
                     _lockerDoorOnHover = true;
-                    currentLockerDoor = rayCastHit.collider.gameObject;
-                    currentDoorPivot = currentLockerDoor.transform.parent.gameObject;
-                    currentLocker = currentDoorPivot.transform.parent.gameObject;
-                    Transform hideCameraPointTransform = currentLocker.transform.Find("HideCameraPoint");
+                    _currentLockerDoor = rayCastHit.collider.gameObject;
+                    _currentDoorPivot = _currentLockerDoor.transform.parent.gameObject;
+                    _currentLocker = _currentDoorPivot.transform.parent.gameObject;
+                    Transform hideCameraPointTransform = _currentLocker.transform.Find("HideCameraPoint");
                     if (hideCameraPointTransform != null)
                     {
-                        currentHideCameraPoint = hideCameraPointTransform.gameObject;
+                        _currentHideCameraPoint = hideCameraPointTransform.gameObject;
                     }
-                    Transform inFrontOfTheLockerTransform = currentLocker.transform.Find("InFrontOfTheLockerPoint");
+                    Transform inFrontOfTheLockerTransform = _currentLocker.transform.Find("InFrontOfTheLockerPoint");
                     if (inFrontOfTheLockerTransform != null)
                     {
-                        currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
+                        _currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
                     }
-                    Transform exitLockerPointTransform = currentLocker.transform.Find("ExitLockerPoint");
+                    Transform exitLockerPointTransform = _currentLocker.transform.Find("ExitLockerPoint");
                     if (exitLockerPointTransform != null)
                     {
-                        currentExitPointLockerPoint= exitLockerPointTransform.gameObject;
+                        _currentExitPointLockerPoint= exitLockerPointTransform.gameObject;
                     }
-                    if (currentDoorPivot != null && !_isDoorPositionSet)
+                    if (_currentDoorPivot != null && !_isDoorPositionSet)
                     {
-                        _closedRotation = currentDoorPivot.transform.rotation;
-                        var eulerAngles = currentDoorPivot.transform.eulerAngles;
+                        _closedRotation = _currentDoorPivot.transform.rotation;
+                        var eulerAngles = _currentDoorPivot.transform.eulerAngles;
                         _openRotation = Quaternion.Euler(eulerAngles.x, eulerAngles.y + 90f, eulerAngles.z);
                         _isDoorPositionSet = true;
                     }
@@ -176,8 +176,8 @@ namespace FPC
                 {
                     _isSimpleDoorOnHover = true;
                     _currentSimpleDoor = rayCastHit.collider.gameObject;
-                    currentDoorPivot = _currentSimpleDoor.transform.parent.gameObject;
-                    GameObject simpleDoor = currentDoorPivot.transform.parent.gameObject;
+                    _currentDoorPivot = _currentSimpleDoor.transform.parent.gameObject;
+                    GameObject simpleDoor = _currentDoorPivot.transform.parent.gameObject;
                     Transform currentSimpleDoorOpenPivotTransform = simpleDoor.transform.Find("openDoor");
                     if (currentSimpleDoorOpenPivotTransform != null)
                     {
@@ -197,8 +197,8 @@ namespace FPC
                 {
                     _isKeyLockedDoorOnHover = true;
                     _currentKeyDoor = rayCastHit.collider.gameObject;
-                    currentDoorPivot = _currentKeyDoor.transform.parent.gameObject;
-                    GameObject keyDoor = currentDoorPivot.transform.parent.gameObject;
+                    _currentDoorPivot = _currentKeyDoor.transform.parent.gameObject;
+                    GameObject keyDoor = _currentDoorPivot.transform.parent.gameObject;
                     Transform currentKeyDoorOpenPivotTransform = keyDoor.transform.Find("openDoor");
                     if (currentKeyDoorOpenPivotTransform != null)
                     {
@@ -280,8 +280,8 @@ namespace FPC
             if (_lockerDoorOnHover && FirstPersonController.Instance.isHiden)
             {
                 isInteracting= true;
-                player.transform.position = currentHideCameraPoint.transform.position;
-                player.transform.rotation = currentHideCameraPoint.transform.rotation;
+                player.transform.position = _currentHideCameraPoint.transform.position;
+                player.transform.rotation = _currentHideCameraPoint.transform.rotation;
                 yield return StartCoroutine(ToggleDoor());
                 yield return StartCoroutine(SmoothTransitionCoroutine());
                 yield return _characterController.enabled = true;
@@ -319,8 +319,8 @@ namespace FPC
                 _headBobController.enabled = false;
                 playerMesh.SetActive(false);
                 hands.SetActive(false);
-                player.transform.position = currentFrontOfTheLockerPoint.transform.position;
-                player.transform.rotation = currentFrontOfTheLockerPoint.transform.rotation;
+                player.transform.position = _currentFrontOfTheLockerPoint.transform.position;
+                player.transform.rotation = _currentFrontOfTheLockerPoint.transform.rotation;
                 yield return StartCoroutine(ToggleDoor());
 
                 yield return StartCoroutine(SmoothTransitionCoroutine());
@@ -337,11 +337,11 @@ namespace FPC
             Vector3 initialPosition = player.transform.position;
             Quaternion initialRotation = player.transform.rotation;
             Vector3 targetPosition = FirstPersonController.Instance.isHiden
-                ? currentExitPointLockerPoint.transform.position
-                : currentHideCameraPoint.transform.position;
+                ? _currentExitPointLockerPoint.transform.position
+                : _currentHideCameraPoint.transform.position;
             Quaternion targetRotation = FirstPersonController.Instance.isHiden
-                ? currentExitPointLockerPoint.transform.rotation
-                : currentHideCameraPoint.transform.rotation;
+                ? _currentExitPointLockerPoint.transform.rotation
+                : _currentHideCameraPoint.transform.rotation;
             while (elapsedTime < transitionDuration)
             {
                 elapsedTime += Time.deltaTime;
@@ -360,7 +360,7 @@ namespace FPC
 
         private IEnumerator OpenKeyDoor()
         {
-            if (currentDoorPivot != null)
+            if (_currentDoorPivot != null)
             {
                 yield return StartCoroutine(RotateDoor(_keyDoorOpenRotation));
             }
@@ -368,7 +368,7 @@ namespace FPC
         
         private IEnumerator ToggleSimpleDoor()
         {
-            if (currentDoorPivot != null)
+            if (_currentDoorPivot != null)
             {
                 yield return StartCoroutine(RotateDoor(_isSimpleDoorOpen ? _simpleDoorCloseRotation : _simpleDoorOpenRotation));
                 _isSimpleDoorOpen = !_isSimpleDoorOpen;
@@ -377,7 +377,7 @@ namespace FPC
         
         private IEnumerator ToggleDoor()
         {
-            if (currentDoorPivot != null)
+            if (_currentDoorPivot != null)
             {
                 yield return StartCoroutine(RotateDoor(_isLockerDoorOpen ? _closedRotation : _openRotation));
                 _isLockerDoorOpen = !_isLockerDoorOpen;
@@ -385,17 +385,17 @@ namespace FPC
         }
         private IEnumerator RotateDoor(Quaternion targetRotation)
         {
-            Quaternion startRotation = currentDoorPivot.transform.rotation;
+            Quaternion startRotation = _currentDoorPivot.transform.rotation;
             float timeElapsed = 0f;
 
             while (timeElapsed < doorOpeningDuration)
             {
-                currentDoorPivot.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, timeElapsed / doorOpeningDuration);
+                _currentDoorPivot.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, timeElapsed / doorOpeningDuration);
                 timeElapsed += Time.deltaTime;
                 yield return null;
             }
 
-            currentDoorPivot.transform.rotation = targetRotation; 
+            _currentDoorPivot.transform.rotation = targetRotation; 
         }
         private void InteractWithBattery()
         {
