@@ -18,7 +18,7 @@ namespace EnemyScripts
         private Transform _currentDestination;
         private Vector3 _lastKnownPosition;
         private Vector3 _destination;
-        private int _randNum, _randNum2;
+        private int _randNum;
         private int _destinationsAmount;
         public bool isChasing;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
@@ -30,7 +30,11 @@ namespace EnemyScripts
         public LayerMask targetMask;
         public LayerMask obsructionMask;
         public bool canSeePlayer;
-        
+        public bool radiusChanged;
+
+        private Coroutine _returnToLastKnownPositionCoroutine;
+        private Coroutine _stayIdleCoroutine;
+        private Coroutine _returnToPatrolCoroutine;
 
         private void Start()
         {
@@ -39,7 +43,7 @@ namespace EnemyScripts
             SetNewDestination();
             isWalking = true;
             playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
-            //FOV
+            // FOV
             playerRef = GameObject.FindGameObjectWithTag("Player");
             StartCoroutine(FOVRoutine());
         }
@@ -57,13 +61,19 @@ namespace EnemyScripts
                 }
             }
         }
-        
-        private void StartChase(){
+
+        private void StartChase()
+        {
             if (canSeePlayer)
             {
                 isWalking = false;
                 isRunning = true;
                 isChasing = true;
+                if (!radiusChanged)
+                {
+                    radius *= 2;
+                    radiusChanged = true;
+                }
             }
 
             if (isChasing)
@@ -83,39 +93,69 @@ namespace EnemyScripts
                 direction.y = 0;
                 gameObject.transform.rotation = Quaternion.LookRotation(direction);
                 aiNavMesh.speed = runSpeed;
+
                 if (!canSeePlayer)
                 {
+                    /*
+                    float timeAfterLosingFromSight = 0;
+                    while (timeAfterLosingFromSight < 2f)
+                    {
+                        timeAfterLosingFromSight += Time.deltaTime;
+                        return;
+                    }*/
                     _lastKnownPosition = playerTransform.position;
-                    StartCoroutine(ReturnToLastKnownPosition());
+                    if (_returnToLastKnownPositionCoroutine != null)
+                    {
+                        StopCoroutine(_returnToLastKnownPositionCoroutine);
+                    }
+                    _returnToLastKnownPositionCoroutine = StartCoroutine(ReturnToLastKnownPosition());
                     isChasing = false;
                 }
             }
         }
+
         private IEnumerator ReturnToLastKnownPosition()
         {
             aiNavMesh.SetDestination(_lastKnownPosition);
-            while (Vector3.Distance(gameObject.transform.position, _lastKnownPosition) > aiNavMesh.stoppingDistance)
+            while (Vector3.Distance(transform.position, _lastKnownPosition) > aiNavMesh.stoppingDistance)
             {
                 yield return null;
             }
-            isWalking = true;
+            isWalking = false;
             isRunning = false;
-            StopCoroutine(StayIdle());
-            yield return StartCoroutine(StayIdle());
+            if (radiusChanged)
+            {
+                radius /= 2;
+                radiusChanged = false;
+            }
             if (!canSeePlayer)
             {
-                StartCoroutine(ReturnToPatrol());
+                if (_stayIdleCoroutine != null)
+                {
+                    StopCoroutine(_stayIdleCoroutine);
+                }
+                _stayIdleCoroutine = StartCoroutine(StayIdle());
             }
             else
             {
+                if (_stayIdleCoroutine != null)
+                {
+                    StopCoroutine(_stayIdleCoroutine);
+                }
+                if (_returnToPatrolCoroutine != null)
+                {
+                    StopCoroutine(_returnToPatrolCoroutine);
+                }
                 StartChase();
             }
         }
+
         private IEnumerator ReturnToPatrol()
         {
             SetNewDestination();
             yield return null;
         }
+
         private void CheckForPlayer()
         {
             Collider[] rangeChecks = Physics.OverlapSphere(transform.position, radius, targetMask);
@@ -123,7 +163,7 @@ namespace EnemyScripts
             {
                 Transform target = rangeChecks[0].transform;
                 Vector3 directionToTarget = (target.position - transform.position).normalized;
-                if (Vector3.Angle(transform.forward , directionToTarget) < angle / 2)
+                if (Vector3.Angle(transform.forward, directionToTarget) < angle / 2)
                 {
                     float distanceToTarget = Vector3.Distance(transform.position, target.position);
                     if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obsructionMask))
@@ -140,7 +180,7 @@ namespace EnemyScripts
                     canSeePlayer = false;
                 }
             }
-            else if(canSeePlayer)
+            else if (canSeePlayer)
             {
                 canSeePlayer = false;
             }
@@ -155,8 +195,7 @@ namespace EnemyScripts
                 CheckForPlayer();
             }
         }
-        
-        
+
         private void SetNewDestination()
         {
             int newDestinationIndex;
@@ -174,14 +213,19 @@ namespace EnemyScripts
 
         private void HandleDestinationReached()
         {
-            _randNum2 = Random.Range(0, 2);
-            if (_randNum2 == 0)
+            int randomChoice = Random.Range(0, 2);
+            if (randomChoice == 0)
             {
                 SetNewDestination();
+                isWalking = true;
             }
             else
             {
-                StartCoroutine(StayIdle());
+                if (_stayIdleCoroutine != null)
+                {
+                    StopCoroutine(_stayIdleCoroutine);
+                }
+                _stayIdleCoroutine = StartCoroutine(StayIdle());
                 isWalking = false;
             }
         }
@@ -192,6 +236,7 @@ namespace EnemyScripts
             yield return new WaitForSeconds(_idleTime);
             isWalking = true;
             SetNewDestination();
+            Debug.Log($"Idle for: {_idleTime}");
         }
     }
 }

@@ -19914,8 +19914,8 @@ MonoBehaviour:
   aiAnimator: {fileID: 0}
   walkSpeed: 2
   runSpeed: 4
-  minIdleTime: 5
-  maxIdleTime: 6
+  minIdleTime: 3
+  maxIdleTime: 5
   isWalking: 0
   isRunning: 0
   playerTransform: {fileID: 0}
@@ -19930,6 +19930,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   canSeePlayer: 0
+  radiusChanged: 0
 --- !u!136 &4586839784990911740
 CapsuleCollider:
   m_ObjectHideFlags: 0
