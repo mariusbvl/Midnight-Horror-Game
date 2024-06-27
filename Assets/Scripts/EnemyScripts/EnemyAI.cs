@@ -42,11 +42,13 @@ namespace EnemyScripts
         [SerializeField]private GameObject gameOverPanel;
         private CameraController _cameraController;
         private InteractController _interactController;
+        private FlashlightAndCameraController _flashlightAndCameraController;
 
         private void Start()
         {
             _cameraController = GameObject.Find("CamHolder").GetComponent<CameraController>();
             _interactController = GameObject.Find("Player").GetComponent<InteractController>();
+            _flashlightAndCameraController = GameObject.Find("Player").GetComponent<FlashlightAndCameraController>();
             gameOverPanel.SetActive(false);
             aiAnimator = GetComponent<Animator>();
             _destinationsAmount = destinations.Count;
@@ -85,6 +87,7 @@ namespace EnemyScripts
                     gameOverPanel.SetActive(true);
                     _cameraController.enabled = false;
                     _interactController.enabled = false;
+                    _flashlightAndCameraController.enabled = false;
                     Time.timeScale = 0f;
                 }
             }
