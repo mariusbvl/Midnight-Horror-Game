@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using FPC;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -28,16 +30,24 @@ namespace EnemyScripts
         [Range(0, 360)] public float angle;
         public GameObject playerRef;
         public LayerMask targetMask;
-        public LayerMask obsructionMask;
+        public LayerMask obstructionMask;
         public bool canSeePlayer;
         public bool radiusChanged;
-
+        private Coroutine _lostPlayerCoroutine;
         private Coroutine _returnToLastKnownPositionCoroutine;
         private Coroutine _stayIdleCoroutine;
         private Coroutine _returnToPatrolCoroutine;
+        [Header("GameOver")]
+        [SerializeField]private float gameOverDistance;
+        [SerializeField]private GameObject gameOverPanel;
+        private CameraController _cameraController;
+        private InteractController _interactController;
 
         private void Start()
         {
+            _cameraController = GameObject.Find("CamHolder").GetComponent<CameraController>();
+            _interactController = GameObject.Find("Player").GetComponent<InteractController>();
+            gameOverPanel.SetActive(false);
             aiAnimator = GetComponent<Animator>();
             _destinationsAmount = destinations.Count;
             SetNewDestination();
@@ -52,6 +62,8 @@ namespace EnemyScripts
         {
             aiAnimator.SetBool(IsWalking, isWalking);
             aiAnimator.SetBool(IsRunning, isRunning);
+            FovRadiusController();
+            FovAngleController();
             StartChase();
             if (isWalking)
             {
@@ -60,8 +72,48 @@ namespace EnemyScripts
                     HandleDestinationReached();
                 }
             }
+            GameOver();
         }
 
+        private void GameOver()
+        {
+            if (isChasing)
+            {
+                if (Vector3.Distance(gameObject.transform.position, playerTransform.transform.position) <=
+                    gameOverDistance)
+                {
+                    gameOverPanel.SetActive(true);
+                    _cameraController.enabled = false;
+                    _interactController.enabled = false;
+                    Time.timeScale = 0f;
+                }
+            }
+        }
+        private void FovAngleController()
+        {
+            if (FirstPersonController.Instance.isSprinting && !isChasing)
+            {
+                angle = 360f;
+            }
+            else
+            {
+                angle = 100f;
+            }
+            
+        }
+        private void FovRadiusController()
+        {
+            if (FirstPersonController.Instance.isCrouching && !isChasing && !radiusChanged)
+            {
+                radius = 4f;
+            }
+            else if(!FirstPersonController.Instance.isCrouching && !isChasing && !radiusChanged)
+            {
+                radius = 8f;
+            }
+        }
+        
+        
         private void StartChase()
         {
             if (canSeePlayer)
@@ -71,7 +123,7 @@ namespace EnemyScripts
                 isChasing = true;
                 if (!radiusChanged)
                 {
-                    radius *= 2;
+                    radius += 5;
                     radiusChanged = true;
                 }
             }
@@ -96,24 +148,27 @@ namespace EnemyScripts
 
                 if (!canSeePlayer)
                 {
-                    /*
-                    float timeAfterLosingFromSight = 0;
-                    while (timeAfterLosingFromSight < 2f)
-                    {
-                        timeAfterLosingFromSight += Time.deltaTime;
-                        return;
-                    }*/
-                    _lastKnownPosition = playerTransform.position;
-                    if (_returnToLastKnownPositionCoroutine != null)
-                    {
-                        StopCoroutine(_returnToLastKnownPositionCoroutine);
-                    }
-                    _returnToLastKnownPositionCoroutine = StartCoroutine(ReturnToLastKnownPosition());
-                    isChasing = false;
+                    _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
                 }
             }
         }
 
+        private IEnumerator LostPlayerCoroutine()
+        {
+            yield return new WaitForSeconds(2f);
+            if (!canSeePlayer)
+            {
+                _lastKnownPosition = playerTransform.position;
+                if (_returnToLastKnownPositionCoroutine != null)
+                {
+                    StopCoroutine(_returnToLastKnownPositionCoroutine);
+                }
+
+                _returnToLastKnownPositionCoroutine = StartCoroutine(ReturnToLastKnownPosition());
+                isChasing = false;
+            }
+            _lostPlayerCoroutine = null;
+        }
         private IEnumerator ReturnToLastKnownPosition()
         {
             aiNavMesh.SetDestination(_lastKnownPosition);
@@ -125,7 +180,7 @@ namespace EnemyScripts
             isRunning = false;
             if (radiusChanged)
             {
-                radius /= 2;
+                radius -= 5;
                 radiusChanged = false;
             }
             if (!canSeePlayer)
@@ -166,7 +221,7 @@ namespace EnemyScripts
                 if (Vector3.Angle(transform.forward, directionToTarget) < angle / 2)
                 {
                     float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                    if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obsructionMask))
+                    if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask))
                     {
                         canSeePlayer = true;
                     }

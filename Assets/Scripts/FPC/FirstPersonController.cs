@@ -26,7 +26,7 @@ namespace FPC
         [HideInInspector]public bool isJumpIdle;
         [Header("Sprint")]
         [SerializeField] private float sprintSpeed;
-        [SerializeField] private bool isSprinting;
+        [SerializeField] public bool isSprinting;
         [Header("Crouch")]
         [SerializeField]private Transform playerMesh;
         [SerializeField] private Transform cameraTransform;
