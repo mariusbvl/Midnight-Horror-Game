@@ -1,15 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using FPC;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations.Rigging;
 using Random = UnityEngine.Random;
 
 namespace EnemyScripts
 {
     public class EnemyAI : MonoBehaviour
     {
+        public static EnemyAI Instance { get; private set; }
         public NavMeshAgent aiNavMesh;
         public List<Transform> destinations;
         public Animator aiAnimator;
@@ -37,19 +40,19 @@ namespace EnemyScripts
         private Coroutine _returnToLastKnownPositionCoroutine;
         private Coroutine _stayIdleCoroutine;
         private Coroutine _returnToPatrolCoroutine;
-        [Header("GameOver")]
-        [SerializeField]private float gameOverDistance;
-        [SerializeField]private GameObject gameOverPanel;
-        private CameraController _cameraController;
-        private InteractController _interactController;
-        private FlashlightAndCameraController _flashlightAndCameraController;
+        [Header("Rig")] 
+        [SerializeField]private MultiAimConstraint _headAim;
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+        }
 
         private void Start()
         {
-            _cameraController = GameObject.Find("CamHolder").GetComponent<CameraController>();
-            _interactController = GameObject.Find("Player").GetComponent<InteractController>();
-            _flashlightAndCameraController = GameObject.Find("Player").GetComponent<FlashlightAndCameraController>();
-            gameOverPanel.SetActive(false);
+            _headAim = GameObject.Find("HeadAim").GetComponent<MultiAimConstraint>();
             aiAnimator = GetComponent<Animator>();
             _destinationsAmount = destinations.Count;
             SetNewDestination();
@@ -74,24 +77,9 @@ namespace EnemyScripts
                     HandleDestinationReached();
                 }
             }
-            GameOver();
         }
 
-        private void GameOver()
-        {
-            if (isChasing)
-            {
-                if (Vector3.Distance(gameObject.transform.position, playerTransform.transform.position) <=
-                    gameOverDistance)
-                {
-                    gameOverPanel.SetActive(true);
-                    _cameraController.enabled = false;
-                    _interactController.enabled = false;
-                    _flashlightAndCameraController.enabled = false;
-                    Time.timeScale = 0f;
-                }
-            }
-        }
+        
         private void FovAngleController()
         {
             if (FirstPersonController.Instance.isSprinting && !isChasing)
@@ -124,6 +112,7 @@ namespace EnemyScripts
                 isWalking = false;
                 isRunning = true;
                 isChasing = true;
+                _headAim.weight = 1f;
                 if (!radiusChanged)
                 {
                     radius += 5;
@@ -151,6 +140,7 @@ namespace EnemyScripts
 
                 if (!canSeePlayer)
                 {
+                    _headAim.weight = 0f;
                     _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
                 }
             }
