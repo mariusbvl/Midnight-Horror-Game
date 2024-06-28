@@ -20740,12 +20740,6 @@ MonoBehaviour:
   player: {fileID: 721260721608531520}
   hands: {fileID: 612911543863750530}
   camHolder: {fileID: 3298416928299805684}
-  currentLockerDoor: {fileID: 0}
-  currentLocker: {fileID: 0}
-  currentDoorPivot: {fileID: 0}
-  currentHideCameraPoint: {fileID: 0}
-  currentFrontOfTheLockerPoint: {fileID: 0}
-  currentExitPointLockerPoint: {fileID: 0}
   doorOpeningDuration: 0.5
   transitionDuration: 1
   lockedText: {fileID: 6392605679394801407}
@@ -20945,7 +20939,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94cb4788c5eb2ec44906276644e586ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraSensitivity: 50
+  cameraSensitivity: 0.1
   playerBody: {fileID: 8686902096147372376}
 --- !u!4 &829012797541280900
 Transform:
