@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using FPC;
-using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
@@ -22,7 +20,7 @@ namespace EnemyScripts
         public Transform playerTransform;
         private Transform _currentDestination;
         private Vector3 _lastKnownPosition;
-        private Vector3 _destination;
+        public Vector3 destination;
         private int _randNum;
         private int _destinationsAmount;
         public bool isChasing;
@@ -131,8 +129,8 @@ namespace EnemyScripts
             if (isChasing)
             {
                 var position = playerTransform.position;
-                _destination = position;
-                aiNavMesh.SetDestination(_destination);
+                destination = position;
+                aiNavMesh.SetDestination(destination);
                 Vector3 direction = position - gameObject.transform.position;
                 direction.y = 0;
                 gameObject.transform.rotation = Quaternion.LookRotation(direction);
@@ -254,8 +252,8 @@ namespace EnemyScripts
 
             _randNum = newDestinationIndex;
             _currentDestination = destinations[_randNum];
-            _destination = _currentDestination.position;
-            aiNavMesh.destination = _destination;
+            destination = _currentDestination.position;
+            aiNavMesh.destination = destination;
             aiNavMesh.speed = walkSpeed;
         }
 
