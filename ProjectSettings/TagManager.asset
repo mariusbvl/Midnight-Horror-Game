@@ -12,6 +12,9 @@ TagManager:
   - Key
   - Enemy
   - FrontDoor
+  - Ladder
+  - CardReader
+  - KeyCard
   layers:
   - Default
   - TransparentFX

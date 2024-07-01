@@ -80,6 +80,29 @@ namespace FPC
         [Header("Front Door")] 
         [SerializeField] private int mainGameSceneId;
         private bool _isFrontDoorOnHover;
+        [Header("Ladder")] 
+        private bool _isLadderOnHover;
+        private bool _isOnUpperFloor;
+        private GameObject _ladder;
+        private Transform _bottomPoint;
+        private Transform _upPoint;
+        [Header("KeyCard")] 
+        [SerializeField]private bool isKeyCardPicked;
+        private bool _isKeyCardOnHover;
+        private GameObject _keyCard;
+        [Header("CardDoubleDoor")] 
+        [SerializeField]public float cardDoorOpeningDuration;
+        [SerializeField] private TMP_Text accessDeniedText; 
+        private bool _isCardReaderOnHover;
+        private GameObject _leftCardDoor;
+        private GameObject _rightCardDoor;
+        private Transform _leftCardDoorOpenPoint;
+        private Transform _rightCardDoorOpenPoint;
+        
+        
+        private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
+        private static readonly int Stand = Animator.StringToHash("Stand");
+
         void Awake()
         {
             if (Instance == null)
@@ -95,12 +118,17 @@ namespace FPC
             batteryText.text = nrOfBatteries + "/5";
             _inputActions = new GameInputActions();
             _inputActions.Player.Interact.performed += _ => Interact();
+            StartCoroutine(RayCastCoroutine());
         }
 
-        
-        void Update()
+        private IEnumerator RayCastCoroutine()
         {
-            CursorRayCast();
+            WaitForSeconds wait = new WaitForSeconds(0.2f);
+            while (true)
+            {
+                yield return wait;
+                CursorRayCast();
+            }
         }
         private void CursorRayCast(){
             if (!isInteracting)
@@ -130,6 +158,10 @@ namespace FPC
                 _isKeyLockedDoorOnHover = false;
 
                 _isFrontDoorOnHover = false;
+                
+                _isLadderOnHover = false;
+
+                _isCardReaderOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -212,7 +244,9 @@ namespace FPC
                     {
                         _currentKeyDoorOpenPivot = currentKeyDoorOpenPivotTransform.gameObject;
                     }
-                    _keyDoorOpenRotation = _currentKeyDoorOpenPivot.transform.rotation;
+
+                    if (_currentKeyDoorOpenPivot != null)
+                        _keyDoorOpenRotation = _currentKeyDoorOpenPivot.transform.rotation;
                     _doorIdComponent = keyDoor.GetComponentInChildren<TMP_Text>();
                     _doorIdText = _doorIdComponent.text;
                     if (int.TryParse(_doorIdText, out int doorInt))
@@ -238,6 +272,34 @@ namespace FPC
                     _isFrontDoorOnHover = true;
                     Debug.Log("FrontDoor");
                 }
+
+                if (rayCastHit.collider.gameObject.CompareTag("Ladder"))
+                {
+                    _isLadderOnHover = true;
+                    _ladder = rayCastHit.collider.gameObject;
+                    _bottomPoint = GameObject.Find("BottomPoint").GetComponent<Transform>();
+                    _upPoint = GameObject.Find("UpPoint").GetComponent<Transform>();
+                    Debug.Log("Ladder");
+                }
+
+                if (rayCastHit.collider.gameObject.CompareTag("KeyCard"))
+                {
+                    _isKeyCardOnHover = true;
+                    _keyCard = rayCastHit.collider.gameObject;
+                    Debug.Log("KeyCard");
+                }
+                
+                if (rayCastHit.collider.gameObject.CompareTag("CardReader"))
+                {
+                    _isCardReaderOnHover = true;
+                    GameObject doubleDoorCard = rayCastHit.collider.gameObject.transform.parent.gameObject;
+                    GameObject doubleDoors = doubleDoorCard.transform.Find("DoubleDoors").gameObject;
+                    _leftCardDoor = doubleDoors.transform.Find("LeftDoor").gameObject;
+                    _rightCardDoor = doubleDoors.transform.Find("RightDoor").gameObject;
+                    _leftCardDoorOpenPoint = doubleDoors.transform.Find("LeftDoorOpenPoint");
+                    _rightCardDoorOpenPoint = doubleDoors.transform.Find("RightDoorOpenPoint");
+                    Debug.Log("CardReader");
+                }
             }
         }
         private void Interact()
@@ -252,10 +314,74 @@ namespace FPC
                 PickKey();
                 StartCoroutine(OpenDoorWithKey());
                 EnterHospital();
+                ClimbGetDownLadder();
+                PickKeyCard();
+                StartCoroutine(ReadCardReader());
             }
         }
 
+        private void PickKeyCard()
+        {
+            if (_isKeyCardOnHover)
+            {
+                isKeyCardPicked = true;
+                Destroy(_keyCard);
+            }
+        }
+        
+        private IEnumerator ReadCardReader()
+        {
+            if (_isCardReaderOnHover)
+            {
+                if (isKeyCardPicked)
+                {
+                    isInteracting = true;
+                    yield return StartCoroutine(OpenCardDoors());
+                    isInteracting = false;
+                }
+                else
+                {
+                    yield return StartCoroutine(FadeText(accessDeniedText));
+                }
+            }
+        }
 
+        private IEnumerator OpenCardDoors()
+        {
+            Vector3 leftCardDoorStartPosition = _leftCardDoor.transform.position;
+            Vector3 leftCardDoorTargetPosition = _leftCardDoorOpenPoint.transform.position;
+            Vector3 rightCardDoorStartPosition = _rightCardDoor.transform.position;
+            Vector3 rightCardDoorTargetPosition = _rightCardDoorOpenPoint.transform.position;
+            float timeElapsed = 0f;
+
+            while (timeElapsed < cardDoorOpeningDuration)
+            {
+                _leftCardDoor.transform.position = Vector3.Lerp(leftCardDoorStartPosition, leftCardDoorTargetPosition, timeElapsed / cardDoorOpeningDuration);
+                _rightCardDoor.transform.position = Vector3.Lerp(rightCardDoorStartPosition, rightCardDoorTargetPosition, timeElapsed / cardDoorOpeningDuration);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            _leftCardDoor.transform.position = leftCardDoorTargetPosition;
+            _rightCardDoor.transform.position = rightCardDoorTargetPosition;
+        }
+        
+        
+        private void ClimbGetDownLadder()
+        {
+            if (_isLadderOnHover)
+            {
+                _characterController.enabled = false;
+                Vector3 worldTransform = _isOnUpperFloor
+                    ? _ladder.transform.TransformPoint(_bottomPoint.localPosition)
+                    : _ladder.transform.TransformPoint(_upPoint.localPosition);
+                player.transform.position = worldTransform;
+                _isOnUpperFloor = !_isOnUpperFloor;
+                _characterController.enabled = true;
+            }
+        }
+        
+        
         private void EnterHospital()
         {
             if (_isFrontDoorOnHover)
@@ -334,8 +460,8 @@ namespace FPC
                 if (FirstPersonController.Instance.isCrouching)
                 {
                     FirstPersonController.Instance.CrouchPressed();
-                    AnimationController.Instance.animator.SetTrigger("Stand");
-                    AnimationController.Instance.animator.SetBool("isCrouching", false);
+                    AnimationController.Instance.animator.SetTrigger(Stand);
+                    AnimationController.Instance.animator.SetBool(IsCrouching, false);
                     yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
                 }
                 
