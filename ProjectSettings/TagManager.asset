@@ -11,6 +11,7 @@ TagManager:
   - KeyLockedDoor
   - Key
   - Enemy
+  - FrontDoor
   layers:
   - Default
   - TransparentFX

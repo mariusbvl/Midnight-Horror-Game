@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 221678879159212064}
   - component: {fileID: 7174622111827242790}
   m_Layer: 0
-  m_Name: battery
+  m_Name: Battery
   m_TagString: Battery
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 
 namespace FPC
@@ -75,12 +77,16 @@ namespace FPC
         private string _idText;
         private int _idInt;
         private GameObject _key;
+        [Header("Front Door")] 
+        [SerializeField] private int mainGameSceneId;
+        private bool _isFrontDoorOnHover;
         void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
             }
+            Array.Fill(keysPicked,false);
             _characterController = GetComponent<CharacterController>();
             _cameraController = camHolder.GetComponent<CameraController>();
             _flashlightAndCameraController = GetComponent<FlashlightAndCameraController>();
@@ -122,6 +128,8 @@ namespace FPC
                 _currentKeyDoor = null;
                 _currentKeyDoorOpenPivot = null;
                 _isKeyLockedDoorOnHover = false;
+
+                _isFrontDoorOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -224,6 +232,12 @@ namespace FPC
                         _idInt = idInt;
                     }
                 }
+
+                if (rayCastHit.collider.gameObject.CompareTag("FrontDoor"))
+                {
+                    _isFrontDoorOnHover = true;
+                    Debug.Log("FrontDoor");
+                }
             }
         }
         private void Interact()
@@ -237,6 +251,23 @@ namespace FPC
                 StartCoroutine(OpenCloseSimpleDoor());
                 PickKey();
                 StartCoroutine(OpenDoorWithKey());
+                EnterHospital();
+            }
+        }
+
+
+        private void EnterHospital()
+        {
+            if (_isFrontDoorOnHover)
+            {
+                if (keysPicked[0])
+                {
+                    SceneManager.LoadScene(mainGameSceneId);
+                }
+                else
+                {
+                    StartCoroutine(FadeText(lockedText));
+                }
             }
         }
         
