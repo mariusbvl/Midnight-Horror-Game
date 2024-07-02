@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -13,7 +14,7 @@ namespace FPC
         [Header("General")] 
         private GameInputActions _inputActions;
         [SerializeField] private Camera mainCamera;
-        [SerializeField] private float rayCastDistance;
+        [SerializeField] public float rayCastDistance;
         public bool isInteracting; 
         [Header("Battery")]
         [SerializeField] public TMP_Text batteryText;
@@ -98,6 +99,23 @@ namespace FPC
         private GameObject _rightCardDoor;
         private Transform _leftCardDoorOpenPoint;
         private Transform _rightCardDoorOpenPoint;
+        [Header("Rope")] 
+        private bool _isRopeOnHover;
+        private bool _isInPit;
+        private GameObject _rope;
+        private Transform _pitTopPoint;
+        private Transform _pitBottomPoint;
+        private BoxCollider _pitBottomArea;
+        private BoxCollider _pitTopArea;
+        [Header("WallCrack")] 
+        [SerializeField] private float timeToPassWallCrack;
+        private bool _isWallCrackOnHover;
+        private bool _isInWallCrackArea;
+        private GameObject _wallCrack;
+        private Transform _inStartPoint;
+        private Transform _inTargetPoint;
+        private Transform _outStartPoint;
+        private Transform _outTargetPoint;
         
         
         private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
@@ -119,6 +137,16 @@ namespace FPC
             _inputActions = new GameInputActions();
             _inputActions.Player.Interact.performed += _ => Interact();
             StartCoroutine(RayCastCoroutine());
+        }
+
+        private void Start()
+        {
+            _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
+            _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
+            _inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
+            _inTargetPoint = GameObject.Find("InTargetPosition").GetComponent<Transform>();
+            _outStartPoint = GameObject.Find("OutStartPosition").GetComponent<Transform>();
+            _outTargetPoint = GameObject.Find("OutTargetPosition").GetComponent<Transform>();
         }
 
         private IEnumerator RayCastCoroutine()
@@ -160,8 +188,12 @@ namespace FPC
                 _isFrontDoorOnHover = false;
                 
                 _isLadderOnHover = false;
-
+                    
                 _isCardReaderOnHover = false;
+
+                _isRopeOnHover = false;
+
+                _isWallCrackOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -171,16 +203,12 @@ namespace FPC
                     _batteryOnHover = true;
                     _battery = rayCastHit.collider.gameObject;
                 }
-
-                if (FlashlightAndCameraController.Instance.recordingImage.activeSelf)
-                {
-                    rayCastDistance = 3;
-                    if (rayCastHit.collider.gameObject.CompareTag("Corpse"))
-                    {
-                        _corpseOnHover = true;
-                        _currentCorpse = rayCastHit.collider.gameObject;
-                    }
-                }else{rayCastDistance = 1.2f;}
+                
+                if (rayCastHit.collider.gameObject.CompareTag("Corpse"))
+                { 
+                    _corpseOnHover = true; 
+                    _currentCorpse = rayCastHit.collider.gameObject;
+                }
                 
                 if(rayCastHit.collider.gameObject.CompareTag("LockerDoor"))
                 {
@@ -300,6 +328,28 @@ namespace FPC
                     _rightCardDoorOpenPoint = doubleDoors.transform.Find("RightDoorOpenPoint");
                     Debug.Log("CardReader");
                 }
+
+                if (rayCastHit.collider.gameObject.CompareTag("Rope"))
+                {
+                    if (_characterController.bounds.Intersects(_pitBottomArea.bounds))
+                    {
+                        _isInPit = true;
+                    }else if (_characterController.bounds.Intersects(_pitTopArea.bounds))
+                    {
+                        _isInPit = false;
+                    }
+                    _isRopeOnHover = true;
+                    _rope = rayCastHit.collider.gameObject;
+                    _pitBottomPoint = _rope.transform.Find("PitBottomPoint");
+                    _pitTopPoint = _rope.transform.Find("PitTopPoint");
+                }
+
+                if (rayCastHit.collider.gameObject.CompareTag("WallCrack"))
+                {
+                    _isWallCrackOnHover = true;
+                    _wallCrack = rayCastHit.collider.gameObject;
+                    //Debug.Log("WallCrack");
+                }
             }
         }
         private void Interact()
@@ -317,9 +367,71 @@ namespace FPC
                 ClimbGetDownLadder();
                 PickKeyCard();
                 StartCoroutine(ReadCardReader());
+                ClimbGetDownRope();
+                StartCoroutine(PassWallCrack());
             }
         }
 
+        private IEnumerator PassWallCrack()
+        {
+            if (_isWallCrackOnHover)
+            {
+                isInteracting = true;
+                if (FirstPersonController.Instance.isCrouching)
+                {
+                    FirstPersonController.Instance.CrouchPressed();
+                    AnimationController.Instance.animator.SetTrigger(Stand);
+                    AnimationController.Instance.animator.SetBool(IsCrouching, false);
+                    yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
+                }
+                _characterController.enabled = false;
+                _cameraController.enabled = false;
+                _headBobController.enabled = false;
+                hands.SetActive(false);
+                yield return StartCoroutine(TranslateThroughWallCrack());
+                hands.SetActive(true);
+                _characterController.enabled = true;
+                _cameraController.enabled = true;
+                _headBobController.enabled = true;
+                isInteracting = false;
+            }
+        }
+
+        private IEnumerator TranslateThroughWallCrack()
+        {
+            Vector3 startPosition = _isInWallCrackArea ? _outStartPoint.position : _inStartPoint.position;
+            Vector3 targetPosition = _isInWallCrackArea ? _outTargetPoint.position : _inTargetPoint.position;
+            Quaternion targetRotation = _isInWallCrackArea ? _outTargetPoint.rotation : _inTargetPoint.rotation;
+            float timeElapsed = 0f;
+            
+            while (timeElapsed < timeToPassWallCrack)
+            {
+                player.transform.rotation = targetRotation;
+                camHolder.transform.rotation = targetRotation;
+                player.transform.position = Vector3.Lerp(startPosition, targetPosition, timeElapsed / timeToPassWallCrack);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+            _isInWallCrackArea = !_isInWallCrackArea;
+            player.transform.position = targetPosition;
+            player.transform.rotation = targetRotation;
+            camHolder.transform.rotation = targetRotation;
+        }
+        
+        private void ClimbGetDownRope()
+        {
+            if (_isRopeOnHover)
+            {
+                _characterController.enabled = false;
+                Vector3 worldTransform = _isInPit
+                    ? _rope.transform.TransformPoint(_pitTopPoint.localPosition)
+                    : _rope.transform.TransformPoint(_pitBottomPoint.localPosition);
+                player.transform.position = worldTransform;
+                _isInPit = !_isInPit;
+                _characterController.enabled = true;
+            }
+        }
+        
         private void PickKeyCard()
         {
             if (_isKeyCardOnHover)

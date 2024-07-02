@@ -21,6 +21,8 @@ namespace FPC
         [SerializeField] private GameObject handCamera;
         [SerializeField] private GameObject modelCamera;
         [SerializeField] public GameObject recordingImage;
+        [SerializeField] private float defaultRaycastDistance;
+        [SerializeField] private float cameraRaycastDistance;
         [HideInInspector]public bool isCameraOn;
         void Awake()
         {
@@ -43,6 +45,7 @@ namespace FPC
             SwitchFlashlight();
             SwitchCamera();
             ConsumeBattery();
+            RayCastDistanceController();
         }
         
         private void CheckIfHasBattery()
@@ -128,6 +131,11 @@ namespace FPC
             {
                 isFlashlightOn = !isFlashlightOn;
             }
+        }
+
+        private void RayCastDistanceController()
+        {
+            InteractController.Instance.rayCastDistance = recordingImage.activeSelf ? cameraRaycastDistance : defaultRaycastDistance;
         }
 
         private void SwitchCamera()
