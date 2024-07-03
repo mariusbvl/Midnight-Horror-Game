@@ -55,13 +55,14 @@ namespace FPC
         private Coroutine _transitionCoroutine;
         public float transitionDuration = 1.0f;
         [Header("SimpleDoor")] 
-        private bool _isSimpleDoorOnHover;
-        private GameObject _currentSimpleDoor;
-        private GameObject _currentSimpleDoorOpenPivot;
-        private GameObject _currentSimpleDoorClosedPivot;
-        private Quaternion _simpleDoorOpenRotation;
-        private Quaternion _simpleDoorCloseRotation;
-        private bool _isSimpleDoorOpen;
+        public bool _isSimpleDoorOnHover;
+        public GameObject _currentSimpleDoor;
+        public GameObject _currentSimpleDoorOpenPivot;
+        public GameObject _currentSimpleDoorClosedPivot;
+        public Quaternion _simpleDoorOpenRotation;
+        public Quaternion _simpleDoorCloseRotation;
+        public bool _isSimpleDoorOpen;
+        public bool _isDoorOpening;
         [Header("KeyLockedDoor")] 
         [SerializeField] private TMP_Text lockedText;
         private bool _isKeyLockedDoorOnHover;
@@ -175,6 +176,7 @@ namespace FPC
                 _currentFrontOfTheLockerPoint = null;
                 _currentExitPointLockerPoint = null;
                 _isDoorPositionSet = false;
+                
                 _isSimpleDoorOnHover = false;
                 _currentSimpleDoor = null;
 
@@ -203,14 +205,14 @@ namespace FPC
                     _batteryOnHover = true;
                     _battery = rayCastHit.collider.gameObject;
                 }
-                
+
                 if (rayCastHit.collider.gameObject.CompareTag("Corpse"))
-                { 
-                    _corpseOnHover = true; 
+                {
+                    _corpseOnHover = true;
                     _currentCorpse = rayCastHit.collider.gameObject;
                 }
-                
-                if(rayCastHit.collider.gameObject.CompareTag("LockerDoor"))
+
+                if (rayCastHit.collider.gameObject.CompareTag("LockerDoor"))
                 {
                     _lockerDoorOnHover = true;
                     _currentLockerDoor = rayCastHit.collider.gameObject;
@@ -221,16 +223,19 @@ namespace FPC
                     {
                         _currentHideCameraPoint = hideCameraPointTransform.gameObject;
                     }
+
                     Transform inFrontOfTheLockerTransform = _currentLocker.transform.Find("InFrontOfTheLockerPoint");
                     if (inFrontOfTheLockerTransform != null)
                     {
                         _currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
                     }
+
                     Transform exitLockerPointTransform = _currentLocker.transform.Find("ExitLockerPoint");
                     if (exitLockerPointTransform != null)
                     {
-                        _currentExitPointLockerPoint= exitLockerPointTransform.gameObject;
+                        _currentExitPointLockerPoint = exitLockerPointTransform.gameObject;
                     }
+
                     if (_currentDoorPivot != null && !_isDoorPositionSet)
                     {
                         _closedRotation = _currentDoorPivot.transform.rotation;
@@ -240,26 +245,39 @@ namespace FPC
                     }
                 }
 
-                if (rayCastHit.collider.gameObject.CompareTag("SimpleDoor"))
+                if (!_isDoorOpening)
                 {
-                    _isSimpleDoorOnHover = true;
-                    _currentSimpleDoor = rayCastHit.collider.gameObject;
-                    _currentDoorPivot = _currentSimpleDoor.transform.parent.gameObject;
-                    GameObject simpleDoor = _currentDoorPivot.transform.parent.gameObject;
-                    Transform currentSimpleDoorOpenPivotTransform = simpleDoor.transform.Find("openDoor");
-                    if (currentSimpleDoorOpenPivotTransform != null)
+                    if (rayCastHit.collider.gameObject.CompareTag("SimpleDoor"))
                     {
-                        _currentSimpleDoorOpenPivot= currentSimpleDoorOpenPivotTransform.gameObject;
+                        _isSimpleDoorOnHover = true;
+                        _currentSimpleDoor = rayCastHit.collider.gameObject;
+                        _currentDoorPivot = _currentSimpleDoor.transform.parent.gameObject;
+                        GameObject simpleDoor = _currentDoorPivot.transform.parent.gameObject;
+                        Transform currentSimpleDoorOpenPivotTransform = simpleDoor.transform.Find("openDoor");
+                        if (currentSimpleDoorOpenPivotTransform != null)
+                        {
+                            _currentSimpleDoorOpenPivot = currentSimpleDoorOpenPivotTransform.gameObject;
+                        }
+
+                        Transform currentSimpleDoorClosePivotTransform = simpleDoor.transform.Find("closedDoor");
+                        if (currentSimpleDoorClosePivotTransform != null)
+                        {
+                            _currentSimpleDoorClosedPivot = currentSimpleDoorClosePivotTransform.gameObject;
+                        }
+
+                        _simpleDoorOpenRotation = _currentSimpleDoorOpenPivot.transform.rotation;
+                        _simpleDoorCloseRotation = _currentSimpleDoorClosedPivot.transform.rotation;
+                        if (_currentDoorPivot.transform.rotation == _simpleDoorOpenRotation)
+                        {
+                            _isSimpleDoorOpen = true;
+                        }
+                        else if (_currentDoorPivot.transform.rotation == _simpleDoorCloseRotation)
+                        {
+                            _isSimpleDoorOpen = false;
+                        }
                     }
-                    Transform currentSimpleDoorClosePivotTransform = simpleDoor.transform.Find("closedDoor");
-                    if (currentSimpleDoorClosePivotTransform != null)
-                    {
-                        _currentSimpleDoorClosedPivot= currentSimpleDoorClosePivotTransform.gameObject;
-                    }
-                    _simpleDoorOpenRotation = _currentSimpleDoorOpenPivot.transform.rotation;
-                    _simpleDoorCloseRotation = _currentSimpleDoorClosedPivot.transform.rotation;
-                    print("SimpleDoor");
                 }
+                else {_isSimpleDoorOnHover = false;}
 
                 if (rayCastHit.collider.gameObject.CompareTag("KeyLockedDoor"))
                 {
@@ -540,7 +558,9 @@ namespace FPC
             if (_isSimpleDoorOnHover)
             {
                 isInteracting = true;
+                _isDoorOpening = true;
                 yield return StartCoroutine(ToggleSimpleDoor());
+                _isDoorOpening = false;
                 isInteracting = false;
             }
         }
