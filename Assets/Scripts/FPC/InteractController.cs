@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 
 namespace FPC
@@ -41,7 +42,7 @@ namespace FPC
         private GameObject _currentLocker;
         private GameObject _currentDoorPivot;
         private GameObject _currentHideCameraPoint;
-        private GameObject _currentFrontOfTheLockerPoint;
+        [HideInInspector]public GameObject currentFrontOfTheLockerPoint;
         private GameObject _currentExitPointLockerPoint;
         private bool _lockerDoorOnHover;
         //Locker Door Variables
@@ -174,7 +175,7 @@ namespace FPC
                 _currentDoorPivot = null;
                 _currentLocker = null;
                 _currentHideCameraPoint = null;
-                _currentFrontOfTheLockerPoint = null;
+                currentFrontOfTheLockerPoint = null;
                 _currentExitPointLockerPoint = null;
                 _isDoorPositionSet = false;
                 
@@ -228,7 +229,7 @@ namespace FPC
                     Transform inFrontOfTheLockerTransform = _currentLocker.transform.Find("InFrontOfTheLockerPoint");
                     if (inFrontOfTheLockerTransform != null)
                     {
-                        _currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
+                        currentFrontOfTheLockerPoint = inFrontOfTheLockerTransform.gameObject;
                     }
 
                     Transform exitLockerPointTransform = _currentLocker.transform.Find("ExitLockerPoint");
@@ -609,8 +610,8 @@ namespace FPC
                 _headBobController.enabled = false;
                 playerMesh.SetActive(false);
                 hands.SetActive(false);
-                player.transform.position = _currentFrontOfTheLockerPoint.transform.position;
-                player.transform.rotation = _currentFrontOfTheLockerPoint.transform.rotation;
+                player.transform.position = currentFrontOfTheLockerPoint.transform.position;
+                player.transform.rotation = currentFrontOfTheLockerPoint.transform.rotation;
                 yield return StartCoroutine(ToggleDoor());
 
                 yield return StartCoroutine(SmoothTransitionCoroutine());

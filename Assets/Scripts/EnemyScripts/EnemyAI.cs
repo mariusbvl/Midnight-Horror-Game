@@ -155,7 +155,7 @@ namespace EnemyScripts
             {
                 if (FirstPersonController.Instance.isHiden)
                 {
-                    _lastKnownPosition = InteractController.Instance._currentFrontOfTheLockerPoint.transform.position;
+                    _lastKnownPosition = InteractController.Instance.currentFrontOfTheLockerPoint.transform.position;
                 }
                 else
                 {
