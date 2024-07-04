@@ -9249,7 +9249,7 @@ CharacterController:
   m_StepOffset: 0.5
   m_SkinWidth: 0.0001
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0, z: 0.2}
 --- !u!4 &590683732243474863
 Transform:
   m_ObjectHideFlags: 0
@@ -17559,10 +17559,22 @@ MonoBehaviour:
   player: {fileID: 5032211153039749827}
   hands: {fileID: 7713141254699210258}
   camHolder: {fileID: 5493341827737298554}
+  _currentLockerDoor: {fileID: 0}
+  _currentLocker: {fileID: 0}
+  _currentDoorPivot: {fileID: 0}
+  _currentHideCameraPoint: {fileID: 0}
+  _currentFrontOfTheLockerPoint: {fileID: 0}
+  _currentExitPointLockerPoint: {fileID: 0}
+  _lockerDoorOnHover: 0
   doorOpeningDuration: 0.5
   transitionDuration: 1
   lockedText: {fileID: 6281433392131997180}
   keysPicked: 0000
+  mainGameSceneId: 0
+  isKeyCardPicked: 0
+  cardDoorOpeningDuration: 0
+  accessDeniedText: {fileID: 0}
+  timeToPassWallCrack: 0
 --- !u!224 &3789617851761312838
 RectTransform:
   m_ObjectHideFlags: 0
@@ -21222,6 +21234,8 @@ MonoBehaviour:
   handCamera: {fileID: 2534604288789948828}
   modelCamera: {fileID: 5415789564120764900}
   recordingImage: {fileID: 5251382730276027817}
+  defaultRaycastDistance: 3
+  cameraRaycastDistance: 7
   isCameraOn: 0
 --- !u!1 &5215613915217135674
 GameObject:
@@ -24506,9 +24520,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0da61a62a504e346a20a8e28b27fcc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _characterController: {fileID: 0}
   moveSpeed: 0
   headBob: {fileID: 5824121666273787794}
   walkSpeed: 4
+  _velocity: {x: 0, y: 0, z: 0}
   move: {x: 0, y: 0}
   gravity: -9.81
   jumpHeight: 1.5
@@ -24520,7 +24536,7 @@ MonoBehaviour:
   isGrounded: 0
   isInAir: 0
   isJumpIdle: 0
-  sprintSpeed: 8
+  sprintSpeed: 6
   isSprinting: 0
   playerMesh: {fileID: 3426490040627432168}
   cameraTransform: {fileID: 5384424605335087787}
@@ -24528,8 +24544,8 @@ MonoBehaviour:
   crouchTime: 0.25
   standHeight: 2
   crouchHeight: 1.5
-  crouchingCenter: {x: 0, y: 0.5, z: 0}
-  standingCenter: {x: 0, y: 0, z: 0}
+  crouchingCenter: {x: 0, y: 0.5, z: 0.2}
+  standingCenter: {x: 0, y: 0, z: 0.2}
   isCrouching: 0
   isHiden: 0
 --- !u!224 &6300577199061052374

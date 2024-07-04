@@ -49,6 +49,7 @@ public class GameManager : MonoBehaviour
             {
                 //Turn off any interaction
                 FirstPersonController.Instance.inputActions.Disable();
+                FirstPersonController.Instance.velocity = new Vector3(0, 0, 0);
                 FirstPersonController.Instance.moveSpeed = 0f;
                 EnemyAI.Instance.aiNavMesh.speed = 0f;
                 EnemyAI.Instance.aiAnimator.SetBool("isWalking", false);

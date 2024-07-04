@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 
 namespace FPC
@@ -13,7 +14,7 @@ namespace FPC
         [SerializeField] private HeadBobController headBob;
         [Header("Move")]
         [SerializeField] private float walkSpeed;
-        private Vector3 _velocity;
+        [HideInInspector] public Vector3 velocity;
         [HideInInspector]public Vector2 move;
         [Header("Jump")]
         [SerializeField] private float gravity = -9.81f;
@@ -66,13 +67,13 @@ namespace FPC
         private void Gravity()
         {
             isGrounded = Physics.CheckSphere(ground.position, distanceToGround, groundMask);
-            if (isGrounded && (_velocity.y < 0))
+            if (isGrounded && (velocity.y < 0))
             {
-                _velocity.y = -2f;
+                velocity.y = -2f;
             }
 
-            _velocity.y += gravity * Time.deltaTime;
-            _characterController.Move(_velocity * Time.deltaTime);
+            velocity.y += gravity * Time.deltaTime;
+            _characterController.Move(velocity * Time.deltaTime);
         }
 
         private void PlayerMovement()
@@ -92,7 +93,7 @@ namespace FPC
                     isJumpIdle = !inputActions.Player.Move.inProgress;
                     if (inputActions.Player.Jump.triggered && isGrounded && !isInAir)
                     {
-                        _velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                        velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
                     }
                 }
                 if (!isGrounded && !isInAir)

@@ -4,6 +4,7 @@ using FPC;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace EnemyScripts
@@ -38,8 +39,9 @@ namespace EnemyScripts
         private Coroutine _returnToLastKnownPositionCoroutine;
         private Coroutine _stayIdleCoroutine;
         private Coroutine _returnToPatrolCoroutine;
+        [FormerlySerializedAs("_headAim")]
         [Header("Rig")] 
-        [SerializeField]private MultiAimConstraint _headAim;
+        [SerializeField]private MultiAimConstraint headAim;
         private void Awake()
         {
             if (Instance == null)
@@ -50,7 +52,7 @@ namespace EnemyScripts
 
         private void Start()
         {
-            _headAim = GameObject.Find("HeadAim").GetComponent<MultiAimConstraint>();
+            headAim = GameObject.Find("HeadAim").GetComponent<MultiAimConstraint>();
             aiAnimator = GetComponent<Animator>();
             _destinationsAmount = destinations.Count;
             SetNewDestination();
@@ -110,7 +112,7 @@ namespace EnemyScripts
                 isWalking = false;
                 isRunning = true;
                 isChasing = true;
-                _headAim.weight = 1f;
+                headAim.weight = 1f;
                 if (!radiusChanged)
                 {
                     radius += 5;
@@ -131,14 +133,13 @@ namespace EnemyScripts
                 var position = playerTransform.position;
                 destination = position;
                 aiNavMesh.SetDestination(destination);
-                Vector3 direction = position - gameObject.transform.position;
-                direction.y = 0;
-                gameObject.transform.rotation = Quaternion.LookRotation(direction);
+                //Vector3 direction = position - gameObject.transform.position;
+                //direction.y = 0;
+                //gameObject.transform.rotation = Quaternion.LookRotation(direction);
                 aiNavMesh.speed = runSpeed;
-
                 if (!canSeePlayer)
                 {
-                    _headAim.weight = 0f;
+                    headAim.weight = 0f;
                     _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
                 }
             }
@@ -146,10 +147,21 @@ namespace EnemyScripts
 
         private IEnumerator LostPlayerCoroutine()
         {
-            yield return new WaitForSeconds(2f);
+            if (!FirstPersonController.Instance.isHiden)
+            {
+                yield return new WaitForSeconds(2f);
+            }
             if (!canSeePlayer)
             {
-                _lastKnownPosition = playerTransform.position;
+                if (FirstPersonController.Instance.isHiden)
+                {
+                    _lastKnownPosition = InteractController.Instance._currentFrontOfTheLockerPoint.transform.position;
+                }
+                else
+                {
+                    _lastKnownPosition = playerTransform.position;
+                }
+
                 if (_returnToLastKnownPositionCoroutine != null)
                 {
                     StopCoroutine(_returnToLastKnownPositionCoroutine);
@@ -198,8 +210,9 @@ namespace EnemyScripts
 
         private IEnumerator ReturnToPatrol()
         {
+            yield return new WaitForSeconds(2f);
             SetNewDestination();
-            yield return null;
+            
         }
 
         private void CheckForPlayer()

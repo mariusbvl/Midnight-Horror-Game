@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -55,14 +54,14 @@ namespace FPC
         private Coroutine _transitionCoroutine;
         public float transitionDuration = 1.0f;
         [Header("SimpleDoor")] 
-        public bool _isSimpleDoorOnHover;
-        public GameObject _currentSimpleDoor;
-        public GameObject _currentSimpleDoorOpenPivot;
-        public GameObject _currentSimpleDoorClosedPivot;
-        public Quaternion _simpleDoorOpenRotation;
-        public Quaternion _simpleDoorCloseRotation;
-        public bool _isSimpleDoorOpen;
-        public bool _isDoorOpening;
+        private bool _isSimpleDoorOnHover;
+        private GameObject _currentSimpleDoor;
+        private GameObject _currentSimpleDoorOpenPivot;
+        private GameObject _currentSimpleDoorClosedPivot;
+        private Quaternion _simpleDoorOpenRotation;
+        private Quaternion _simpleDoorCloseRotation;
+        private bool _isSimpleDoorOpen;
+        private bool _isDoorOpening;
         [Header("KeyLockedDoor")] 
         [SerializeField] private TMP_Text lockedText;
         private bool _isKeyLockedDoorOnHover;
@@ -142,6 +141,7 @@ namespace FPC
 
         private void Start()
         {
+            
             _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
             _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
             _inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
@@ -158,6 +158,7 @@ namespace FPC
                 yield return wait;
                 CursorRayCast();
             }
+            // ReSharper disable once IteratorNeverReturns
         }
         private void CursorRayCast(){
             if (!isInteracting)
