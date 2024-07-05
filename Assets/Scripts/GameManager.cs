@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     private bool _jumpscareAnimationAlreadyTriggered;
     [SerializeField]private float gameOverDistance;
     [SerializeField]private GameObject gameOverPanel;
-    private FPC.CameraController _cameraController;
+    public FPC.CameraController _cameraController;
     private InteractController _interactController;
     private FlashlightAndCameraController _flashlightAndCameraController;
     private EnemyAI _enemyAI;

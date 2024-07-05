@@ -130,13 +130,37 @@ namespace EnemyScripts
         {
             if (isChasing)
             {
+
                 var position = playerTransform.position;
-                destination = position;
-                aiNavMesh.SetDestination(destination);
-                //Vector3 direction = position - gameObject.transform.position;
-                //direction.y = 0;
-                //gameObject.transform.rotation = Quaternion.LookRotation(direction);
+
+                // Attempt to set the destination
+                bool pathSet = aiNavMesh.SetDestination(position);
+
+                if (!pathSet || aiNavMesh.pathStatus == NavMeshPathStatus.PathInvalid)
+                {
+                    Debug.Log("Invalid path");
+
+                    // Handle the invalid path scenario, maybe stop chasing or perform other actions
+                    headAim.weight = 0f;
+
+                    // Set the last known position and stop chasing
+                    _lastKnownPosition = FirstPersonController.Instance.isHiden ? 
+                        InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : 
+                        playerTransform.position;
+
+                    if (_returnToLastKnownPositionCoroutine != null)
+                    {
+                        StopCoroutine(_returnToLastKnownPositionCoroutine);
+                    }
+
+                    _returnToLastKnownPositionCoroutine = StartCoroutine(ReturnToLastKnownPosition());
+                    isChasing = false;
+                    return;
+                }
+
+                // If the path is valid, continue chasing
                 aiNavMesh.speed = runSpeed;
+
                 if (!canSeePlayer)
                 {
                     headAim.weight = 0f;
@@ -149,18 +173,11 @@ namespace EnemyScripts
         {
             if (!FirstPersonController.Instance.isHiden)
             {
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(1.5f);
             }
-            if (!canSeePlayer)
+            if (!canSeePlayer )
             {
-                if (FirstPersonController.Instance.isHiden)
-                {
-                    _lastKnownPosition = InteractController.Instance.currentFrontOfTheLockerPoint.transform.position;
-                }
-                else
-                {
-                    _lastKnownPosition = playerTransform.position;
-                }
+                _lastKnownPosition = FirstPersonController.Instance.isHiden ? InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : playerTransform.position;
 
                 if (_returnToLastKnownPositionCoroutine != null)
                 {
@@ -255,7 +272,7 @@ namespace EnemyScripts
             }
         }
 
-        private void SetNewDestination()
+        private void  SetNewDestination()
         {
             int newDestinationIndex;
             do
@@ -295,7 +312,6 @@ namespace EnemyScripts
             yield return new WaitForSeconds(_idleTime);
             isWalking = true;
             SetNewDestination();
-            Debug.Log($"Idle for: {_idleTime}");
         }
     }
 }

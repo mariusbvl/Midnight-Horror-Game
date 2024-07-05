@@ -591,6 +591,7 @@ namespace FPC
             if (_lockerDoorOnHover && !FirstPersonController.Instance.isHiden)
             {
                 isInteracting = true;
+                FirstPersonController.Instance.inputActions.Disable();
                 if (FirstPersonController.Instance.isCrouching)
                 {
                     FirstPersonController.Instance.CrouchPressed();
@@ -598,7 +599,6 @@ namespace FPC
                     AnimationController.Instance.animator.SetBool(IsCrouching, false);
                     yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
                 }
-                
                 _characterController.enabled = false;
                 _cameraController.enabled = false;
                 _flashlightAndCameraController.enabled = false;
@@ -619,6 +619,7 @@ namespace FPC
                 yield return StartCoroutine(ToggleDoor());
                 yield return FirstPersonController.Instance.isHiden = true;
                 yield return isInteracting= false;
+                FirstPersonController.Instance.inputActions.Enable();
             }
         }
 
