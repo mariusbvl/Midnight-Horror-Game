@@ -142,12 +142,12 @@ namespace FPC
 
         private void Start()
         {
-            _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
-            _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
-            _inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
-            _inTargetPoint = GameObject.Find("InTargetPosition").GetComponent<Transform>();
-            _outStartPoint = GameObject.Find("OutStartPosition").GetComponent<Transform>();
-            _outTargetPoint = GameObject.Find("OutTargetPosition").GetComponent<Transform>();
+            //_pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
+            //_pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
+            //_inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
+            //_inTargetPoint = GameObject.Find("InTargetPosition").GetComponent<Transform>();
+            //_outStartPoint = GameObject.Find("OutStartPosition").GetComponent<Transform>();
+            //_outTargetPoint = GameObject.Find("OutTargetPosition").GetComponent<Transform>();
         }
 
         private IEnumerator RayCastCoroutine()

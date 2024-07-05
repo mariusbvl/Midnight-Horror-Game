@@ -20582,8 +20582,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thunderLight: {fileID: 576364635}
   thunderSound: {fileID: 1501613949}
-  minDelay: 20
-  maxDelay: 60
+  minDelay: 5
+  maxDelay: 15
   lightDuration: 0.5
 --- !u!1001 &1333959630
 PrefabInstance:
