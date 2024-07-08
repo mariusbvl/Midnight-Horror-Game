@@ -94,7 +94,7 @@ namespace FPC
         private GameObject _keyCard;
         [Header("CardDoubleDoor")] 
         [SerializeField]public float cardDoorOpeningDuration;
-        [SerializeField] private TMP_Text accessDeniedText; 
+        [SerializeField] private TMP_Text accessText; 
         private bool _isCardReaderOnHover;
         private GameObject _leftCardDoor;
         private GameObject _rightCardDoor;
@@ -117,7 +117,10 @@ namespace FPC
         private Transform _inTargetPoint;
         private Transform _outStartPoint;
         private Transform _outTargetPoint;
-        
+        [Header("InfoText")] 
+        [SerializeField] private TMP_Text objInfoText;
+        private string _objName;
+        private bool _isCursorOnObj;
         
         private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
         private static readonly int Stand = Animator.StringToHash("Stand");
@@ -135,6 +138,7 @@ namespace FPC
             _headBobController = GetComponent<HeadBobController>();
             nrOfBatteries = 3;
             batteryText.text = nrOfBatteries + "/5";
+            objInfoText.gameObject.SetActive(false);
             _inputActions = new GameInputActions();
             _inputActions.Player.Interact.performed += _ => Interact();
             StartCoroutine(RayCastCoroutine());
@@ -142,7 +146,6 @@ namespace FPC
 
         private void Start()
         {
-            
             _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
             _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
             _inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
@@ -158,6 +161,7 @@ namespace FPC
             {
                 yield return wait;
                 CursorRayCast();
+                ObjInfoText();
             }
             // ReSharper disable once IteratorNeverReturns
         }
@@ -198,12 +202,16 @@ namespace FPC
                 _isRopeOnHover = false;
 
                 _isWallCrackOnHover = false;
+                
+                _objName = "";
+                _isCursorOnObj = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
             {
                 if (rayCastHit.collider.gameObject.CompareTag("Battery"))
                 {
+                    _objName = "Battery";
                     _batteryOnHover = true;
                     _battery = rayCastHit.collider.gameObject;
                 }
@@ -217,6 +225,7 @@ namespace FPC
                 if (rayCastHit.collider.gameObject.CompareTag("LockerDoor"))
                 {
                     _lockerDoorOnHover = true;
+                    _objName = "Locker";
                     _currentLockerDoor = rayCastHit.collider.gameObject;
                     _currentDoorPivot = _currentLockerDoor.transform.parent.gameObject;
                     _currentLocker = _currentDoorPivot.transform.parent.gameObject;
@@ -301,11 +310,11 @@ namespace FPC
                     {
                         _doorIdInt = doorInt;
                     }
-                    print("LockedDoor");
                 }
                 if (rayCastHit.collider.gameObject.CompareTag("Key"))
                 { 
                     _isKeyOnHover = true;
+                    
                     _key = rayCastHit.collider.gameObject;
                     _idTextComponent = _key.GetComponentInChildren<TMP_Text>();
                     _idText = _idTextComponent.text;
@@ -313,32 +322,33 @@ namespace FPC
                     {
                         _idInt = idInt;
                     }
+                    _objName = $"Key{_idInt}";
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("FrontDoor"))
                 {
                     _isFrontDoorOnHover = true;
-                    Debug.Log("FrontDoor");
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("Ladder"))
                 {
+                    _objName = "Ladder";
                     _isLadderOnHover = true;
                     _ladder = rayCastHit.collider.gameObject;
                     _bottomPoint = GameObject.Find("BottomPoint").GetComponent<Transform>();
                     _upPoint = GameObject.Find("UpPoint").GetComponent<Transform>();
-                    Debug.Log("Ladder");
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("KeyCard"))
                 {
+                    _objName = "Key Card";
                     _isKeyCardOnHover = true;
                     _keyCard = rayCastHit.collider.gameObject;
-                    Debug.Log("KeyCard");
                 }
                 
                 if (rayCastHit.collider.gameObject.CompareTag("CardReader"))
                 {
+                    _objName = "Card Reader";
                     _isCardReaderOnHover = true;
                     GameObject doubleDoorCard = rayCastHit.collider.gameObject.transform.parent.gameObject;
                     GameObject doubleDoors = doubleDoorCard.transform.Find("DoubleDoors").gameObject;
@@ -346,7 +356,6 @@ namespace FPC
                     _rightCardDoor = doubleDoors.transform.Find("RightDoor").gameObject;
                     _leftCardDoorOpenPoint = doubleDoors.transform.Find("LeftDoorOpenPoint");
                     _rightCardDoorOpenPoint = doubleDoors.transform.Find("RightDoorOpenPoint");
-                    Debug.Log("CardReader");
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("Rope"))
@@ -359,6 +368,7 @@ namespace FPC
                         _isInPit = false;
                     }
                     _isRopeOnHover = true;
+                    _objName = "Rope";
                     _rope = rayCastHit.collider.gameObject;
                     _pitBottomPoint = _rope.transform.Find("PitBottomPoint");
                     _pitTopPoint = _rope.transform.Find("PitTopPoint");
@@ -367,9 +377,16 @@ namespace FPC
                 if (rayCastHit.collider.gameObject.CompareTag("WallCrack"))
                 {
                     _isWallCrackOnHover = true;
+                    _objName = "Wall Crack";
                     _wallCrack = rayCastHit.collider.gameObject;
-                    //Debug.Log("WallCrack");
                 }
+
+                _isCursorOnObj = true;
+            }
+            else
+            {
+                _objName = "";
+                _isCursorOnObj = false;
             }
         }
         private void Interact()
@@ -392,6 +409,21 @@ namespace FPC
             }
         }
 
+
+        private void ObjInfoText()
+        {
+            if (_isCursorOnObj)
+            {
+                objInfoText.text = _objName;
+                objInfoText.gameObject.SetActive(true);
+            }
+            else
+            {
+                objInfoText.gameObject.SetActive(false);
+            }
+        }
+        
+        
         private IEnumerator PassWallCrack()
         {
             if (_isWallCrackOnHover)
@@ -468,12 +500,15 @@ namespace FPC
                 if (isKeyCardPicked)
                 {
                     isInteracting = true;
+                    yield return accessText.text = "Access Granted";
+                    StartCoroutine(FadeText(accessText));
                     yield return StartCoroutine(OpenCardDoors());
                     isInteracting = false;
                 }
                 else
                 {
-                    yield return StartCoroutine(FadeText(accessDeniedText));
+                    yield return accessText.text = "Access Denied";
+                    yield return StartCoroutine(FadeText(accessText));
                 }
             }
         }
@@ -533,15 +568,19 @@ namespace FPC
         {
             if (_isKeyLockedDoorOnHover)
             {
-                Debug.Log($"Door status: {keysPicked[_doorIdInt]}");
+                //Debug.Log($"Door status: {keysPicked[_doorIdInt]}");
                 if (keysPicked[_doorIdInt])
                 {
                     isInteracting = true;
+                    lockedText.text = $"Key{_idInt} was used";
+                    StartCoroutine(FadeText(lockedText));
                     yield return StartCoroutine(OpenKeyDoor());
                     isInteracting = false;
+                    
                 }
                 else
                 {
+                    lockedText.text = $"Locked\nKey{_doorIdInt} is needed";
                     yield return StartCoroutine(FadeText(lockedText));
                 }
             }
@@ -701,12 +740,15 @@ namespace FPC
         
         private void PhotoCorpse()
         {
-            if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
+            if (_flashlightAndCameraController.isCameraOn)
             {
-                AddGameObject(_currentCorpse);
-                _nrOfCorpses++;
-                corpsesFoundText.text = _nrOfCorpses + "/5";
-                StartCoroutine(FadeText(corpsesFoundText));
+                if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
+                {
+                    AddGameObject(_currentCorpse);
+                    _nrOfCorpses++;
+                    corpsesFoundText.text = _nrOfCorpses + "/5";
+                    StartCoroutine(FadeText(corpsesFoundText));
+                }
             }
         }
         private bool IsCorpseAlreadyFound(GameObject corpse)

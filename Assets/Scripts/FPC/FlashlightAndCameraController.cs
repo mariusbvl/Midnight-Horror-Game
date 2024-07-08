@@ -13,6 +13,7 @@ namespace FPC
         [SerializeField] private GameObject modelFlashlight;
         [SerializeField] public GameObject flashlight;
         [SerializeField] private Slider consumeSlider;
+        [SerializeField] private float consumeValue;
         [HideInInspector]public bool isFlashlightOn;
         [HideInInspector]public bool canConsumeBattery;
         private bool _isConsumingBattery;
@@ -95,8 +96,9 @@ namespace FPC
         {
             while (true)
             {
-                consumeSlider.value -= 0.5f;
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(1f);
+                consumeSlider.value -= consumeValue;
+                yield return new WaitForSeconds(1f);
             }
         }
          private void ScrollCameraAndFlashlight()
