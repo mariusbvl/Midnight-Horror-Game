@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
+
 
 
 namespace FPC
@@ -39,7 +39,7 @@ namespace FPC
         [SerializeField] private Vector3 standingCenter;
         [SerializeField] public bool isCrouching;
         [Header("Hide")] 
-        [SerializeField] public bool isHiden;
+        [SerializeField] public bool isHidden;
 
         private void Awake()
         {
@@ -135,7 +135,7 @@ namespace FPC
 
         private void Crouch()
         {
-            if (!isHiden)
+            if (!isHidden)
             {
                 if (isGrounded)
                 {
@@ -221,7 +221,7 @@ namespace FPC
 
         public void CrouchPressed()
         {
-            if (!isHiden)
+            if (!isHidden)
             {
                 isCrouching = !isCrouching;
             }

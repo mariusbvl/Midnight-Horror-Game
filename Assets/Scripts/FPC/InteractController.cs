@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 
 namespace FPC
@@ -112,7 +111,6 @@ namespace FPC
         [SerializeField] private float timeToPassWallCrack;
         private bool _isWallCrackOnHover;
         private bool _isInWallCrackArea;
-        private GameObject _wallCrack;
         private Transform _inStartPoint;
         private Transform _inTargetPoint;
         private Transform _outStartPoint;
@@ -136,7 +134,7 @@ namespace FPC
             _cameraController = camHolder.GetComponent<CameraController>();
             _flashlightAndCameraController = GetComponent<FlashlightAndCameraController>();
             _headBobController = GetComponent<HeadBobController>();
-            nrOfBatteries = 3;
+            nrOfBatteries = 1;
             batteryText.text = nrOfBatteries + "/5";
             objInfoText.gameObject.SetActive(false);
             _inputActions = new GameInputActions();
@@ -146,12 +144,12 @@ namespace FPC
 
         private void Start()
         {
-            //_pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
-            //_pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
-            //_inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
-            //_inTargetPoint = GameObject.Find("InTargetPosition").GetComponent<Transform>();
-            //_outStartPoint = GameObject.Find("OutStartPosition").GetComponent<Transform>();
-            //_outTargetPoint = GameObject.Find("OutTargetPosition").GetComponent<Transform>();
+            _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
+            _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
+            _inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
+            _inTargetPoint = GameObject.Find("InTargetPosition").GetComponent<Transform>();
+            _outStartPoint = GameObject.Find("OutStartPosition").GetComponent<Transform>();
+            _outTargetPoint = GameObject.Find("OutTargetPosition").GetComponent<Transform>();
         }
 
         private IEnumerator RayCastCoroutine()
@@ -214,6 +212,7 @@ namespace FPC
                     _objName = "Battery";
                     _batteryOnHover = true;
                     _battery = rayCastHit.collider.gameObject;
+                    Debug.Log("Battery");
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("Corpse"))
@@ -378,7 +377,6 @@ namespace FPC
                 {
                     _isWallCrackOnHover = true;
                     _objName = "Wall Crack";
-                    _wallCrack = rayCastHit.collider.gameObject;
                 }
 
                 _isCursorOnObj = true;
@@ -607,7 +605,7 @@ namespace FPC
         }
         private IEnumerator ExitLocker()
         {
-            if (_lockerDoorOnHover && FirstPersonController.Instance.isHiden)
+            if (_lockerDoorOnHover && FirstPersonController.Instance.isHidden)
             {
                 isInteracting= true;
                 player.transform.position = _currentHideCameraPoint.transform.position;
@@ -621,13 +619,13 @@ namespace FPC
                 playerMesh.SetActive(true);
                 hands.SetActive(true);
                 yield return StartCoroutine(ToggleDoor());
-                yield return FirstPersonController.Instance.isHiden = false;
+                yield return FirstPersonController.Instance.isHidden = false;
                 yield return isInteracting = false;
             }
         }
         private IEnumerator HideInLocker()
         {
-            if (_lockerDoorOnHover && !FirstPersonController.Instance.isHiden)
+            if (_lockerDoorOnHover && !FirstPersonController.Instance.isHidden)
             {
                 isInteracting = true;
                 FirstPersonController.Instance.inputActions.Disable();
@@ -656,7 +654,7 @@ namespace FPC
                 yield return StartCoroutine(SmoothTransitionCoroutine());
 
                 yield return StartCoroutine(ToggleDoor());
-                yield return FirstPersonController.Instance.isHiden = true;
+                yield return FirstPersonController.Instance.isHidden = true;
                 yield return isInteracting= false;
                 FirstPersonController.Instance.inputActions.Enable();
             }
@@ -667,10 +665,10 @@ namespace FPC
             float elapsedTime = 0f;
             Vector3 initialPosition = player.transform.position;
             Quaternion initialRotation = player.transform.rotation;
-            Vector3 targetPosition = FirstPersonController.Instance.isHiden
+            Vector3 targetPosition = FirstPersonController.Instance.isHidden
                 ? _currentExitPointLockerPoint.transform.position
                 : _currentHideCameraPoint.transform.position;
-            Quaternion targetRotation = FirstPersonController.Instance.isHiden
+            Quaternion targetRotation = FirstPersonController.Instance.isHidden
                 ? _currentExitPointLockerPoint.transform.rotation
                 : _currentHideCameraPoint.transform.rotation;
             while (elapsedTime < transitionDuration)

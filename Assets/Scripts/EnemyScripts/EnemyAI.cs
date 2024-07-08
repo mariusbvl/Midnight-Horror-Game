@@ -144,7 +144,7 @@ namespace EnemyScripts
                     headAim.weight = 0f;
 
                     // Set the last known position and stop chasing
-                    _lastKnownPosition = FirstPersonController.Instance.isHiden ? 
+                    _lastKnownPosition = FirstPersonController.Instance.isHidden ? 
                         InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : 
                         playerTransform.position;
 
@@ -171,13 +171,13 @@ namespace EnemyScripts
 
         private IEnumerator LostPlayerCoroutine()
         {
-            if (!FirstPersonController.Instance.isHiden)
+            if (!FirstPersonController.Instance.isHidden)
             {
                 yield return new WaitForSeconds(1.5f);
             }
             if (!canSeePlayer )
             {
-                _lastKnownPosition = FirstPersonController.Instance.isHiden ? InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : playerTransform.position;
+                _lastKnownPosition = FirstPersonController.Instance.isHidden ? InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : playerTransform.position;
 
                 if (_returnToLastKnownPositionCoroutine != null)
                 {
@@ -224,13 +224,7 @@ namespace EnemyScripts
                 StartChase();
             }
         }
-
-        private IEnumerator ReturnToPatrol()
-        {
-            yield return new WaitForSeconds(2f);
-            SetNewDestination();
-            
-        }
+        
 
         private void CheckForPlayer()
         {
@@ -241,15 +235,9 @@ namespace EnemyScripts
                 Vector3 directionToTarget = (target.position - transform.position).normalized;
                 if (Vector3.Angle(transform.forward, directionToTarget) < angle / 2)
                 {
-                    float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                    if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask))
-                    {
-                        canSeePlayer = true;
-                    }
-                    else
-                    {
-                        canSeePlayer = false;
-                    }
+                    var position = transform.position;
+                    float distanceToTarget = Vector3.Distance(position, target.position);
+                    canSeePlayer = !Physics.Raycast(position, directionToTarget, distanceToTarget, obstructionMask);
                 }
                 else
                 {
