@@ -20582,8 +20582,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thunderLight: {fileID: 576364635}
   thunderSound: {fileID: 1501613949}
-  minDelay: 5
-  maxDelay: 15
+  minDelay: 20
+  maxDelay: 60
   lightDuration: 0.5
 --- !u!1001 &1333959630
 PrefabInstance:
@@ -26432,6 +26432,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 833189472028234826, guid: 63da32603c6ac9f49af65ecc883702e3,
+        type: 3}
+      propertyPath: prewarm
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8313098892636733640, guid: 63da32603c6ac9f49af65ecc883702e3,
         type: 3}
       propertyPath: m_Name
@@ -28004,6 +28009,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6828128785942501644, guid: afb3efbc25e837e429ff2f3a87c73806,
+        type: 3}
+      propertyPath: prewarm
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6828128785942501644, guid: afb3efbc25e837e429ff2f3a87c73806,
         type: 3}
