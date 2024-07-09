@@ -60324,7 +60324,7 @@ MonoBehaviour:
   modelFlashlight: {fileID: 6562046081371010175}
   flashlight: {fileID: 3705872565364819107}
   consumeSlider: {fileID: 695824836263334537}
-  consumeValue: 25
+  consumeValue: 5
   isFlashlightOn: 0
   canConsumeBattery: 0
   handCamera: {fileID: 8518096728428115597}
@@ -72647,6 +72647,7 @@ MonoBehaviour:
   walkSpeed: 4
   velocity: {x: 0, y: 0, z: 0}
   move: {x: 0, y: 0}
+  movement: {x: 0, y: 0, z: 0}
   gravity: -9.81
   jumpHeight: 1.5
   ground: {fileID: 3305375869914672766}
@@ -77412,7 +77413,7 @@ Transform:
   m_GameObject: {fileID: 7287672412222001113}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -0.94, z: 0}
   m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
   m_ConstrainProportionsScale: 1
   m_Children:

@@ -16,6 +16,7 @@ namespace FPC
         [SerializeField] private float walkSpeed;
         [HideInInspector] public Vector3 velocity;
         [HideInInspector]public Vector2 move;
+        [HideInInspector] public Vector3 movement;
         [Header("Jump")]
         [SerializeField] private float gravity = -9.81f;
         [SerializeField] private float jumpHeight = 2f;
@@ -80,7 +81,7 @@ namespace FPC
         {
             move = inputActions.Player.Move.ReadValue<Vector2>();
             var transform1 = transform;
-            Vector3 movement = (move.y * transform1.forward) + (move.x * transform1.right);
+            movement = (move.y * transform1.forward) + (move.x * transform1.right);
             _characterController.Move(movement * (moveSpeed * Time.deltaTime));
         }
 
@@ -167,7 +168,7 @@ namespace FPC
             //PlayerMesh
             float startPMeshYTransform= isCrouching ? -1f
                 : -0.25f;
-            float targetPMeshYTransform = isCrouching ? -0.25f : -1f;
+            float targetPMeshYTransform = isCrouching ? -0.15f : -0.94f;
             //Camera
             float startCameraYTransform = isCrouching ? 0.75f : 1.1f;
             float targetCameraYTransform = isCrouching ? 1.1f : 0.75f;
