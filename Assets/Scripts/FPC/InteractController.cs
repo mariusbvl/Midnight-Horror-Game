@@ -21,7 +21,7 @@ namespace FPC
         private bool _batteryOnHover;
         [HideInInspector] public float nrOfBatteries;
         [Header("Corpse")] 
-        [SerializeField]private TMP_Text corpsesFoundText;
+        [SerializeField]public TMP_Text corpsesFoundText;
         private GameObject _currentCorpse;
         public GameObject[] foundCorpses;
         private float _nrOfCorpses;
@@ -136,6 +136,7 @@ namespace FPC
             _headBobController = GetComponent<HeadBobController>();
             nrOfBatteries = 1;
             batteryText.text = nrOfBatteries + "/5";
+            corpsesFoundText.text = "0/5";
             objInfoText.gameObject.SetActive(false);
             _inputActions = new GameInputActions();
             _inputActions.Player.Interact.performed += _ => Interact();
@@ -746,6 +747,7 @@ namespace FPC
                     _nrOfCorpses++;
                     corpsesFoundText.text = _nrOfCorpses + "/5";
                     StartCoroutine(FadeText(corpsesFoundText));
+                    GameManager.Instance.ChangeObjective();
                 }
             }
         }
@@ -771,7 +773,7 @@ namespace FPC
             newArray[foundCorpses.Length] = obj;
             foundCorpses = newArray;
         }
-        private IEnumerator FadeText(TMP_Text text)
+        public IEnumerator FadeText(TMP_Text text)
         {
             text.gameObject.SetActive(true);
             yield return StartCoroutine(Fade(0f, 1f, text));
@@ -794,7 +796,7 @@ namespace FPC
             }
             
             color.a = endAlpha;
-            corpsesFoundText.color = color;
+            text.color = color;
         }
         private void OnEnable()
         {

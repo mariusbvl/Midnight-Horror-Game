@@ -32,11 +32,10 @@ namespace FPC
 
             ResetPosition();
             if(speed < _toggleSpeed) return;
-            /*if(!_controller.isGrounded)
+            if(!FirstPersonController.Instance.isGrounded)
             {
                 return;
-            }*/
-
+            }
             PlayMotion(FootStepMotion());
         }
         
