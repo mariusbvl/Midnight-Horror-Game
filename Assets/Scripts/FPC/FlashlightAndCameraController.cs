@@ -114,12 +114,14 @@ namespace FPC
                 handCamera.SetActive(false);
                 modelFlashlight.SetActive(true);
                 handFlashlight.SetActive(true);
+                batteryIcons.SetActive(true);
             }else if (modelFlashlight.activeSelf && !modelCamera.activeSelf)
             {
                 modelCamera.SetActive(true);
                 handCamera.SetActive(true);
                 modelFlashlight.SetActive(false);
                 handFlashlight.SetActive(false);
+                batteryIcons.SetActive(true);
             }
         }
         

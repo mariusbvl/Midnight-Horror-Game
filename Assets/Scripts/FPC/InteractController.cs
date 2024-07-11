@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 
 
+
 namespace FPC
 {
     public class InteractController : MonoBehaviour
@@ -24,7 +25,7 @@ namespace FPC
         [SerializeField]public TMP_Text corpsesFoundText;
         private GameObject _currentCorpse;
         public GameObject[] foundCorpses;
-        private float _nrOfCorpses;
+        public int nrOfCorpses;
         private bool _corpseOnHover;
         public float fadeDuration = 1.0f;
 
@@ -118,11 +119,16 @@ namespace FPC
         private Transform _inTargetPoint;
         private Transform _outStartPoint;
         private Transform _outTargetPoint;
+        [Header("Phone")]
+        private bool _isPhoneOnHover;
+        [HideInInspector]public bool canCallPolice;
+        [Header("ExitDoor")] 
+        private bool _isExitDoorOnHover;
+        
         [Header("InfoText")] 
         [SerializeField] private TMP_Text objInfoText;
         private string _objName;
         private bool _isCursorOnObj;
-        
         private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
         private static readonly int Stand = Animator.StringToHash("Stand");
 
@@ -212,6 +218,8 @@ namespace FPC
                 
                 _objName = "";
                 _isCursorOnObj = false;
+
+                _isPhoneOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -387,6 +395,16 @@ namespace FPC
                     _objName = "Wall Crack";
                 }
 
+                if (rayCastHit.collider.gameObject.CompareTag("Phone"))
+                {
+                    _objName = "Phone";
+                    _isPhoneOnHover = true;
+                }
+
+                if (rayCastHit.collider.gameObject.CompareTag("ExitDoor"))
+                {
+                    _isExitDoorOnHover = true;
+                }
                 _isCursorOnObj = true;
             }
             else
@@ -412,10 +430,28 @@ namespace FPC
                 StartCoroutine(ReadCardReader());
                 ClimbGetDownRope();
                 StartCoroutine(PassWallCrack());
+                CallPolice();
+                ExitHospital();
             }
         }
-
-
+        
+        private void ExitHospital()
+        {
+            if (!_isExitDoorOnHover) return;
+            if (GameManager.Instance.canExitHospital)
+            {
+                Debug.Log("ExitedHospital");
+            }
+        }
+        private void CallPolice()
+        {
+            if (!_isPhoneOnHover) return;
+            if (canCallPolice)
+            {
+                GameManager.Instance.StartPoliceTimer();
+            }
+        }
+        
         private void ObjInfoText()
         {
             if (_isCursorOnObj)
@@ -756,10 +792,11 @@ namespace FPC
                 if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
                 {
                     AddGameObject(_currentCorpse);
-                    _nrOfCorpses++;
-                    corpsesFoundText.text = _nrOfCorpses + "/5";
+                    nrOfCorpses++;
+                    corpsesFoundText.text = nrOfCorpses + "/5";
                     StartCoroutine(FadeText(corpsesFoundText));
-                    GameManager.Instance.ChangeObjective();
+                    if (nrOfCorpses != 5) { GameManager.Instance.ChangeObjective();}
+                    GameManager.Instance.CheckForAllCorpses();
                 }
             }
         }
@@ -787,6 +824,11 @@ namespace FPC
         }
         public IEnumerator FadeText(TMP_Text text)
         {
+            if (text.gameObject.activeSelf)
+            {
+                yield return StartCoroutine(Fade(1f, 0f, text));
+                text.gameObject.SetActive(false);
+            }
             text.gameObject.SetActive(true);
             yield return StartCoroutine(Fade(0f, 1f, text));
             yield return new WaitForSeconds(2.0f);

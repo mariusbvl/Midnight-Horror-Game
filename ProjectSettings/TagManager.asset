@@ -17,6 +17,8 @@ TagManager:
   - KeyCard
   - Rope
   - WallCrack
+  - Phone
+  - ExitDoor
   layers:
   - Default
   - TransparentFX

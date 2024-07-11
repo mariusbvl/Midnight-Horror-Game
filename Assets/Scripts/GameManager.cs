@@ -26,11 +26,19 @@ public class GameManager : MonoBehaviour
     [SerializeField]private GameObject pausePanel;
     [SerializeField] private Button resumeButton;
     private bool _isPause;
-
+    
     [Header("KeysCollected")] 
     [SerializeField] private TMP_Text[] collectedKeysTxtArray;
     public bool[] _collectedKeysBoolArray;
     [SerializeField] private GameObject noKeyFoundText;
+
+    [Header("Timer")] 
+    [SerializeField] private int callSeconds;
+    [SerializeField] private TMP_Text policeTimerText;
+
+    [Header("ExitHospital")] 
+    public bool canExitHospital;
+    
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
     [SerializeField] private GameObject player;
@@ -120,6 +128,51 @@ public class GameManager : MonoBehaviour
             if(collectedKeysTxtArray[0].text != ""){noKeyFoundText.SetActive(false);}
         }
     }
+
+    private void CanExitHospital()
+    {
+        if (!canExitHospital) return;
+        _currentObjectiveState = 4;
+        ChangeObjective();
+        StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
+    }
+    
+    public void StartPoliceTimer()
+    {
+        _currentObjectiveState = 3;
+        ChangeObjective();
+        StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
+        StartCoroutine(PoliceTimer());
+    }
+    
+    private IEnumerator PoliceTimer()
+    {
+        policeTimerText.gameObject.SetActive(true);
+        float remainingTime = callSeconds;
+        while (remainingTime > 0)
+        {
+            remainingTime--;
+            int minutes = Mathf.FloorToInt(remainingTime / 60);
+            int seconds = Mathf.FloorToInt(remainingTime % 60);
+            policeTimerText.text = $"{minutes:00}:{seconds:00}";
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        if (remainingTime != 0) yield break;
+        policeTimerText.gameObject.SetActive(false);
+        canExitHospital = true;
+        CanExitHospital();
+    }
+    public void CheckForAllCorpses()
+    {
+        if (InteractController.Instance.nrOfCorpses != 5) return;
+        if (InteractController.Instance.canCallPolice) return;
+        _currentObjectiveState = 2;
+        ChangeObjective();
+        StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
+        InteractController.Instance.canCallPolice = true;
+    }
     public void ChangeObjective()
     {
         switch (_currentObjectiveState)
@@ -127,7 +180,7 @@ public class GameManager : MonoBehaviour
             case 0: { objectiveTextPause.text = Objectives.EnterHospital; objectiveTextInGame.text = Objectives.EnterHospital; break; }
             case 1: { objectiveTextPause.text = $"{Objectives.FindCorpses} {InteractController.Instance.corpsesFoundText.text}" ; objectiveTextInGame.text = Objectives.FindCorpses; break; }
             case 2: { objectiveTextPause.text = Objectives.CallPolice; objectiveTextInGame.text = Objectives.CallPolice; break; }
-            case 3: { objectiveTextPause.text = Objectives.WaitForPolice; objectiveTextInGame.text = Objectives.CallPolice; break; }
+            case 3: { objectiveTextPause.text = Objectives.WaitForPolice; objectiveTextInGame.text = Objectives.WaitForPolice; break; }
             case 4: { objectiveTextPause.text = Objectives.ExitHospital; objectiveTextInGame.text = Objectives.ExitHospital; break; }
             case 5: { objectiveTextPause.text = Objectives.LeaveHospitalTerritory; objectiveTextPause.text = Objectives.LeaveHospitalTerritory; break; }
         }
