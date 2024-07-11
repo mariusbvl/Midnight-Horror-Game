@@ -26,7 +26,11 @@ public class GameManager : MonoBehaviour
     [SerializeField]private GameObject pausePanel;
     [SerializeField] private Button resumeButton;
     private bool _isPause;
-    
+
+    [Header("KeysCollected")] 
+    [SerializeField] private TMP_Text[] collectedKeysTxtArray;
+    public bool[] _collectedKeysBoolArray;
+    [SerializeField] private GameObject noKeyFoundText;
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
     [SerializeField] private GameObject player;
@@ -82,8 +86,40 @@ public class GameManager : MonoBehaviour
         {
             GameOver();
         }
+
+        if (isMainGame)
+        {
+            KeysCollectedController();
+        }
     }
 
+    private void CombineKeys()
+    {
+        int length = InteractController.Instance.keysPicked.Length;
+        _collectedKeysBoolArray = new bool[length + 1];
+        for (int i = 0; i < length; i++)
+        {
+            _collectedKeysBoolArray[i] = InteractController.Instance.keysPicked[i];
+        }
+        _collectedKeysBoolArray[length] = InteractController.Instance.isKeyCardPicked;
+    }
+    private void KeysCollectedController()
+    {
+        if (InteractController.Instance.aKeyWasPicked)
+        {
+            CombineKeys();
+            InteractController.Instance.aKeyWasPicked = false;
+            foreach (var t in collectedKeysTxtArray)
+            {
+                if (InteractController.Instance.canAddKey && t.text == "")
+                {
+                    InteractController.Instance.canAddKey = false;
+                    t.text = InteractController.Instance.lastPickedKey.name;
+                }
+            }
+            if(collectedKeysTxtArray[0].text != ""){noKeyFoundText.SetActive(false);}
+        }
+    }
     public void ChangeObjective()
     {
         switch (_currentObjectiveState)
@@ -104,6 +140,8 @@ public class GameManager : MonoBehaviour
         {
             Time.timeScale = 0f;
             cameraController.enabled = false;
+            _interactController.enabled = false;
+            _flashlightAndCameraController.enabled = false;
             Cursor.lockState = CursorLockMode.None;
             playerCanvas.SetActive(false);
             pausePanel.SetActive(true);
@@ -112,6 +150,8 @@ public class GameManager : MonoBehaviour
         else
         {
             cameraController.enabled = true;
+            _interactController.enabled = true;
+            _flashlightAndCameraController.enabled = true;
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.Locked;
             pausePanel.SetActive(false);

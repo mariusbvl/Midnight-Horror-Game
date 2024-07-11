@@ -11,7 +11,7 @@ namespace FPC
     {
         public static InteractController Instance { get; private set; }
         [Header("General")] 
-        private GameInputActions _inputActions;
+        [HideInInspector]public GameInputActions inputActions;
         [SerializeField] private Camera mainCamera;
         [SerializeField] public float rayCastDistance;
         public bool isInteracting; 
@@ -77,6 +77,9 @@ namespace FPC
         private TMP_Text _idTextComponent;
         private string _idText;
         private int _idInt;
+        public bool aKeyWasPicked;
+        public bool canAddKey;
+        [HideInInspector] public GameObject lastPickedKey;
         private GameObject _key;
         [Header("Front Door")] 
         [SerializeField] private int mainGameSceneId;
@@ -88,7 +91,7 @@ namespace FPC
         private Transform _bottomPoint;
         private Transform _upPoint;
         [Header("KeyCard")] 
-        [SerializeField]private bool isKeyCardPicked;
+        [SerializeField]public bool isKeyCardPicked;
         private bool _isKeyCardOnHover;
         private GameObject _keyCard;
         [Header("CardDoubleDoor")] 
@@ -138,8 +141,8 @@ namespace FPC
             batteryText.text = nrOfBatteries + "/5";
             corpsesFoundText.text = "0/5";
             objInfoText.gameObject.SetActive(false);
-            _inputActions = new GameInputActions();
-            _inputActions.Player.Interact.performed += _ => Interact();
+            inputActions = new GameInputActions();
+            inputActions.Player.Interact.performed += _ => Interact();
             StartCoroutine(RayCastCoroutine());
         }
 
@@ -187,6 +190,11 @@ namespace FPC
 
                 _isKeyOnHover = false;
                 _key = null;
+                lastPickedKey = null;
+                aKeyWasPicked = false;
+                canAddKey = false;
+                _keyCard = null;
+                _isKeyCardOnHover = false;
                 
                 _currentKeyDoor = null;
                 _currentKeyDoorOpenPivot = null;
@@ -213,7 +221,6 @@ namespace FPC
                     _objName = "Battery";
                     _batteryOnHover = true;
                     _battery = rayCastHit.collider.gameObject;
-                    Debug.Log("Battery");
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("Corpse"))
@@ -482,13 +489,26 @@ namespace FPC
                 _characterController.enabled = true;
             }
         }
-        
+        private void PickKey()
+        {
+            if (_isKeyOnHover)
+            {
+                keysPicked[_idInt] = true;
+                lastPickedKey = _key;
+                _key.SetActive(false);
+                aKeyWasPicked = true;
+                canAddKey = true;
+            }
+        }
         private void PickKeyCard()
         {
             if (_isKeyCardOnHover)
             {
                 isKeyCardPicked = true;
-                Destroy(_keyCard);
+                lastPickedKey = _keyCard;
+                _keyCard.SetActive(false);
+                aKeyWasPicked = true;
+                canAddKey = true;
             }
         }
         
@@ -585,14 +605,6 @@ namespace FPC
             }
         }
         
-        private void PickKey()
-        {
-            if (_isKeyOnHover)
-            {
-                keysPicked[_idInt] = true;
-                Destroy(_key);
-            }
-        }
         private IEnumerator OpenCloseSimpleDoor()
         {
             if (_isSimpleDoorOnHover)
@@ -800,12 +812,12 @@ namespace FPC
         }
         private void OnEnable()
         {
-            _inputActions.Enable();
+            inputActions.Enable();
         }
 
         private void OnDisable()
         {
-            _inputActions.Disable();
+            inputActions.Disable();
         }
     }
 }
