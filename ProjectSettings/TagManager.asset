@@ -19,6 +19,7 @@ TagManager:
   - WallCrack
   - Phone
   - ExitDoor
+  - FinalCutSceneTrigger
   layers:
   - Default
   - TransparentFX

@@ -11,19 +11,23 @@ namespace FPC
 
         [SerializeField] private new Transform camera;
         [SerializeField] private Transform cameraHolder;
-
+        [SerializeField] private Transform hands;
+        
         private readonly float _toggleSpeed = 3f;
         private Vector3 _startPos;
+        private Vector3 _handsStartPos;
         private CharacterController _controller;
         void Awake()
         {
             _controller = GetComponent<CharacterController>();
             _startPos = camera.localPosition;
+            _handsStartPos = hands.localPosition;
         }
 
         private void PlayMotion(Vector3 motion)
         {
             camera.localPosition += motion;
+            hands.localPosition += motion;
         }
         private void CheckMotion()
         {
@@ -40,8 +44,9 @@ namespace FPC
         }
         
         private void ResetPosition(){
-            if(camera.localPosition == _startPos) return;
+            if(camera.localPosition == _startPos && hands.localPosition == _handsStartPos) return;
             camera.localPosition = Vector3.Lerp(camera.localPosition, _startPos, 3 * Time.deltaTime);
+            hands.localPosition = Vector3.Lerp(hands.localPosition, _handsStartPos, 3 * Time.deltaTime);
         }
         private Vector3 FootStepMotion()
         {
