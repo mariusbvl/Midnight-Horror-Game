@@ -344,7 +344,7 @@ namespace FPC
                     {
                         _idInt = idInt;
                     }
-                    _objName = $"Key{_idInt}";
+                    _objName = _key.name;
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("FrontDoor"))

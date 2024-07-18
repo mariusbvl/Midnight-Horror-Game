@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
     
     [Header("KeysCollected")] 
     [SerializeField] private TMP_Text[] collectedKeysTxtArray;
-    public bool[] _collectedKeysBoolArray;
+    public bool[] collectedKeysBoolArray;
     [SerializeField] private GameObject noKeyFoundText;
 
     [Header("Timer")] 
@@ -104,12 +104,12 @@ public class GameManager : MonoBehaviour
     private void CombineKeys()
     {
         int length = InteractController.Instance.keysPicked.Length;
-        _collectedKeysBoolArray = new bool[length + 1];
+        collectedKeysBoolArray = new bool[length + 1];
         for (int i = 0; i < length; i++)
         {
-            _collectedKeysBoolArray[i] = InteractController.Instance.keysPicked[i];
+            collectedKeysBoolArray[i] = InteractController.Instance.keysPicked[i];
         }
-        _collectedKeysBoolArray[length] = InteractController.Instance.isKeyCardPicked;
+        collectedKeysBoolArray[length] = InteractController.Instance.isKeyCardPicked;
     }
     private void KeysCollectedController()
     {
@@ -182,7 +182,7 @@ public class GameManager : MonoBehaviour
             case 2: { objectiveTextPause.text = Objectives.CallPolice; objectiveTextInGame.text = Objectives.CallPolice; break; }
             case 3: { objectiveTextPause.text = Objectives.WaitForPolice; objectiveTextInGame.text = Objectives.WaitForPolice; break; }
             case 4: { objectiveTextPause.text = Objectives.ExitHospital; objectiveTextInGame.text = Objectives.ExitHospital; break; }
-            case 5: { objectiveTextPause.text = Objectives.LeaveHospitalTerritory; objectiveTextPause.text = Objectives.LeaveHospitalTerritory; break; }
+            case 5: { objectiveTextPause.text = Objectives.LeaveHospitalTerritory; objectiveTextInGame.text = Objectives.LeaveHospitalTerritory; break; }
         }
     }
 

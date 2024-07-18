@@ -1,68 +1,76 @@
 using System;
 using FPC;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
-
-public class FinalSceneManager : MonoBehaviour
+public class OutsideGameManager : MonoBehaviour
 {
     private GameInputActions _inputActions;
-    [SerializeField] private BoxCollider finalCutSceneTrigger; 
-    [SerializeField] private GameObject playerCanvas;
-    [SerializeField] private GameObject finalPanel;
-    [SerializeField] private Button continueButton;
-    private CharacterController _characterController;
-    private CameraController _cameraController;
-    private InteractController _interactController;
-    private FlashlightAndCameraController _flashlightAndCameraController;
     [Header("PausePanel")]
+    [SerializeField] private GameObject playerCanvas;
     [SerializeField]private GameObject pausePanel;
     [SerializeField] private Button resumeButton;
     private bool _isPause;
+    private FPC.CameraController _cameraController;
+    private InteractController _interactController;
+    private FlashlightAndCameraController _flashlightAndCameraController;
     [Header("Objective")] 
     [SerializeField] private TMP_Text objectiveTextInGame;
     [SerializeField] private TMP_Text objectiveTextPause;
     private int _currentObjectiveState;
+    [Header("KeysCollected")] 
+    [SerializeField] private TMP_Text[] collectedKeysTxtArray;
+    public bool[] collectedKeysBoolArray;
+    [SerializeField] private GameObject noKeyFoundText;
     private void Awake()
     {
         _inputActions = new GameInputActions();
-        finalPanel.SetActive(false);
-        _cameraController = FindObjectOfType<CameraController>().GetComponent<CameraController>();
-        _flashlightAndCameraController = FindObjectOfType<FlashlightAndCameraController>().GetComponent<FlashlightAndCameraController>();
+        _cameraController = FindObjectOfType<FPC.CameraController>().GetComponentInChildren<FPC.CameraController>();
         _interactController = FindObjectOfType<InteractController>().GetComponent<InteractController>();
-        _characterController = FindObjectOfType<CharacterController>().GetComponent<CharacterController>();
+        _flashlightAndCameraController = FindObjectOfType<FlashlightAndCameraController>().GetComponent<FlashlightAndCameraController>();
         _inputActions.Player.Pause.performed += _ => TogglePausePanel();
     }
 
-    void Start()
+    private void Update()
     {
-        _currentObjectiveState = 5;
+        KeysCollectedController();
+    }
+
+    private void Start()
+    {
+        _currentObjectiveState = 0;
         ChangeObjective();
         StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
     }
-
-
-    private void Update()
-    {
-       Win();
-    }
     
-    private void Win(){
-        if (_characterController.bounds.Intersects(finalCutSceneTrigger.bounds) && !finalPanel.activeSelf)
+    private void CombineKeys()
+    {
+        int length = InteractController.Instance.keysPicked.Length;
+        collectedKeysBoolArray = new bool[length + 1];
+        for (int i = 0; i < length; i++)
         {
-            Time.timeScale = 0f;
-            _cameraController.enabled = false;
-            _interactController.enabled = false;
-            _flashlightAndCameraController.enabled = false;
-            Cursor.lockState = CursorLockMode.None;
-            playerCanvas.SetActive(false);
-            finalPanel.SetActive(true);
-            EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
+            collectedKeysBoolArray[i] = InteractController.Instance.keysPicked[i];
+        }
+        collectedKeysBoolArray[length] = InteractController.Instance.isKeyCardPicked;
+    }
+    private void KeysCollectedController()
+    {
+        if (InteractController.Instance.aKeyWasPicked)
+        {
+            CombineKeys();
+            InteractController.Instance.aKeyWasPicked = false;
+            foreach (var t in collectedKeysTxtArray)
+            {
+                if (InteractController.Instance.canAddKey && t.text == "")
+                {
+                    InteractController.Instance.canAddKey = false;
+                    t.text = InteractController.Instance.lastPickedKey.name;
+                }
+            }
+            if(collectedKeysTxtArray[0].text != ""){noKeyFoundText.SetActive(false);}
         }
     }
-    
     public void ChangeObjective()
     {
         switch (_currentObjectiveState)
@@ -101,12 +109,6 @@ public class FinalSceneManager : MonoBehaviour
             playerCanvas.SetActive(true);
         }
     }
-    
-    public void LoadMainMenu()
-    {
-        SceneManager.LoadScene(0);
-    }
-    
     private void OnEnable()
     {
         _inputActions.Enable();
