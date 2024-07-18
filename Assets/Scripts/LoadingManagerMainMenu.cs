@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
-public class SceneLoader : MonoBehaviour
+public class LoadingManagerMainMenu : MonoBehaviour
 {
     public GameObject mainMenuCanvas;
     public GameObject loadingCanvas;
@@ -20,10 +20,11 @@ public class SceneLoader : MonoBehaviour
 
     public void LoadScene(int index)
     {
+        Time.timeScale = 1;
         StartCoroutine(LoadScene_Coroutine(index));
     }
 
-    private IEnumerator LoadScene_Coroutine(int index)
+    public IEnumerator LoadScene_Coroutine(int index)
     {
         progressSlider.value = 0;
         mainMenuCanvas.SetActive(false);
@@ -55,8 +56,8 @@ public class SceneLoader : MonoBehaviour
 
     IEnumerator AnimateTextAndImage()
     {
-        float frequency = 2f; 
-        float offset = 0.5f; 
+        float frequency = 2f; // Adjust this value to control the speed of the blinking
+        float offset = 0.5f; // Adjust this value to control the phase of the blinking
 
         while (true)
         {

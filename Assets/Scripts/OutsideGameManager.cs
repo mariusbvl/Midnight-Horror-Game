@@ -6,7 +6,9 @@ using UnityEngine.EventSystems;
 using TMPro;
 public class OutsideGameManager : MonoBehaviour
 {
+    public static OutsideGameManager Instance { get; private set; }
     private GameInputActions _inputActions;
+    [SerializeField] public LoadingManagerMainMenu loadingManagerMainMenu;
     [Header("PausePanel")]
     [SerializeField] private GameObject playerCanvas;
     [SerializeField]private GameObject pausePanel;
@@ -25,6 +27,10 @@ public class OutsideGameManager : MonoBehaviour
     [SerializeField] private GameObject noKeyFoundText;
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
         _inputActions = new GameInputActions();
         _cameraController = FindObjectOfType<FPC.CameraController>().GetComponentInChildren<FPC.CameraController>();
         _interactController = FindObjectOfType<InteractController>().GetComponent<InteractController>();
@@ -109,6 +115,7 @@ public class OutsideGameManager : MonoBehaviour
             playerCanvas.SetActive(true);
         }
     }
+    
     private void OnEnable()
     {
         _inputActions.Enable();

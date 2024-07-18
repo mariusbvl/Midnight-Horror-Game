@@ -11,7 +11,6 @@ public class MainMenuManager : MonoBehaviour
 
     private void Awake()
     {
-        Time.timeScale = 1;
         EventSystem.current.SetSelectedGameObject(startButton.gameObject);
     }
 
@@ -19,5 +18,10 @@ public class MainMenuManager : MonoBehaviour
     void Update()
     {
         
+    }
+    public void ExitGame()
+    {
+        Debug.Log("Exited game");
+        Application.Quit();    
     }
 }

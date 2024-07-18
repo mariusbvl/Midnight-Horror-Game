@@ -12,6 +12,7 @@ using Cursor = UnityEngine.Cursor;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    [SerializeField] public LoadingManagerMainMenu loadingManagerMainMenu;
     [Header("General")] 
     private GameInputActions _inputActions;
     public bool isMainGame;
@@ -274,6 +275,8 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+    
+    
     
     private void OnEnable()
     {

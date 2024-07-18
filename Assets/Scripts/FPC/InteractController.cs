@@ -447,7 +447,21 @@ namespace FPC
             if (!_isExitDoorOnHover) return;
             if (GameManager.Instance.canExitHospital)
             {
-                SceneManager.LoadScene(3);
+                GameManager.Instance.loadingManagerMainMenu.LoadScene(3);
+            }
+        }
+        private void EnterHospital()
+        {
+            if (_isFrontDoorOnHover)
+            {
+                if (keysPicked[0])
+                {
+                    OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(2);
+                }
+                else
+                {
+                    StartCoroutine(FadeText(lockedText));
+                }
             }
         }
         private void CallPolice()
@@ -610,21 +624,6 @@ namespace FPC
             }
         }
         
-        
-        private void EnterHospital()
-        {
-            if (_isFrontDoorOnHover)
-            {
-                if (keysPicked[0])
-                {
-                    SceneManager.LoadScene(mainGameSceneId);
-                }
-                else
-                {
-                    StartCoroutine(FadeText(lockedText));
-                }
-            }
-        }
         
         private IEnumerator OpenDoorWithKey()
         {
