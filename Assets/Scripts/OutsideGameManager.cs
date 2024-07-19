@@ -8,7 +8,7 @@ public class OutsideGameManager : MonoBehaviour
 {
     public static OutsideGameManager Instance { get; private set; }
     private GameInputActions _inputActions;
-    [SerializeField] public LoadingManagerMainMenu loadingManagerMainMenu;
+    [SerializeField] public LoadingManager loadingManagerMainMenu;
     [Header("PausePanel")]
     [SerializeField] private GameObject playerCanvas;
     [SerializeField]private GameObject pausePanel;

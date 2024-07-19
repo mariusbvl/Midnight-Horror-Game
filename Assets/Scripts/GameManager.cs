@@ -12,7 +12,7 @@ using Cursor = UnityEngine.Cursor;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-    [SerializeField] public LoadingManagerMainMenu loadingManagerMainMenu;
+    [SerializeField] public LoadingManager loadingManagerMainMenu;
     [Header("General")] 
     private GameInputActions _inputActions;
     public bool isMainGame;
@@ -156,10 +156,8 @@ public class GameManager : MonoBehaviour
             int minutes = Mathf.FloorToInt(remainingTime / 60);
             int seconds = Mathf.FloorToInt(remainingTime % 60);
             policeTimerText.text = $"{minutes:00}:{seconds:00}";
-
             yield return new WaitForSeconds(1f);
         }
-
         if (remainingTime != 0) yield break;
         policeTimerText.gameObject.SetActive(false);
         canExitHospital = true;
@@ -183,7 +181,7 @@ public class GameManager : MonoBehaviour
             case 2: { objectiveTextPause.text = Objectives.CallPolice; objectiveTextInGame.text = Objectives.CallPolice; break; }
             case 3: { objectiveTextPause.text = Objectives.WaitForPolice; objectiveTextInGame.text = Objectives.WaitForPolice; break; }
             case 4: { objectiveTextPause.text = Objectives.ExitHospital; objectiveTextInGame.text = Objectives.ExitHospital; break; }
-            case 5: { objectiveTextPause.text = Objectives.LeaveHospitalTerritory; objectiveTextInGame.text = Objectives.LeaveHospitalTerritory; break; }
+            case 5: { objectiveTextPause.text = Objectives.LeaveHospitalTerritory; objectiveTextInGame.text = Objectives.LeaveHospitalTerritory; break;}
         }
     }
 

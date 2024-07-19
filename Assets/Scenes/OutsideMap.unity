@@ -1437,7 +1437,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6c21762ce6b57b4192457673fe44b84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuCanvas: {fileID: 196565613}
+  canvasToDisable: {fileID: 1918541833}
   loadingCanvas: {fileID: 1513865881}
   progressSlider: {fileID: 1910073006}
   pressAnyKeyText: {fileID: 57850487}
@@ -17398,7 +17398,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!224 &1513865885
 RectTransform:
@@ -18117,6 +18117,7 @@ MonoBehaviour:
   accessText: {fileID: 2117449791}
   timeToPassWallCrack: 1.5
   canCallPolice: 0
+  wasPoliceCalled: 0
   objInfoText: {fileID: 1200900109}
 --- !u!114 &1608507885
 MonoBehaviour:
@@ -18576,7 +18577,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1

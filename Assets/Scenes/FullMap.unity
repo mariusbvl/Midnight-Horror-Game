@@ -22635,7 +22635,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6c21762ce6b57b4192457673fe44b84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuCanvas: {fileID: 1165649837}
+  canvasToDisable: {fileID: 829628088}
   loadingCanvas: {fileID: 1397305106}
   progressSlider: {fileID: 2117542171}
   pressAnyKeyText: {fileID: 128955883}
@@ -27743,7 +27743,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -36443,7 +36443,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!224 &1397305110
 RectTransform:
@@ -37566,7 +37566,7 @@ MonoBehaviour:
   - {fileID: 914046752}
   collectedKeysBoolArray: 
   noKeyFoundText: {fileID: 1622220783}
-  callSeconds: 61
+  callSeconds: 11
   policeTimerText: {fileID: 588150304}
   canExitHospital: 0
   camHolder: {fileID: 6158286616638799888}
@@ -82635,6 +82635,7 @@ MonoBehaviour:
   accessText: {fileID: 1380341085}
   timeToPassWallCrack: 1.5
   canCallPolice: 0
+  wasPoliceCalled: 0
   objInfoText: {fileID: 800571103}
 --- !u!4 &4378475664908175277
 Transform:

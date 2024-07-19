@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.SceneManagement;
 
 
@@ -122,6 +123,7 @@ namespace FPC
         [Header("Phone")]
         private bool _isPhoneOnHover;
         [HideInInspector]public bool canCallPolice;
+        [HideInInspector] public bool wasPoliceCalled;
         [Header("ExitDoor")] 
         private bool _isExitDoorOnHover;
         
@@ -447,6 +449,7 @@ namespace FPC
             if (!_isExitDoorOnHover) return;
             if (GameManager.Instance.canExitHospital)
             {
+                GameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas");
                 GameManager.Instance.loadingManagerMainMenu.LoadScene(3);
             }
         }
@@ -456,6 +459,7 @@ namespace FPC
             {
                 if (keysPicked[0])
                 {
+                    OutsideGameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas").gameObject;
                     OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(2);
                 }
                 else
@@ -467,9 +471,10 @@ namespace FPC
         private void CallPolice()
         {
             if (!_isPhoneOnHover) return;
-            if (canCallPolice)
+            if (canCallPolice && !wasPoliceCalled)
             {
                 GameManager.Instance.StartPoliceTimer();
+                wasPoliceCalled = true;
             }
         }
         

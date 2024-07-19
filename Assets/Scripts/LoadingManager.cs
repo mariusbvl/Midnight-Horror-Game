@@ -4,14 +4,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
-public class LoadingManagerMainMenu : MonoBehaviour
+public class LoadingManager : MonoBehaviour
 {
-    public GameObject mainMenuCanvas;
+    public GameObject canvasToDisable;
     public GameObject loadingCanvas;
     public Slider progressSlider;
     public TMP_Text pressAnyKeyText;
     public Image pressAnyKeyIcon;
     public TMP_Text loadingText;
+    
     private void Start()
     {
         pressAnyKeyText.color = new Color(pressAnyKeyText.color.r, pressAnyKeyText.color.g, pressAnyKeyText.color.b, 0);
@@ -27,7 +28,7 @@ public class LoadingManagerMainMenu : MonoBehaviour
     public IEnumerator LoadScene_Coroutine(int index)
     {
         progressSlider.value = 0;
-        mainMenuCanvas.SetActive(false);
+        canvasToDisable.SetActive(false);
         loadingCanvas.SetActive(true);
 
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(index);
