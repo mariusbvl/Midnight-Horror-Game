@@ -20,6 +20,7 @@ TagManager:
   - Phone
   - ExitDoor
   - FinalCutSceneTrigger
+  - Safe
   layers:
   - Default
   - TransparentFX
@@ -59,4 +60,7 @@ TagManager:
     locked: 0
   - name: Camera_Effect
     uniqueID: 1256766929
+    locked: 0
+  - name: Blur_Camera
+    uniqueID: 3510131527
     locked: 0
