@@ -14,7 +14,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     [SerializeField] public LoadingManager loadingManagerMainMenu;
     [Header("General")] 
-    private GameInputActions _inputActions;
+    [HideInInspector]public GameInputActions inputActions;
+    public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> pausePerformedHandler;
+    public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeSafeCodePickerHandler;
     public bool isMainGame;
     public bool isEnemyOn;
     [Header("Objective")] 
@@ -23,7 +25,7 @@ public class GameManager : MonoBehaviour
     private int _currentObjectiveState;
     
     [Header("PausePanel")] 
-    [SerializeField] private GameObject playerCanvas;
+    [SerializeField] public GameObject playerCanvas;
     [SerializeField]private GameObject pausePanel;
     [SerializeField] private Button resumeButton;
     private bool _isPause;
@@ -67,7 +69,7 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
         }
-        _inputActions = new GameInputActions();
+        inputActions = new GameInputActions();
         //Components
         cameraController = GameObject.Find("Player").GetComponentInChildren<FPC.CameraController>();
         _interactController = GameObject.Find("Player").GetComponent<InteractController>();
@@ -78,7 +80,9 @@ public class GameManager : MonoBehaviour
         pausePanel.SetActive(false);
         playerCanvas.SetActive(true);
         //Input
-        _inputActions.Player.Pause.performed += _ => TogglePausePanel();
+        pausePerformedHandler = _ => TogglePausePanel();
+        closeSafeCodePickerHandler = _ => CloseSafeCodePicker();
+        inputActions.Player.Pause.performed  += pausePerformedHandler;
     }
 
     private void Start()
@@ -101,7 +105,25 @@ public class GameManager : MonoBehaviour
             KeysCollectedController();
         }
     }
-
+    
+    public void CloseSafeCodePicker()
+    {
+        if (InteractController.Instance.isSafeCodeActive)
+        {
+            InteractController.Instance.puzzleCanvasBlur.SetActive(false);
+            InteractController.Instance.safeCodeImage.SetActive(false);
+            InteractController.Instance.characterController.enabled = true;
+            cameraController.enabled = true;
+            _flashlightAndCameraController.enabled = true;
+            Cursor.lockState = CursorLockMode.Locked;
+            playerCanvas.SetActive(true);
+            hands.SetActive(true);
+            InteractController.Instance.isSafeCodeActive = false;
+            inputActions.Player.Pause.performed -= closeSafeCodePickerHandler;
+            inputActions.Player.Pause.performed += pausePerformedHandler;
+        }
+    }
+    
     private void CombineKeys()
     {
         int length = InteractController.Instance.keysPicked.Length;
@@ -278,11 +300,11 @@ public class GameManager : MonoBehaviour
     
     private void OnEnable()
     {
-        _inputActions.Enable();
+        inputActions.Enable();
     }
 
     private void OnDisable()
     {
-        _inputActions.Disable();
+        inputActions.Disable();
     }
 }

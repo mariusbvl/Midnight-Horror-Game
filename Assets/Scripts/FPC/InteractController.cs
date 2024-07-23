@@ -2,9 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using UnityEngine.Experimental.GlobalIllumination;
-using UnityEngine.SceneManagement;
-
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 
 namespace FPC
@@ -36,7 +35,7 @@ namespace FPC
         [SerializeField] private GameObject hands;
         [SerializeField] private GameObject camHolder;
         private CameraController _cameraController;
-        private CharacterController _characterController;
+        [HideInInspector] public CharacterController characterController;
         private FlashlightAndCameraController _flashlightAndCameraController;
         private HeadBobController _headBobController;
         private GameObject _currentLockerDoor;
@@ -126,6 +125,14 @@ namespace FPC
         [HideInInspector] public bool wasPoliceCalled;
         [Header("ExitDoor")] 
         private bool _isExitDoorOnHover;
+
+        [Header("Safe")]
+        [SerializeField] public GameObject puzzleCanvasBlur;
+        [SerializeField] public GameObject safeCodeImage;
+        [SerializeField] private Button safeButtonToSelectOnStart;
+        [HideInInspector]public bool isSafeCodeActive;
+        private bool _isSafeOnHover;
+        [HideInInspector]public bool isSafeOpen;
         
         [Header("InfoText")] 
         [SerializeField] private TMP_Text objInfoText;
@@ -141,7 +148,7 @@ namespace FPC
                 Instance = this;
             }
             Array.Fill(keysPicked,false);
-            _characterController = GetComponent<CharacterController>();
+            characterController = GetComponent<CharacterController>();
             _cameraController = camHolder.GetComponent<CameraController>();
             _flashlightAndCameraController = GetComponent<FlashlightAndCameraController>();
             _headBobController = GetComponent<HeadBobController>();
@@ -150,6 +157,7 @@ namespace FPC
             corpsesFoundText.text = "0/5";
             objInfoText.gameObject.SetActive(false);
             inputActions = new GameInputActions();
+            
             inputActions.Player.Interact.performed += _ => Interact();
             StartCoroutine(RayCastCoroutine());
         }
@@ -229,6 +237,8 @@ namespace FPC
                 _isCursorOnObj = false;
 
                 _isPhoneOnHover = false;
+
+                _isSafeOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -384,10 +394,10 @@ namespace FPC
 
                 if (rayCastHit.collider.gameObject.CompareTag("Rope"))
                 {
-                    if (_characterController.bounds.Intersects(_pitBottomArea.bounds))
+                    if (characterController.bounds.Intersects(_pitBottomArea.bounds))
                     {
                         _isInPit = true;
-                    }else if (_characterController.bounds.Intersects(_pitTopArea.bounds))
+                    }else if (characterController.bounds.Intersects(_pitTopArea.bounds))
                     {
                         _isInPit = false;
                     }
@@ -413,6 +423,11 @@ namespace FPC
                 if (rayCastHit.collider.gameObject.CompareTag("ExitDoor"))
                 {
                     _isExitDoorOnHover = true;
+                }
+                
+                if (rayCastHit.collider.gameObject.CompareTag("Safe"))
+                {
+                    _isSafeOnHover = true;
                 }
                 _isCursorOnObj = true;
             }
@@ -441,7 +456,26 @@ namespace FPC
                 StartCoroutine(PassWallCrack());
                 CallPolice();
                 ExitHospital();
+                OpenSafeCodePicker();
             }
+        }
+
+        private void OpenSafeCodePicker()
+        {
+            if(!_isSafeOnHover) return;
+            if(isSafeOpen) return;
+            characterController.enabled = false;
+            _cameraController.enabled = false;
+            _flashlightAndCameraController.enabled = false;
+            Cursor.lockState = CursorLockMode.None;
+            GameManager.Instance.playerCanvas.SetActive(false);
+            hands.SetActive(false);
+            puzzleCanvasBlur.SetActive(true);
+            safeCodeImage.SetActive(true);
+            isSafeCodeActive = true;
+            GameManager.Instance.inputActions.Player.Pause.performed -= GameManager.Instance.pausePerformedHandler;
+            GameManager.Instance.inputActions.Player.Pause.performed += GameManager.Instance.closeSafeCodePickerHandler;
+            EventSystem.current.SetSelectedGameObject(safeButtonToSelectOnStart.gameObject);
         }
         
         private void ExitHospital()
@@ -460,7 +494,7 @@ namespace FPC
                 if (keysPicked[0])
                 {
                     OutsideGameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas").gameObject;
-                    OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(2);
+                    OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(mainGameSceneId);
                 }
                 else
                 {
@@ -504,13 +538,13 @@ namespace FPC
                     AnimationController.Instance.animator.SetBool(IsCrouching, false);
                     yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
                 }
-                _characterController.enabled = false;
+                characterController.enabled = false;
                 _cameraController.enabled = false;
                 _headBobController.enabled = false;
                 hands.SetActive(false);
                 yield return StartCoroutine(TranslateThroughWallCrack());
                 hands.SetActive(true);
-                _characterController.enabled = true;
+                characterController.enabled = true;
                 _cameraController.enabled = true;
                 _headBobController.enabled = true;
                 isInteracting = false;
@@ -542,13 +576,13 @@ namespace FPC
         {
             if (_isRopeOnHover)
             {
-                _characterController.enabled = false;
+                characterController.enabled = false;
                 Vector3 worldTransform = _isInPit
                     ? _rope.transform.TransformPoint(_pitTopPoint.localPosition)
                     : _rope.transform.TransformPoint(_pitBottomPoint.localPosition);
                 player.transform.position = worldTransform;
                 _isInPit = !_isInPit;
-                _characterController.enabled = true;
+                characterController.enabled = true;
             }
         }
         private void PickKey()
@@ -619,13 +653,13 @@ namespace FPC
         {
             if (_isLadderOnHover)
             {
-                _characterController.enabled = false;
+                characterController.enabled = false;
                 Vector3 worldTransform = _isOnUpperFloor
                     ? _ladder.transform.TransformPoint(_bottomPoint.localPosition)
                     : _ladder.transform.TransformPoint(_upPoint.localPosition);
                 player.transform.position = worldTransform;
                 _isOnUpperFloor = !_isOnUpperFloor;
-                _characterController.enabled = true;
+                characterController.enabled = true;
             }
         }
         
@@ -672,7 +706,7 @@ namespace FPC
                 player.transform.rotation = _currentHideCameraPoint.transform.rotation;
                 yield return StartCoroutine(ToggleDoor());
                 yield return StartCoroutine(SmoothTransitionCoroutine());
-                yield return _characterController.enabled = true;
+                yield return characterController.enabled = true;
                 yield return _cameraController.enabled = true;
                 _flashlightAndCameraController.enabled = true;
                 _headBobController.enabled = true;
@@ -696,7 +730,7 @@ namespace FPC
                     AnimationController.Instance.animator.SetBool(IsCrouching, false);
                     yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
                 }
-                _characterController.enabled = false;
+                characterController.enabled = false;
                 _cameraController.enabled = false;
                 _flashlightAndCameraController.enabled = false;
                 FlashlightAndCameraController.Instance.isFlashlightOn = false;
