@@ -222,6 +222,7 @@ namespace FPC
 
         public void CrouchPressed()
         {
+            Debug.Log("Crouch presseds");
             if (!isHidden)
             {
                 isCrouching = !isCrouching;
