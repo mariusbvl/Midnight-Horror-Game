@@ -674,6 +674,7 @@ GameObject:
   - component: {fileID: 14828794}
   - component: {fileID: 14828793}
   - component: {fileID: 14828795}
+  - component: {fileID: 14828796}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -792,12 +793,27 @@ Animation:
   serializedVersion: 3
   m_Animation: {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
   m_Animations:
-  - {fileID: 0}
   - {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
+  - {fileID: 7400000, guid: b5a527ebbe0c9b34d936ce6994cbcd21, type: 2}
+  - {fileID: 7400000, guid: fb6b32e2722a1814e92dad4bdf9971f8, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 0
+--- !u!114 &14828796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 14828791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e99f434c5bd7c8e40a99050909ddbc1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightMode: 0
+  FlareLight: {fileID: 14828791}
 --- !u!1 &17077869
 GameObject:
   m_ObjectHideFlags: 0
@@ -15956,6 +15972,7 @@ GameObject:
   - component: {fileID: 789137160}
   - component: {fileID: 789137159}
   - component: {fileID: 789137161}
+  - component: {fileID: 789137162}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -16075,10 +16092,26 @@ Animation:
   m_Animation: {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
   m_Animations:
   - {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
+  - {fileID: 7400000, guid: b5a527ebbe0c9b34d936ce6994cbcd21, type: 2}
+  - {fileID: 7400000, guid: fb6b32e2722a1814e92dad4bdf9971f8, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 0
+--- !u!114 &789137162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789137157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e99f434c5bd7c8e40a99050909ddbc1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightMode: 0
+  FlareLight: {fileID: 789137157}
 --- !u!1 &790251643
 GameObject:
   m_ObjectHideFlags: 0
@@ -24679,6 +24712,7 @@ GameObject:
   - component: {fileID: 982619753}
   - component: {fileID: 982619752}
   - component: {fileID: 982619754}
+  - component: {fileID: 982619755}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -24798,10 +24832,26 @@ Animation:
   m_Animation: {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
   m_Animations:
   - {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
+  - {fileID: 7400000, guid: b5a527ebbe0c9b34d936ce6994cbcd21, type: 2}
+  - {fileID: 7400000, guid: fb6b32e2722a1814e92dad4bdf9971f8, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 0
+--- !u!114 &982619755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982619750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e99f434c5bd7c8e40a99050909ddbc1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightMode: 0
+  FlareLight: {fileID: 982619750}
 --- !u!1 &984867820
 GameObject:
   m_ObjectHideFlags: 0
@@ -44216,6 +44266,7 @@ GameObject:
   - component: {fileID: 1339850797}
   - component: {fileID: 1339850796}
   - component: {fileID: 1339850798}
+  - component: {fileID: 1339850799}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -44335,10 +44386,26 @@ Animation:
   m_Animation: {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
   m_Animations:
   - {fileID: 7400000, guid: 5e34d31b2a4935f42a691a0d1871c854, type: 2}
+  - {fileID: 7400000, guid: b5a527ebbe0c9b34d936ce6994cbcd21, type: 2}
+  - {fileID: 7400000, guid: fb6b32e2722a1814e92dad4bdf9971f8, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 0
+--- !u!114 &1339850799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339850794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e99f434c5bd7c8e40a99050909ddbc1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightMode: 0
+  FlareLight: {fileID: 1339850794}
 --- !u!1 &1342814895
 GameObject:
   m_ObjectHideFlags: 0
