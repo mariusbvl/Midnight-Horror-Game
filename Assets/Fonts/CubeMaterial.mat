@@ -112,6 +112,7 @@ Material:
     - _Glossiness: 0.84
     - _GlossyReflections: 0
     - _LightAngle: 56.530807
+    - _LightEnabled: 1
     - _Metallic: 0.349
     - _OcclusionStrength: 1
     - _Parallax: 0.005

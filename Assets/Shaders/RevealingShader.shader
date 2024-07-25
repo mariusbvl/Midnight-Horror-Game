@@ -10,6 +10,7 @@ Shader "URP/Revealing Under Light"
         _LightPosition("Light Position", Vector) = (0,0,0,0)
         _LightAngle("Light Angle", Range(0,180)) = 45
         _StrengthScaler("Strength", Float) = 50
+        _LightEnabled("Light Enabled", Float) = 0.0
     }
 
     SubShader
@@ -51,6 +52,7 @@ Shader "URP/Revealing Under Light"
             float4 _LightDirection;
             float _LightAngle;
             float _StrengthScaler;
+            float _LightEnabled;
 
             Varyings vert(Attributes v)
             {
@@ -66,7 +68,7 @@ Shader "URP/Revealing Under Light"
                 float3 Dir = normalize(_LightPosition.xyz - i.worldPos);
                 float Scale = dot(Dir, -_LightDirection.xyz);
                 float Strength = Scale - cos(_LightAngle * (3.14 / 360.0));
-                Strength = saturate(Strength * _StrengthScaler);
+                Strength = saturate(Strength * _StrengthScaler) * _LightEnabled;
                 half4 RC = tex2D(_MainTex, i.uv) * _MyColor;
                 half3 Albedo = RC.rgb;
                 half3 Emission = RC.rgb * RC.a * Strength;

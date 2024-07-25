@@ -25,11 +25,18 @@ public class SafePuzzleScript : MonoBehaviour
     [SerializeField] private Transform safeOpenDoorPivot;
     public int handleAnimationDuration;
     public int doorOpeningAnimationDuration;
+    [Header("Codes")] 
+    [SerializeField] private TMP_Text[] codesText;
+    private int _randomIndex;
     private void Awake()
     {
         if (Instance == null) { Instance = this; }
         _characterCounter = 0;
         correctCode = Random.Range(1000, 9999);
+
+        _randomIndex = Random.Range(0, codesText.Length);
+        codesText[_randomIndex].text = correctCode.ToString();
+        codesText[_randomIndex].gameObject.SetActive(true);
     }
 
     public void PressNumber()
