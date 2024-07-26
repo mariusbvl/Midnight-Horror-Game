@@ -457,7 +457,7 @@ namespace FPC
                         bookParent = bookPivot.transform.parent.gameObject;
                         bookInitialPivot = bookParent.transform.Find("initialPivot").gameObject;
                         bookTargetPivot = bookParent.transform.Find("targetPivot").gameObject;
-
+                        _objName = bookParent.name;
                     }
                 }
                 else { _isBookOnHover = false;}
