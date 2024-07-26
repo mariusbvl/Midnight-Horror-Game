@@ -133,6 +133,15 @@ namespace FPC
         [HideInInspector]public bool isSafeCodeActive;
         private bool _isSafeOnHover;
         [HideInInspector]public bool isSafeOpen;
+
+        [Header("Book")] 
+        public GameObject book;
+        public GameObject bookPivot;
+        public GameObject bookParent;
+        public GameObject bookInitialPivot;
+        public GameObject bookTargetPivot;
+        private bool _isBookOnHover;
+        private bool _isBookRotating;
         
         [Header("InfoText")] 
         [SerializeField] private TMP_Text objInfoText;
@@ -239,6 +248,13 @@ namespace FPC
                 _isPhoneOnHover = false;
 
                 _isSafeOnHover = false;
+
+                _isBookOnHover = false;
+                book = null;
+                bookParent = null;
+                bookPivot = null;
+                bookInitialPivot = null;
+                bookTargetPivot = null;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -429,6 +445,23 @@ namespace FPC
                 {
                     _isSafeOnHover = true;
                 }
+
+                if (!_isBookRotating)
+                {
+                    if (rayCastHit.collider.gameObject.CompareTag("Book"))
+                    {
+                        _isBookOnHover = true;
+                        var objectHit = rayCastHit.collider.gameObject;
+                        book = objectHit;
+                        bookPivot = objectHit.transform.parent.gameObject;
+                        bookParent = bookPivot.transform.parent.gameObject;
+                        bookInitialPivot = bookParent.transform.Find("initialPivot").gameObject;
+                        bookTargetPivot = bookParent.transform.Find("targetPivot").gameObject;
+
+                    }
+                }
+                else { _isBookOnHover = false;}
+
                 _isCursorOnObj = true;
             }
             else
@@ -457,9 +490,23 @@ namespace FPC
                 CallPolice();
                 ExitHospital();
                 OpenSafeCodePicker();
+                StartCoroutine(InteractWithBook());
             }
         }
 
+        private IEnumerator InteractWithBook()
+        {
+            if (!_isBookOnHover) yield break;
+            isInteracting = true;
+            _isBookRotating = true;
+            yield return StartCoroutine(BookShelfPuzzle.Instance.InteractWithBook());
+            _isBookRotating = false;
+            isInteracting = false;
+        }
+        
+        
+        
+        
         private void OpenSafeCodePicker()
         {
             if(!_isSafeOnHover) return;

@@ -21,6 +21,7 @@ TagManager:
   - ExitDoor
   - FinalCutSceneTrigger
   - Safe
+  - Book
   layers:
   - Default
   - TransparentFX
