@@ -23,6 +23,11 @@ public class BookShelfPuzzle : MonoBehaviour
    [Header("TryBook")] 
    [SerializeField] private float tryDuration;
    [SerializeField] private float returnDuration;
+
+   [Header("BookShelf's pivots")] 
+   [SerializeField] private Transform bookshelfPivot;
+   [SerializeField] private Transform topBookShelfPivot;
+   [SerializeField] private float bookShelfMoveDuration;
    private void Awake()
    {
       if (Instance == null)
@@ -57,9 +62,24 @@ public class BookShelfPuzzle : MonoBehaviour
       {
          Debug.Log("All books activated");
          canTryBook = false;
+         yield return MoveBookShelf();
       }
    }
+   
+   private IEnumerator MoveBookShelf()
+   {
+     Vector3 startPosition = bookshelfPivot.transform.position;
+     Vector3 targetPosition = topBookShelfPivot.transform.position;
 
+     float timeElapsed = 0;
+     while (timeElapsed < bookShelfMoveDuration)
+     {
+        bookshelfPivot.position = Vector3.Lerp(startPosition, targetPosition, timeElapsed / bookShelfMoveDuration);
+        timeElapsed += Time.deltaTime;
+        yield return null;
+     }
+     bookshelfPivot.position = targetPosition;
+   }
    private IEnumerator TryBook()
    {
       if(InteractController.Instance.bookPivot.transform.rotation != InteractController.Instance.bookInitialPivot.transform.rotation) yield break;
