@@ -34,7 +34,7 @@ namespace FPC
         [SerializeField] private GameObject player;
         [SerializeField] private GameObject hands;
         [SerializeField] private GameObject camHolder;
-        private CameraController _cameraController;
+        [HideInInspector]public CameraController cameraController;
         [HideInInspector] public CharacterController characterController;
         private FlashlightAndCameraController _flashlightAndCameraController;
         private HeadBobController _headBobController;
@@ -142,6 +142,15 @@ namespace FPC
         public GameObject bookTargetPivot;
         private bool _isBookOnHover;
         private bool _isBookRotating;
+
+        [Header("ElectricBox")] 
+        [SerializeField] private Transform electricBoxPuzzlePosition;
+        [SerializeField] public GameObject electricBoxPanel;
+        [SerializeField] public GameObject electricTimerText;
+        private bool _isElectricBoxOnHover;
+        [HideInInspector] public bool isElectricBoxActive;
+        [SerializeField] private Button switchButton;
+        [SerializeField] private Button redButton;
         
         [Header("InfoText")] 
         [SerializeField] private TMP_Text objInfoText;
@@ -158,7 +167,7 @@ namespace FPC
             }
             Array.Fill(keysPicked,false);
             characterController = GetComponent<CharacterController>();
-            _cameraController = camHolder.GetComponent<CameraController>();
+            cameraController = camHolder.GetComponent<CameraController>();
             _flashlightAndCameraController = GetComponent<FlashlightAndCameraController>();
             _headBobController = GetComponent<HeadBobController>();
             nrOfBatteries = 1;
@@ -255,6 +264,8 @@ namespace FPC
                 bookPivot = null;
                 bookInitialPivot = null;
                 bookTargetPivot = null;
+
+                _isElectricBoxOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -461,7 +472,13 @@ namespace FPC
                     }
                 }
                 else { _isBookOnHover = false;}
-
+                
+                if (rayCastHit.collider.gameObject.CompareTag("ElectricBox"))
+                {
+                    _isElectricBoxOnHover = true;
+                    _objName = "Electricity Box";
+                }
+                
                 _isCursorOnObj = true;
             }
             else
@@ -491,9 +508,39 @@ namespace FPC
                 ExitHospital();
                 OpenSafeCodePicker();
                 StartCoroutine(InteractWithBook());
+                OpenElectricBoxPuzzle();
             }
         }
 
+        private void OpenElectricBoxPuzzle()
+        {
+            if(!_isElectricBoxOnHover) return;
+            if(isElectricBoxActive) return;
+            characterController.enabled = false;
+            cameraController.enabled = false;
+            hands.SetActive(false);
+            _flashlightAndCameraController.enabled = false;
+            FlashlightAndCameraController.Instance.isFlashlightOn = false;
+            FlashlightAndCameraController.Instance.isCameraOn = false;
+            FlashlightAndCameraController.Instance.flashlight.SetActive(false);
+            FlashlightAndCameraController.Instance.recordingImage.SetActive(false);
+            FlashlightAndCameraController.Instance.ConsumeBattery();
+            player.transform.position = electricBoxPuzzlePosition.position;
+            var rotation = electricBoxPuzzlePosition.rotation;
+            player.transform.rotation =  rotation;
+            camHolder.transform.rotation = rotation;
+            GameManager.Instance.playerCanvas.SetActive(false);
+            electricBoxPanel.SetActive(true);
+            electricTimerText.SetActive(true);
+            isElectricBoxActive = true;
+            Cursor.lockState = CursorLockMode.None;
+            GameManager.Instance.inputActions.Player.Pause.performed -= GameManager.Instance.pausePerformedHandler;
+            GameManager.Instance.inputActions.Player.Pause.performed += GameManager.Instance.closeElectricBoxHandler;
+            redButton.gameObject.SetActive(false);
+            EventSystem.current.SetSelectedGameObject(switchButton.gameObject);
+            Debug.Log("Electric Box clicked");
+        }
+        
         private IEnumerator InteractWithBook()
         {
             if (!_isBookOnHover) yield break;
@@ -512,7 +559,7 @@ namespace FPC
             if(!_isSafeOnHover) return;
             if(isSafeOpen) return;
             characterController.enabled = false;
-            _cameraController.enabled = false;
+            cameraController.enabled = false;
             _flashlightAndCameraController.enabled = false;
             Cursor.lockState = CursorLockMode.None;
             GameManager.Instance.playerCanvas.SetActive(false);
@@ -586,13 +633,13 @@ namespace FPC
                     yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
                 }
                 characterController.enabled = false;
-                _cameraController.enabled = false;
+                cameraController.enabled = false;
                 _headBobController.enabled = false;
                 hands.SetActive(false);
                 yield return StartCoroutine(TranslateThroughWallCrack());
                 hands.SetActive(true);
                 characterController.enabled = true;
-                _cameraController.enabled = true;
+                cameraController.enabled = true;
                 _headBobController.enabled = true;
                 isInteracting = false;
             }
@@ -754,7 +801,7 @@ namespace FPC
                 yield return StartCoroutine(ToggleDoor());
                 yield return StartCoroutine(SmoothTransitionCoroutine());
                 yield return characterController.enabled = true;
-                yield return _cameraController.enabled = true;
+                yield return cameraController.enabled = true;
                 _flashlightAndCameraController.enabled = true;
                 _headBobController.enabled = true;
                 playerMesh.SetActive(true);
@@ -778,7 +825,7 @@ namespace FPC
                     yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
                 }
                 characterController.enabled = false;
-                _cameraController.enabled = false;
+                cameraController.enabled = false;
                 _flashlightAndCameraController.enabled = false;
                 FlashlightAndCameraController.Instance.isFlashlightOn = false;
                 FlashlightAndCameraController.Instance.isCameraOn = false;

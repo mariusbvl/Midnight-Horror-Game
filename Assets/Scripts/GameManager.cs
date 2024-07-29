@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector]public GameInputActions inputActions;
     public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> pausePerformedHandler;
     public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeSafeCodePickerHandler;
+    public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeElectricBoxHandler;
     public bool isMainGame;
     public bool isEnemyOn;
     [Header("Objective")] 
@@ -82,6 +83,7 @@ public class GameManager : MonoBehaviour
         //Input
         pausePerformedHandler = _ => TogglePausePanel();
         closeSafeCodePickerHandler = _ => CloseSafeCodePicker();
+        closeElectricBoxHandler = _ => CloseElectricBoxPuzzle();
         inputActions.Player.Pause.performed  += pausePerformedHandler;
     }
 
@@ -104,6 +106,22 @@ public class GameManager : MonoBehaviour
         {
             KeysCollectedController();
         }
+    }
+    
+    public void CloseElectricBoxPuzzle()
+    {
+        if(!InteractController.Instance.isElectricBoxActive) return;
+        InteractController.Instance.characterController.enabled = true;
+        InteractController.Instance.cameraController.enabled = true;
+        hands.SetActive(true);
+        _flashlightAndCameraController.enabled = true;
+        playerCanvas.SetActive(true);
+        InteractController.Instance.electricBoxPanel.SetActive(false);
+        InteractController.Instance. electricTimerText.SetActive(false);
+        InteractController.Instance.isElectricBoxActive = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        inputActions.Player.Pause.performed -= closeElectricBoxHandler;
+        inputActions.Player.Pause.performed += pausePerformedHandler;
     }
     
     public void CloseSafeCodePicker()
