@@ -61,6 +61,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
    public void StartPuzzle()
    {
       _rotatorIndex = 1;
+      blinkingInterval = 1f;
       StartCoroutine(TwistRotator(rotatorTurnsTransform[_rotatorIndex].rotation));
       if (electricBoxTimerCoroutine != null)
       {
