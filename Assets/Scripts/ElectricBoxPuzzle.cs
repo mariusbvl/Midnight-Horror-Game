@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public class ElectricBoxPuzzle : MonoBehaviour
@@ -42,7 +43,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
    [SerializeField] private Transform redButtonIdleTransform;
    [SerializeField] private Transform redButtonPressedTransform;
    [SerializeField] public float halfPressDuration;
-   private bool redButtonIsPressing;
+   private bool _redButtonIsPressing;
 
    [Header("LittleElectricBox")] 
    [SerializeField] private Transform littleElectricBoxDoorPivot;
@@ -68,8 +69,9 @@ public class ElectricBoxPuzzle : MonoBehaviour
          StopCoroutine(electricBoxTimerCoroutine);
       }
       electricBoxTimerCoroutine = StartCoroutine(ElectricBoxTimer());
-      redButton.gameObject.SetActive(true);
-      EventSystem.current.SetSelectedGameObject(redButton.gameObject);
+      GameObject o;
+      (o = redButton.gameObject).SetActive(true);
+      EventSystem.current.SetSelectedGameObject(o);
       switchButton.gameObject.SetActive(false);
       isPuzzleOngoing = true;
       if (blinkingCoroutine != null)
@@ -99,7 +101,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
    
    public void PressButton()
    {
-      if(redButtonIsPressing) return;
+      if(_redButtonIsPressing) return;
       pressedLightBool[_currentLightIndex] = !pressedLightBool[_currentLightIndex];
       ResetLightColor();
       StartCoroutine(RedButtonAnimation());
@@ -129,7 +131,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
       InteractController.Instance.isLittleElectricBoxOpen = true;
    }
 
-   public bool IsPuzzleComplete()
+   private bool IsPuzzleComplete()
    {
       for (int i = 0; i < levelLightBool.Length; i++)
       {
@@ -253,10 +255,10 @@ public class ElectricBoxPuzzle : MonoBehaviour
    private IEnumerator RedButtonAnimation()
    {
       
-      redButtonIsPressing = true;
+      _redButtonIsPressing = true;
       yield return StartCoroutine(PressButtonCoroutine(redButtonPressedTransform.position));
       yield return StartCoroutine(PressButtonCoroutine(redButtonIdleTransform.position));
-      redButtonIsPressing = false;
+      _redButtonIsPressing = false;
    }
    
    private IEnumerator PressButtonCoroutine( Vector3 target)
