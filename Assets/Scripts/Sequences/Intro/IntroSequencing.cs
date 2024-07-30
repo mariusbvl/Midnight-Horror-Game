@@ -8,6 +8,7 @@ public class IntroSequencing : MonoBehaviour
     public GameObject dateDisplay;
     public GameObject placeDisplay;
     public GameObject thunderLight;
+    public GameObject fadeOutScreen;
 
     public AudioSource line01;
     public AudioSource line02;
@@ -31,6 +32,7 @@ public class IntroSequencing : MonoBehaviour
     IEnumerator SequenceBegin()
     {
         yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(0.5f);
         placeDisplay.SetActive(true);
         placeDisplay.GetComponent<TextMeshProUGUI>().text = "Ravenwood Asylum";
         yield return new WaitForSeconds(1);
@@ -39,7 +41,6 @@ public class IntroSequencing : MonoBehaviour
         yield return new WaitForSeconds(4);
         placeDisplay.SetActive(false);
         dateDisplay.SetActive(false);
-        yield return new WaitForSeconds(1);
 
         TextMeshProUGUI textComponent = textBox.GetComponent<TextMeshProUGUI>();
         line01.GetComponent<AudioSource>().Play();
@@ -49,9 +50,10 @@ public class IntroSequencing : MonoBehaviour
         line02.GetComponent<AudioSource>().Play();
         yield return new WaitForSeconds(0.5f);
         textComponent.text = "Ravenwood Asylum was once a beacon of hope for the mentally ill.";
-        yield return new WaitForSeconds(4);
-        textComponent.text = "But in the late 1970s, Dr. Sebastian Voss initiated 'Project Insight'.";
+        yield return new WaitForSeconds(3.5f);
         line03.GetComponent<AudioSource>().Play();
+        yield return new WaitForSeconds(0.2f);
+        textComponent.text = "But in the late 1970s, Dr. Sebastian Voss initiated 'Project Insight'.";
         wolfSound.GetComponent<AudioSource>().Play();
         yield return new WaitForSeconds(6);
         line04.GetComponent<AudioSource>().Play();
@@ -82,5 +84,7 @@ public class IntroSequencing : MonoBehaviour
         yield return new WaitForSeconds(0.4f);
         thunderLight.SetActive(false);
         textComponent.text = "";
+        yield return new WaitForSeconds(0.5f);
+        fadeOutScreen.SetActive(true);
     }
 }
