@@ -151,6 +151,7 @@ namespace FPC
         [HideInInspector] public bool isElectricBoxActive;
         [SerializeField] private Button switchButton;
         [SerializeField] private Button redButton;
+        [HideInInspector] public bool isLittleElectricBoxOpen;
         
         [Header("InfoText")] 
         [SerializeField] private TMP_Text objInfoText;
@@ -516,6 +517,8 @@ namespace FPC
         {
             if(!_isElectricBoxOnHover) return;
             if(isElectricBoxActive) return;
+            if(isLittleElectricBoxOpen) return;
+            ElectricBoxPuzzle.Instance.ResetPuzzle();
             characterController.enabled = false;
             cameraController.enabled = false;
             hands.SetActive(false);
@@ -537,7 +540,9 @@ namespace FPC
             GameManager.Instance.inputActions.Player.Pause.performed -= GameManager.Instance.pausePerformedHandler;
             GameManager.Instance.inputActions.Player.Pause.performed += GameManager.Instance.closeElectricBoxHandler;
             redButton.gameObject.SetActive(false);
+            switchButton.gameObject.SetActive(true);
             EventSystem.current.SetSelectedGameObject(switchButton.gameObject);
+            ElectricBoxPuzzle.Instance.timerText.text = $"{ElectricBoxPuzzle.Instance.puzzleSeconds}";
             Debug.Log("Electric Box clicked");
         }
         

@@ -111,6 +111,16 @@ public class GameManager : MonoBehaviour
     public void CloseElectricBoxPuzzle()
     {
         if(!InteractController.Instance.isElectricBoxActive) return;
+        if (ElectricBoxPuzzle.Instance.blinkingCoroutine != null)
+        {
+            StopCoroutine(ElectricBoxPuzzle.Instance.blinkingCoroutine);
+            ElectricBoxPuzzle.Instance.blinkingCoroutine = null;
+        }
+        if (ElectricBoxPuzzle.Instance.electricBoxTimerCoroutine != null)
+        {
+            StopCoroutine(ElectricBoxPuzzle.Instance.electricBoxTimerCoroutine);
+            ElectricBoxPuzzle.Instance.electricBoxTimerCoroutine = null;
+        }
         InteractController.Instance.characterController.enabled = true;
         InteractController.Instance.cameraController.enabled = true;
         hands.SetActive(true);

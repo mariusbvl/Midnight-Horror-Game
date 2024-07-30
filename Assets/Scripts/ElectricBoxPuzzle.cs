@@ -1,5 +1,5 @@
-using System;
 using System.Collections;
+using FPC;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,9 +8,10 @@ using Random = UnityEngine.Random;
 
 public class ElectricBoxPuzzle : MonoBehaviour
 {
+   public static ElectricBoxPuzzle Instance { get; private set; }
    [Header("General")] 
    public bool isPuzzleOngoing;
-   private Coroutine _blinkingCoroutine;
+   public Coroutine blinkingCoroutine;
    [Header("Buttons")] 
    [SerializeField] private Button switchButton;
    [SerializeField] private Button redButton;
@@ -26,13 +27,15 @@ public class ElectricBoxPuzzle : MonoBehaviour
    private Light _currentLight;
    
    [Header("Timer")] 
-   [SerializeField] private TMP_Text timerText;
-   [SerializeField] private float puzzleSeconds;
+   [SerializeField] public TMP_Text timerText;
+   [SerializeField] public float puzzleSeconds;
+   public Coroutine electricBoxTimerCoroutine;
 
    [Header("SwitchButton")] 
    [SerializeField] private Transform rotatorPivot;
    [SerializeField] private Transform[] rotatorTurnsTransform;
    [SerializeField] private float rotateTime;
+   private int _rotatorIndex;
 
    [Header("RedButton")] 
    [SerializeField] private Transform redButtonPivot;
@@ -41,25 +44,58 @@ public class ElectricBoxPuzzle : MonoBehaviour
    [SerializeField] public float halfPressDuration;
    private bool redButtonIsPressing;
 
-   
+   [Header("LittleElectricBox")] 
+   [SerializeField] private Transform littleElectricBoxDoorPivot;
+   [SerializeField] private Transform littleElectricBoxDoorOpenPivot;
+   [SerializeField] private float doorRotateTime;
+
+
+   private void Awake()
+   {
+      if (Instance == null)
+      {
+         Instance = this;
+      }
+   }
 
    public void StartPuzzle()
    {
-      
-      StartCoroutine(TwistRotator(rotatorTurnsTransform[1].rotation));
-      StartCoroutine(ElectricBoxTimer());
+      _rotatorIndex = 1;
+      StartCoroutine(TwistRotator(rotatorTurnsTransform[_rotatorIndex].rotation));
+      if (electricBoxTimerCoroutine != null)
+      {
+         StopCoroutine(electricBoxTimerCoroutine);
+      }
+      electricBoxTimerCoroutine = StartCoroutine(ElectricBoxTimer());
       redButton.gameObject.SetActive(true);
       EventSystem.current.SetSelectedGameObject(redButton.gameObject);
       switchButton.gameObject.SetActive(false);
       isPuzzleOngoing = true;
-      
-      if (_blinkingCoroutine != null)
+      if (blinkingCoroutine != null)
       {
-         StopCoroutine(_blinkingCoroutine);
+         StopCoroutine(blinkingCoroutine);
       }
-      _blinkingCoroutine = StartCoroutine(BlinkingCoroutine());
+      blinkingCoroutine = StartCoroutine(BlinkingCoroutine());
    }
 
+   public void ResetPuzzle()
+   {
+      _rotatorIndex = 0;
+      for (int i = 0; i < lightIndicator.Length; i++)
+      {
+         lightIndicator[i].color = Color.red;
+         lightBool[i] = false;
+         pressedLightBool[i] = false;
+      }
+
+      for (int i = 0; i < levelLightIndicator.Length; i++)
+      {
+         levelLightIndicator[i].color = new Color(1f , 0.7600516f, 0 , 1f);
+         levelLightBool[i] = false;
+      }
+      StartCoroutine( TwistRotator(rotatorTurnsTransform[_rotatorIndex].rotation));
+   }
+   
    public void PressButton()
    {
       if(redButtonIsPressing) return;
@@ -73,13 +109,36 @@ public class ElectricBoxPuzzle : MonoBehaviour
    private void CheckForNextLevel()
    {
       if(!IsLevelComplete()) return;
-      ResetLastLevel();
+      _rotatorIndex++;
       AddLevelCompletion();
       ChangeLevelLight();
-      blinkingInterval -= 0.25f;
+      StartCoroutine( TwistRotator(rotatorTurnsTransform[_rotatorIndex].rotation));
+      Debug.Log(IsPuzzleComplete());
+      CheckForPuzzleComplete();
+      if(IsPuzzleComplete()) return;
+      ResetLastLevel();
+      blinkingInterval -= 0.33f;
+   }
+   
+   private void CheckForPuzzleComplete()
+   {
+      if(!IsPuzzleComplete()) return;
+      StartCoroutine(RotateLittleElectricBoxDoor());
+      GameManager.Instance.CloseElectricBoxPuzzle();
+      InteractController.Instance.isLittleElectricBoxOpen = true;
    }
 
-
+   public bool IsPuzzleComplete()
+   {
+      for (int i = 0; i < levelLightBool.Length; i++)
+      {
+         if (!levelLightBool[i])
+         {
+            return false;
+         }
+      }
+      return true;
+   }
    private void ChangeLevelLight()
    {
       for (int i = 0; i < levelLightBool.Length; i++)
@@ -123,7 +182,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
       }
       return true;
    }
-   private IEnumerator BlinkingCoroutine()
+   public IEnumerator BlinkingCoroutine()
    {
       while (isPuzzleOngoing)
       {
@@ -134,7 +193,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
          lightBool[_currentLightIndex] = true;
          ResetLightColor();
       }
-      _blinkingCoroutine = null;
+      blinkingCoroutine = null;
    }
 
    private void ResetLightColor()
@@ -149,7 +208,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
       }
    }
    
-   private IEnumerator ElectricBoxTimer()
+   public IEnumerator ElectricBoxTimer()
    {
       float remainingTime = puzzleSeconds;
       while (remainingTime > 0)
@@ -160,6 +219,21 @@ public class ElectricBoxPuzzle : MonoBehaviour
       }
       if (remainingTime != 0) yield break;
       GameManager.Instance.CloseElectricBoxPuzzle();
+   }
+   
+   
+   private IEnumerator RotateLittleElectricBoxDoor()
+   {
+      Quaternion startRotation = littleElectricBoxDoorPivot.rotation;
+      Quaternion targetRotation = littleElectricBoxDoorOpenPivot.rotation;
+      float timeElapsed = 0;
+      while (timeElapsed < doorRotateTime)
+      {
+         littleElectricBoxDoorPivot.rotation = Quaternion.Slerp(startRotation, targetRotation, timeElapsed / doorRotateTime);
+         timeElapsed += Time.deltaTime; 
+         yield return null;
+      }
+      rotatorPivot.rotation = targetRotation;
    }
    
    private IEnumerator TwistRotator(Quaternion target)
