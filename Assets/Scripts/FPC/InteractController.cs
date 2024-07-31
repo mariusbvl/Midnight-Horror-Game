@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 
 namespace FPC
@@ -12,7 +13,7 @@ namespace FPC
     {
         public static InteractController Instance { get; private set; }
         [Header("General")] 
-        [HideInInspector]public GameInputActions inputActions;
+        private GameInputActions _inputActions;
         [SerializeField] private Camera mainCamera;
         [SerializeField] public float rayCastDistance;
         public bool isInteracting; 
@@ -152,11 +153,44 @@ namespace FPC
         [SerializeField] private Button switchButton;
         [SerializeField] private Button redButton;
         [HideInInspector] public bool isLittleElectricBoxOpen;
+
+        [Header("FuelCanister")] 
+        [SerializeField] private float throwForce;
+        [SerializeField] private float torqueAmount;
+        [SerializeField] private GameObject handForCanister;
+        [SerializeField] private GameObject canister;
+        [SerializeField] private Transform canisterInHandTransform;
+        [SerializeField] private GameObject generatorPuzzleGameObject;
+        [SerializeField] private Transform canisterInWorldTransform;
+        private bool _isFuelCanisterOnHover;
+        private bool _isCanisterInHand;
+
+        [Header("Generator")] 
+        [SerializeField] private Slider generatorFillSlider;
+        [SerializeField] private float timeToFill;
+        [SerializeField] private GameObject generatorCameraLight;
+        [SerializeField] private TMP_Text generatorText;
+        private bool _isGeneratorOnHover;
+        private bool _isFillingGenerator;
+        private bool _isGeneratorFilled;
+
+        [Header("Lever Switch")]
+        [SerializeField] private TMP_Text leverText;
+        [SerializeField] private Transform handlePivot;
+        [SerializeField] private Transform handleDraggedPivot;
+        [SerializeField] private Transform switchDoorPivot;
+        [SerializeField] private Transform switchDoorOpenPivot;
+        [SerializeField] private float handleDragTime;
+        [SerializeField] private float switchDoorOpenTime;
+        private bool _isSwitchHandleOnHover;
+        
+        
         
         [Header("InfoText")] 
         [SerializeField] private TMP_Text objInfoText;
         private string _objName;
         private bool _isCursorOnObj;
+        
         private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
         private static readonly int Stand = Animator.StringToHash("Stand");
 
@@ -175,9 +209,11 @@ namespace FPC
             batteryText.text = nrOfBatteries + "/5";
             corpsesFoundText.text = "0/5";
             objInfoText.gameObject.SetActive(false);
-            inputActions = new GameInputActions();
+            _inputActions = new GameInputActions();
             
-            inputActions.Player.Interact.performed += _ => Interact();
+            _inputActions.Player.Interact.performed += _ => Interact();
+            _inputActions.Player.Interact.canceled += _ => ResetInteraction();
+            _inputActions.Player.AltInteract.performed += _ => AltInteract();
             StartCoroutine(RayCastCoroutine());
         }
 
@@ -267,6 +303,12 @@ namespace FPC
                 bookTargetPivot = null;
 
                 _isElectricBoxOnHover = false;
+
+                _isFuelCanisterOnHover = false;
+
+                _isGeneratorOnHover = false;
+
+                _isSwitchHandleOnHover = false;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -480,6 +522,23 @@ namespace FPC
                     _objName = "Electricity Box";
                 }
                 
+                if (rayCastHit.collider.gameObject.CompareTag("FuelCanister"))
+                {
+                    _isFuelCanisterOnHover = true;
+                    _objName = "Fuel Canister";
+                }
+                if (rayCastHit.collider.gameObject.CompareTag("Generator"))
+                {
+                    _isGeneratorOnHover = true;
+                    _isFillingGenerator = true;
+                    _objName = "Generator";
+                }
+                
+                if (rayCastHit.collider.gameObject.CompareTag("LeverSwitch"))
+                {
+                    _isSwitchHandleOnHover = true;
+                    _objName = "Lever";
+                }
                 _isCursorOnObj = true;
             }
             else
@@ -490,29 +549,154 @@ namespace FPC
         }
         private void Interact()
         {
-            if (!isInteracting)
+            if (isInteracting) return;
+            InteractWithBattery();
+            PhotoCorpse();
+            StartCoroutine(HideInLocker());
+            StartCoroutine(ExitLocker());
+            StartCoroutine(OpenCloseSimpleDoor());
+            PickKey();
+            StartCoroutine(OpenDoorWithKey());
+            EnterHospital();
+            ClimbGetDownLadder();
+            PickKeyCard();
+            StartCoroutine(ReadCardReader());
+            ClimbGetDownRope();
+            StartCoroutine(PassWallCrack());
+            CallPolice();
+            ExitHospital();
+            OpenSafeCodePicker();
+            StartCoroutine(InteractWithBook());
+            OpenElectricBoxPuzzle();
+            GrabCanister();
+            StartCoroutine(FillGenerator());
+            StartCoroutine(OpenLeverDoor());
+        }
+
+        private void AltInteract()
+        {
+            if (isInteracting) return;
+            ThrowCanister();
+        }
+
+
+        private void ResetInteraction()
+        {
+            if (_isFillingGenerator) { _isFillingGenerator = false; }
+        }
+
+        private IEnumerator OpenLeverDoor()
+        {
+            if(!_isSwitchHandleOnHover) yield break;
+            if (_isGeneratorFilled)
             {
-                InteractWithBattery();
-                PhotoCorpse();
-                StartCoroutine(HideInLocker());
-                StartCoroutine(ExitLocker());
-                StartCoroutine(OpenCloseSimpleDoor());
-                PickKey();
-                StartCoroutine(OpenDoorWithKey());
-                EnterHospital();
-                ClimbGetDownLadder();
-                PickKeyCard();
-                StartCoroutine(ReadCardReader());
-                ClimbGetDownRope();
-                StartCoroutine(PassWallCrack());
-                CallPolice();
-                ExitHospital();
-                OpenSafeCodePicker();
-                StartCoroutine(InteractWithBook());
-                OpenElectricBoxPuzzle();
+                yield return StartCoroutine(DragLever());
+                yield return StartCoroutine((MoveLeverDoor()));
+            }
+            else
+            {
+                StartCoroutine(FadeText(leverText));
             }
         }
 
+        private IEnumerator DragLever()
+        {
+            Quaternion startRotation = handlePivot.rotation;
+            Quaternion targetRotation = handleDraggedPivot.rotation;
+            float timeElapsed = 0;
+            while (timeElapsed < handleDragTime)
+            {
+                handlePivot.rotation = Quaternion.Slerp(startRotation, targetRotation, timeElapsed / handleDragTime);
+                timeElapsed += Time.deltaTime; 
+                yield return null;
+            }
+            handlePivot.rotation = targetRotation;
+            yield return null;
+        }
+
+        private IEnumerator MoveLeverDoor()
+        {
+            Vector3 startPosition = switchDoorPivot.position;
+            Vector3 targetPosition = switchDoorOpenPivot.position;
+
+            float timeElapsed = 0;
+            while (timeElapsed < switchDoorOpenTime)
+            {
+                switchDoorPivot.position = Vector3.Lerp(startPosition, targetPosition, timeElapsed / switchDoorOpenTime);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+            switchDoorPivot.position = targetPosition;
+        }
+        private IEnumerator FillGenerator()
+        {
+            if (_isGeneratorOnHover && !_isCanisterInHand && !_isGeneratorFilled)
+            {
+                StartCoroutine(FadeText(generatorText));
+                yield break;
+            }
+            if (!_isGeneratorOnHover || !_isCanisterInHand || _isGeneratorFilled) yield break;
+            
+            generatorFillSlider.gameObject.SetActive(true);
+            float elapsedTime = 0f;
+            generatorFillSlider.value = 0f;
+
+            while (elapsedTime < timeToFill)
+            {
+                if (CancelFilling()) yield break;
+
+                elapsedTime += Time.deltaTime;
+                generatorFillSlider.value = Mathf.Lerp(0f, 100f, elapsedTime / timeToFill);
+                yield return null;
+            }
+
+            generatorFillSlider.value = 100f;
+            generatorFillSlider.gameObject.SetActive(false);
+            _isGeneratorFilled = true;
+            generatorCameraLight.SetActive(true);
+        }
+
+        private bool CancelFilling()
+        {
+            if (_isGeneratorOnHover && _isFillingGenerator && _isCanisterInHand) return false;
+
+            generatorFillSlider.gameObject.SetActive(false);
+            return true;
+        }
+
+        
+        private void GrabCanister()
+        {
+            if(!_isFuelCanisterOnHover) return;
+            BoxCollider canisterCollider = canister.GetComponent<BoxCollider>();
+            Rigidbody canisterRigidBody = canister.GetComponent<Rigidbody>();
+            hands.SetActive(false);
+            handForCanister.SetActive(true);
+            canisterCollider.enabled = false;
+            Destroy(canisterRigidBody);
+            canister.transform.SetParent(canisterInHandTransform);
+            canister.transform.localPosition = new Vector3(0f, 0f, 0f);
+            canister.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            canister.transform.localScale = new Vector3(1f, 1f, 1f);
+            _isCanisterInHand = true;
+        }
+
+        private void ThrowCanister()
+        {
+            if(!_isCanisterInHand) return;
+            canister.transform.SetParent(generatorPuzzleGameObject.transform);
+            canister.transform.localScale = canisterInWorldTransform.localScale;
+            BoxCollider canisterCollider = canister.GetComponent<BoxCollider>();
+            canisterCollider.enabled = true;
+            Rigidbody canisterRigidBody = canister.AddComponent<Rigidbody>();
+            Vector3 throwDirection = transform.forward;
+            canisterRigidBody.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+            canisterRigidBody.AddTorque(new Vector3(Random.Range(-torqueAmount, torqueAmount), Random.Range(-torqueAmount, torqueAmount), Random.Range(-torqueAmount, torqueAmount)), ForceMode.Impulse);
+            _isCanisterInHand = false;
+            handForCanister.SetActive(false);
+            hands.SetActive(true);
+        }
+        
         private void OpenElectricBoxPuzzle()
         {
             if(!_isElectricBoxOnHover) return;
@@ -540,8 +724,9 @@ namespace FPC
             GameManager.Instance.inputActions.Player.Pause.performed -= GameManager.Instance.pausePerformedHandler;
             GameManager.Instance.inputActions.Player.Pause.performed += GameManager.Instance.closeElectricBoxHandler;
             redButton.gameObject.SetActive(false);
-            switchButton.gameObject.SetActive(true);
-            EventSystem.current.SetSelectedGameObject(switchButton.gameObject);
+            GameObject button;
+            (button = switchButton.gameObject).SetActive(true);
+            EventSystem.current.SetSelectedGameObject(button);
             ElectricBoxPuzzle.Instance.timerText.text = $"{ElectricBoxPuzzle.Instance.puzzleSeconds}";
             Debug.Log("Electric Box clicked");
         }
@@ -998,12 +1183,12 @@ namespace FPC
         }
         private void OnEnable()
         {
-            inputActions.Enable();
+            _inputActions.Enable();
         }
 
         private void OnDisable()
         {
-            inputActions.Disable();
+            _inputActions.Disable();
         }
     }
 }

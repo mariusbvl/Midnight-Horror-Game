@@ -23,6 +23,9 @@ TagManager:
   - Safe
   - Book
   - ElectricBox
+  - FuelCanister
+  - Generator
+  - LeverSwitch
   layers:
   - Default
   - TransparentFX
