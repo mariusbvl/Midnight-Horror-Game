@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -183,7 +184,12 @@ namespace FPC
         [SerializeField] private float handleDragTime;
         [SerializeField] private float switchDoorOpenTime;
         private bool _isSwitchHandleOnHover;
-        
+
+
+        [Header("Electric Lever")] 
+        private bool _isElectricLeverOnHover;
+        [HideInInspector]public bool isLeverRotating;
+        [HideInInspector] public GameObject electricLever;
         
         
         [Header("InfoText")] 
@@ -309,6 +315,9 @@ namespace FPC
                 _isGeneratorOnHover = false;
 
                 _isSwitchHandleOnHover = false;
+
+                _isElectricLeverOnHover = false;
+                electricLever = null;
             }
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var rayCastHit, rayCastDistance))
@@ -537,8 +546,19 @@ namespace FPC
                 if (rayCastHit.collider.gameObject.CompareTag("LeverSwitch"))
                 {
                     _isSwitchHandleOnHover = true;
-                    _objName = "Lever";
+                    _objName = "Lever Switch";
                 }
+
+                if (!isLeverRotating)
+                {
+                    if (rayCastHit.collider.gameObject.CompareTag("ElectricLever"))
+                    {
+                        _isElectricLeverOnHover = true;
+                        electricLever = rayCastHit.collider.gameObject;
+                        _objName = "Electric Lever";
+                    }
+                }
+
                 _isCursorOnObj = true;
             }
             else
@@ -571,6 +591,7 @@ namespace FPC
             GrabCanister();
             StartCoroutine(FillGenerator());
             StartCoroutine(OpenLeverDoor());
+            StartCoroutine(SwitchElectricLever());
         }
 
         private void AltInteract()
@@ -585,6 +606,16 @@ namespace FPC
             if (_isFillingGenerator) { _isFillingGenerator = false; }
         }
 
+        private IEnumerator SwitchElectricLever()
+        {
+            if(!_isElectricLeverOnHover) yield break;
+            isInteracting = true;
+            isLeverRotating = true;
+            yield return StartCoroutine(LeverPuzzle.Instance.SwitchLever());
+            isLeverRotating = false;
+            isInteracting = false;
+        }
+        
         private IEnumerator OpenLeverDoor()
         {
             if(!_isSwitchHandleOnHover) yield break;
