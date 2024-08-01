@@ -26,6 +26,7 @@ TagManager:
   - FuelCanister
   - Generator
   - LeverSwitch
+  - ElectricLever
   layers:
   - Default
   - TransparentFX
