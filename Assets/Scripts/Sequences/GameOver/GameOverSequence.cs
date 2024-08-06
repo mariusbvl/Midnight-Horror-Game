@@ -20,9 +20,9 @@ public class GameOverSequence : MonoBehaviour
         yield return new WaitForSeconds(1);
         Blood.SetActive(true);
         enemySound.Play();
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(3.5f);
         scareSound.Play();
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1.5f);
         fadeOutScreen.SetActive(true);
     }
 }
