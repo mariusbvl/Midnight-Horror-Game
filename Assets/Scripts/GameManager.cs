@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject noKeyFoundText;
 
     [Header("Timer")] 
-    [SerializeField] private int callSeconds;
+    [SerializeField] public int callSeconds;
     [SerializeField] private TMP_Text policeTimerText;
 
     [Header("ExitHospital")] 
@@ -111,6 +111,7 @@ public class GameManager : MonoBehaviour
     public void CloseElectricBoxPuzzle()
     {
         if(!InteractController.Instance.isElectricBoxActive) return;
+        FirstPersonController.Instance.inputActions.Enable();
         if (ElectricBoxPuzzle.Instance.blinkingCoroutine != null)
         {
             StopCoroutine(ElectricBoxPuzzle.Instance.blinkingCoroutine);

@@ -26,6 +26,12 @@ namespace FPC
         [SerializeField] private float defaultRayCastDistance;
         [SerializeField] private float cameraRayCastDistance;
         [HideInInspector]public bool isCameraOn;
+
+        [Header("AudioClips")] 
+        [SerializeField] private AudioClip flashlightOnSound;
+        [SerializeField] private AudioClip flashlightOffSound;
+        [SerializeField] private AudioClip cameraClickOpen;
+        [SerializeField] private AudioClip cameraClickClose;
         void Awake()
         {
             if (Instance == null)
@@ -77,19 +83,15 @@ namespace FPC
             CheckIfHasBattery();
             if (flashlight.activeSelf && canConsumeBattery)
             {
-                if (!_isConsumingBattery)
-                {
-                    _batteryCoroutine = StartCoroutine(ConsumeBatteryCoroutine());
-                    _isConsumingBattery = true;
-                }
+                if (_isConsumingBattery) return;
+                _batteryCoroutine = StartCoroutine(ConsumeBatteryCoroutine());
+                _isConsumingBattery = true;
             }
             else
             {
-                if (_isConsumingBattery)
-                {
-                    StopCoroutine(_batteryCoroutine);
-                    _isConsumingBattery = false;
-                }
+                if (!_isConsumingBattery) return;
+                StopCoroutine(_batteryCoroutine);
+                _isConsumingBattery = false;
             }
         }
 
@@ -134,6 +136,8 @@ namespace FPC
         {
             if (handFlashlight.activeSelf && modelFlashlight.activeSelf)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(isFlashlightOn ? flashlightOnSound : flashlightOffSound,
+                    flashlight.transform, 1f, 0f);
                 isFlashlightOn = !isFlashlightOn;
             }
         }
@@ -156,6 +160,8 @@ namespace FPC
         {
             if (modelCamera.activeSelf)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(isCameraOn ? cameraClickOpen : cameraClickClose,
+                    modelCamera.transform, 1f, 0f); 
                 isCameraOn = !isCameraOn;
             }
         }

@@ -28,6 +28,10 @@ public class BookShelfPuzzle : MonoBehaviour
    [SerializeField] private Transform bookshelfPivot;
    [SerializeField] private Transform topBookShelfPivot;
    [SerializeField] private float bookShelfMoveDuration;
+
+   [Header("Audio")] 
+   [SerializeField] private AudioClip rotateBookAudio;
+   [SerializeField] private AudioClip bookShelfMoveSound;
    private void Awake()
    {
       if (Instance == null)
@@ -60,8 +64,8 @@ public class BookShelfPuzzle : MonoBehaviour
       }
       if(AreAllCorrectBook())
       {
-         Debug.Log("All books activated");
          canTryBook = false;
+         SoundFXManager.Instance.PlaySoundFxClip(bookShelfMoveSound, bookshelfPivot.transform, 1f,1f);
          yield return MoveBookShelf();
       }
    }
@@ -86,6 +90,7 @@ public class BookShelfPuzzle : MonoBehaviour
       Quaternion startRotation = InteractController.Instance.bookInitialPivot.transform.rotation;
       Quaternion targetRotation = InteractController.Instance.bookTargetPivot.transform.rotation;
       
+      SoundFXManager.Instance.PlaySoundFxClip(rotateBookAudio, InteractController.Instance.book.transform, 1f, 1f);
       
       float timeElapsed = 0;
       while (timeElapsed < tryDuration)
@@ -102,7 +107,9 @@ public class BookShelfPuzzle : MonoBehaviour
       if(InteractController.Instance.bookPivot.transform.rotation != InteractController.Instance.bookTargetPivot.transform.rotation) yield break;
       Quaternion startRotation = InteractController.Instance.bookTargetPivot.transform.rotation;
       Quaternion targetRotation = InteractController.Instance.bookInitialPivot.transform.rotation;
-
+      
+      SoundFXManager.Instance.PlaySoundFxClip(rotateBookAudio, InteractController.Instance.book.transform, 1f, 1f);
+      
       float timeElapsed = 0;
       while (timeElapsed < returnDuration)
       {
@@ -119,6 +126,8 @@ public class BookShelfPuzzle : MonoBehaviour
       Quaternion startRotation = bookParent.transform.Find("targetPivot").transform.rotation;
       Quaternion targetRotation = bookParent.transform.Find("initialPivot").transform.rotation;
 
+      SoundFXManager.Instance.PlaySoundFxClip(rotateBookAudio, bookPivot, 1f, 1f);
+      
       float timeElapsed = 0;
       while (timeElapsed < returnDuration)
       {
@@ -139,6 +148,7 @@ public class BookShelfPuzzle : MonoBehaviour
          Transform initialPivot = bookParent.transform.Find("initialPivot");
          if (bookPivot.transform.rotation != initialPivot.transform.rotation)
          {
+            SoundFXManager.Instance.PlaySoundFxClip(rotateBookAudio, book.transform, 1f, 1f);
             StartCoroutine(ReturnBook(bookParent, bookPivot));
          }
       }

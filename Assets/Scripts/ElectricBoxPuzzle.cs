@@ -50,6 +50,11 @@ public class ElectricBoxPuzzle : MonoBehaviour
    [SerializeField] private Transform littleElectricBoxDoorOpenPivot;
    [SerializeField] private float doorRotateTime;
 
+   [Header("Audio")] 
+   [SerializeField] private AudioClip rotatorSound;
+   [SerializeField] private AudioClip lightBulbSound;
+   [SerializeField] private AudioClip buttonPressSound;
+   [SerializeField] private AudioClip littleElectricBoxDoorSound;
 
    private void Awake()
    {
@@ -63,6 +68,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
    {
       _rotatorIndex = 1;
       blinkingInterval = 1f;
+      SoundFXManager.Instance.PlaySoundFxClip(rotatorSound, rotatorPivot, 1f,0f);
       StartCoroutine(TwistRotator(rotatorTurnsTransform[_rotatorIndex].rotation));
       if (electricBoxTimerCoroutine != null)
       {
@@ -102,6 +108,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
    public void PressButton()
    {
       if(_redButtonIsPressing) return;
+      SoundFXManager.Instance.PlaySoundFxClip(buttonPressSound, redButton.transform, 1f,0f);
       pressedLightBool[_currentLightIndex] = !pressedLightBool[_currentLightIndex];
       ResetLightColor();
       StartCoroutine(RedButtonAnimation());
@@ -115,6 +122,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
       _rotatorIndex++;
       AddLevelCompletion();
       ChangeLevelLight();
+      SoundFXManager.Instance.PlaySoundFxClip(rotatorSound, rotatorPivot, 1f,0f);
       StartCoroutine( TwistRotator(rotatorTurnsTransform[_rotatorIndex].rotation));
       Debug.Log(IsPuzzleComplete());
       CheckForPuzzleComplete();
@@ -126,6 +134,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
    private void CheckForPuzzleComplete()
    {
       if(!IsPuzzleComplete()) return;
+      SoundFXManager.Instance.PlaySoundFxClip(littleElectricBoxDoorSound, littleElectricBoxDoorPivot, 1f,1f);
       StartCoroutine(RotateLittleElectricBoxDoor());
       GameManager.Instance.CloseElectricBoxPuzzle();
       InteractController.Instance.isLittleElectricBoxOpen = true;
@@ -147,6 +156,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
       for (int i = 0; i < levelLightBool.Length; i++)
       {
          if(!levelLightBool[i]) return;
+         SoundFXManager.Instance.PlaySoundFxClip(lightBulbSound, _currentLight.transform, 1f , 0f);
          levelLightIndicator[i].color = Color.green;
       }
    }
@@ -187,10 +197,18 @@ public class ElectricBoxPuzzle : MonoBehaviour
    }
    public IEnumerator BlinkingCoroutine()
    {
+      int previousLightIndex = -1;
       while (isPuzzleOngoing)
       {
          yield return new WaitForSeconds(blinkingInterval);
-         _currentLightIndex = Random.Range(0, lightIndicator.Length);
+         SoundFXManager.Instance.PlaySoundFxClip(lightBulbSound, InteractController.Instance.player.transform, 1f , 0f);
+         int newLightIndex;
+         do
+         {
+            newLightIndex = Random.Range(0, lightIndicator.Length);
+         } while (newLightIndex == previousLightIndex);
+         _currentLightIndex = newLightIndex;
+         previousLightIndex = _currentLightIndex; 
          _currentLight = lightIndicator[_currentLightIndex];
          _currentLight.color = Color.green;
          lightBool[_currentLightIndex] = true;
@@ -198,7 +216,7 @@ public class ElectricBoxPuzzle : MonoBehaviour
       }
       blinkingCoroutine = null;
    }
-
+   
    private void ResetLightColor()
    {
       for (int i = 0; i < lightBool.Length; i++)

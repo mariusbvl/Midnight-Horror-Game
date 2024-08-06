@@ -33,7 +33,7 @@ namespace FPC
 
         [Header("HideInLocker")] 
         [SerializeField] private GameObject playerMesh;
-        [SerializeField] private GameObject player;
+        [SerializeField] public GameObject player;
         [SerializeField] private GameObject hands;
         [SerializeField] private GameObject camHolder;
         [HideInInspector]public CameraController cameraController;
@@ -95,6 +95,7 @@ namespace FPC
         private Transform _upPoint;
         [Header("KeyCard")] 
         [SerializeField]public bool isKeyCardPicked;
+        [SerializeField] private GameObject cardReader;
         private bool _isKeyCardOnHover;
         private GameObject _keyCard;
         [Header("CardDoubleDoor")] 
@@ -125,6 +126,7 @@ namespace FPC
         private bool _isPhoneOnHover;
         [HideInInspector]public bool canCallPolice;
         [HideInInspector] public bool wasPoliceCalled;
+        private GameObject _phoneObj;
         [Header("ExitDoor")] 
         private bool _isExitDoorOnHover;
 
@@ -163,14 +165,17 @@ namespace FPC
         [SerializeField] private Transform canisterInHandTransform;
         [SerializeField] private GameObject generatorPuzzleGameObject;
         [SerializeField] private Transform canisterInWorldTransform;
+        [SerializeField] private LayerMask collisionLayers;
         private bool _isFuelCanisterOnHover;
         private bool _isCanisterInHand;
+        private bool _hasCanisterHitObject;
 
         [Header("Generator")] 
         [SerializeField] private Slider generatorFillSlider;
         [SerializeField] private float timeToFill;
         [SerializeField] private GameObject generatorCameraLight;
         [SerializeField] private TMP_Text generatorText;
+        private GameObject _generator;
         private bool _isGeneratorOnHover;
         private bool _isFillingGenerator;
         private bool _isGeneratorFilled;
@@ -200,7 +205,34 @@ namespace FPC
         private static readonly int IsCrouching = Animator.StringToHash("isCrouching");
         private static readonly int Stand = Animator.StringToHash("Stand");
 
-        void Awake()
+        [Header("AudioClips")] 
+        [SerializeField] private AudioClip doorOpeningSound;
+        [SerializeField] private AudioClip cameraShotSound;
+        [SerializeField] private AudioClip pickBatteryAndKeyCardSound;
+        [SerializeField] private AudioClip pickKeySound;
+        [SerializeField] private AudioClip lockerDoorOpenSound;
+        [SerializeField] private AudioClip lockerDoorCloseSound;
+        [SerializeField] private AudioClip keyRotateSound;
+        [SerializeField] private AudioClip doorCreakSound;
+        [SerializeField] private AudioClip doorLockedSound;
+        [SerializeField] private AudioClip climbLadderAudio;
+        [SerializeField] private AudioClip accessDeniedSound;
+        [SerializeField] private AudioClip accessGrantedSound;
+        [SerializeField] private AudioClip doubleDoorOpenSound;
+        [SerializeField] private AudioClip climbRopeAudio;
+        [SerializeField] private AudioClip wallCrackSound;
+        [SerializeField] private AudioClip phoneRingingSound;
+        [SerializeField] private AudioClip grabCanisterSound;
+        [SerializeField] private AudioClip dropCanisterSound;
+        [SerializeField] private AudioClip pouringFuelSound;
+        private AudioSource _pouringFuelAudioSource;
+        [SerializeField] private AudioClip noFuelGeneratorSound;
+        [SerializeField] private AudioClip generatorSound;
+        [SerializeField] private AudioClip dragLeverSound;
+        [SerializeField] private AudioClip leverDoorSound;
+        [SerializeField] private AudioClip leverHandleDeniedSound;
+
+        private void Awake()
         {
             if (Instance == null)
             {
@@ -463,7 +495,9 @@ namespace FPC
                 {
                     _objName = "Card Reader";
                     _isCardReaderOnHover = true;
-                    GameObject doubleDoorCard = rayCastHit.collider.gameObject.transform.parent.gameObject;
+                    var objHit = rayCastHit.collider.gameObject;
+                    cardReader = objHit;
+                    GameObject doubleDoorCard = objHit.transform.parent.gameObject;
                     GameObject doubleDoors = doubleDoorCard.transform.Find("DoubleDoors").gameObject;
                     _leftCardDoor = doubleDoors.transform.Find("LeftDoor").gameObject;
                     _rightCardDoor = doubleDoors.transform.Find("RightDoor").gameObject;
@@ -497,6 +531,7 @@ namespace FPC
                 {
                     _objName = "Phone";
                     _isPhoneOnHover = true;
+                    _phoneObj = rayCastHit.collider.gameObject;
                 }
 
                 if (rayCastHit.collider.gameObject.CompareTag("ExitDoor"))
@@ -540,6 +575,7 @@ namespace FPC
                 {
                     _isGeneratorOnHover = true;
                     _isFillingGenerator = true;
+                    _generator = rayCastHit.collider.gameObject;
                     _objName = "Generator";
                 }
                 
@@ -587,7 +623,7 @@ namespace FPC
             ExitHospital();
             OpenSafeCodePicker();
             StartCoroutine(InteractWithBook());
-            OpenElectricBoxPuzzle();
+            StartCoroutine(OpenElectricBoxPuzzle());
             GrabCanister();
             StartCoroutine(FillGenerator());
             StartCoroutine(OpenLeverDoor());
@@ -621,11 +657,14 @@ namespace FPC
             if(!_isSwitchHandleOnHover) yield break;
             if (_isGeneratorFilled)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(dragLeverSound, handlePivot, 1f, 1f);
                 yield return StartCoroutine(DragLever());
+                SoundFXManager.Instance.PlaySoundFxClip(leverDoorSound, switchDoorPivot, 1f,1f);
                 yield return StartCoroutine((MoveLeverDoor()));
             }
             else
             {
+                SoundFXManager.Instance.PlaySoundFxClip(leverHandleDeniedSound, handlePivot, 1f,1f);
                 StartCoroutine(FadeText(leverText));
             }
         }
@@ -663,15 +702,17 @@ namespace FPC
         {
             if (_isGeneratorOnHover && !_isCanisterInHand && !_isGeneratorFilled)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(noFuelGeneratorSound, _generator.transform, 1f,1f);
                 StartCoroutine(FadeText(generatorText));
                 yield break;
             }
+
             if (!_isGeneratorOnHover || !_isCanisterInHand || _isGeneratorFilled) yield break;
             
             generatorFillSlider.gameObject.SetActive(true);
-            float elapsedTime = 0f;
-            generatorFillSlider.value = 0f;
-
+            float elapsedTime = 0f; 
+            generatorFillSlider.value = 0f; 
+            SoundFXManager.Instance.PlaySoundFxClip(pouringFuelSound, player.transform, 1f,0f,true, timeToFill);
             while (elapsedTime < timeToFill)
             {
                 if (CancelFilling()) yield break;
@@ -685,12 +726,15 @@ namespace FPC
             generatorFillSlider.gameObject.SetActive(false);
             _isGeneratorFilled = true;
             generatorCameraLight.SetActive(true);
+            SoundFXManager.Instance.PlaySoundFxClip(generatorSound, _generator.transform, 0.75f,1f, true, 3600);
         }
 
         private bool CancelFilling()
         {
             if (_isGeneratorOnHover && _isFillingGenerator && _isCanisterInHand) return false;
-
+            _pouringFuelAudioSource = SoundFXManager.Instance.audioSource;
+            Destroy(_pouringFuelAudioSource.gameObject);
+            _pouringFuelAudioSource = null;
             generatorFillSlider.gameObject.SetActive(false);
             return true;
         }
@@ -699,6 +743,7 @@ namespace FPC
         private void GrabCanister()
         {
             if(!_isFuelCanisterOnHover) return;
+            SoundFXManager.Instance.PlaySoundFxClip(grabCanisterSound, player.transform, 1f, 0f);
             BoxCollider canisterCollider = canister.GetComponent<BoxCollider>();
             Rigidbody canisterRigidBody = canister.GetComponent<Rigidbody>();
             hands.SetActive(false);
@@ -726,14 +771,43 @@ namespace FPC
             _isCanisterInHand = false;
             handForCanister.SetActive(false);
             hands.SetActive(true);
+            _hasCanisterHitObject = false;
+            StartCoroutine(CheckCanisterCollision());
+        }
+        private IEnumerator CheckCanisterCollision()
+        {
+            BoxCollider canisterCollider = canister.GetComponent<BoxCollider>();
+            while (!_hasCanisterHitObject)
+            {
+                Collider[] colliders = Physics.OverlapBox(canisterCollider.bounds.center, canisterCollider.bounds.extents, canister.transform.rotation, collisionLayers);
+            
+                foreach (Collider collider in colliders)
+                {
+                    if (collider.gameObject != canister && collider.gameObject != gameObject)
+                    {
+                        _hasCanisterHitObject = true;
+                        break;
+                    }
+                }
+                yield return null; 
+            }
+            SoundFXManager.Instance.PlaySoundFxClip(dropCanisterSound, canister.transform, 1f, 1f);
         }
         
-        private void OpenElectricBoxPuzzle()
+        private IEnumerator OpenElectricBoxPuzzle()
         {
-            if(!_isElectricBoxOnHover) return;
-            if(isElectricBoxActive) return;
-            if(isLittleElectricBoxOpen) return;
+            if(!_isElectricBoxOnHover) yield break;
+            if(isElectricBoxActive) yield break;
+            if(isLittleElectricBoxOpen) yield break;
             ElectricBoxPuzzle.Instance.ResetPuzzle();
+            FirstPersonController.Instance.inputActions.Disable();
+            if (FirstPersonController.Instance.isCrouching)
+            {
+                FirstPersonController.Instance.CrouchPressed();
+                AnimationController.Instance.animator.SetTrigger(Stand);
+                AnimationController.Instance.animator.SetBool(IsCrouching, false);
+                yield return StartCoroutine(FirstPersonController.Instance.CrouchStand());
+            }
             characterController.enabled = false;
             cameraController.enabled = false;
             hands.SetActive(false);
@@ -798,8 +872,12 @@ namespace FPC
             if (!_isExitDoorOnHover) return;
             if (GameManager.Instance.canExitHospital)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, player.transform, 1f, 0f);
                 GameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas");
                 GameManager.Instance.loadingManagerMainMenu.LoadScene(3);
+            }else
+            {
+                SoundFXManager.Instance.PlaySoundFxClip(doorLockedSound, player.transform, 1f, 0f);
             }
         }
         private void EnterHospital()
@@ -808,11 +886,13 @@ namespace FPC
             {
                 if (keysPicked[0])
                 {
+                    SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, player.transform, 1f, 0f);
                     OutsideGameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas").gameObject;
                     OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(mainGameSceneId);
                 }
                 else
                 {
+                    SoundFXManager.Instance.PlaySoundFxClip(doorLockedSound, player.transform, 1f, 0f);
                     StartCoroutine(FadeText(lockedText));
                 }
             }
@@ -820,11 +900,10 @@ namespace FPC
         private void CallPolice()
         {
             if (!_isPhoneOnHover) return;
-            if (canCallPolice && !wasPoliceCalled)
-            {
-                GameManager.Instance.StartPoliceTimer();
-                wasPoliceCalled = true;
-            }
+            if (!canCallPolice || wasPoliceCalled) return;
+            SoundFXManager.Instance.PlaySoundFxClip(phoneRingingSound, _phoneObj.transform, 1f, 1f, true, GameManager.Instance.callSeconds);
+            GameManager.Instance.StartPoliceTimer();
+            wasPoliceCalled = true;
         }
         
         private void ObjInfoText()
@@ -857,6 +936,7 @@ namespace FPC
                 cameraController.enabled = false;
                 _headBobController.enabled = false;
                 hands.SetActive(false);
+                SoundFXManager.Instance.PlaySoundFxClip(wallCrackSound, player.transform, 1f, 0f);
                 yield return StartCoroutine(TranslateThroughWallCrack());
                 hands.SetActive(true);
                 characterController.enabled = true;
@@ -892,6 +972,7 @@ namespace FPC
             if (_isRopeOnHover)
             {
                 characterController.enabled = false;
+                SoundFXManager.Instance.PlaySoundFxClip(climbRopeAudio, player.transform, 1f, 0f);
                 Vector3 worldTransform = _isInPit
                     ? _rope.transform.TransformPoint(_pitTopPoint.localPosition)
                     : _rope.transform.TransformPoint(_pitBottomPoint.localPosition);
@@ -904,6 +985,7 @@ namespace FPC
         {
             if (_isKeyOnHover)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(pickKeySound, player.transform, 1f, 0f);
                 keysPicked[_idInt] = true;
                 lastPickedKey = _key;
                 _key.SetActive(false);
@@ -915,6 +997,7 @@ namespace FPC
         {
             if (_isKeyCardOnHover)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(pickBatteryAndKeyCardSound, player.transform, 1f, 0f);
                 isKeyCardPicked = true;
                 lastPickedKey = _keyCard;
                 _keyCard.SetActive(false);
@@ -927,16 +1010,20 @@ namespace FPC
         {
             if (_isCardReaderOnHover)
             {
+                if(_leftCardDoor.transform.position == _leftCardDoorOpenPoint.position) yield break;
                 if (isKeyCardPicked)
                 {
                     isInteracting = true;
+                    SoundFXManager.Instance.PlaySoundFxClip(accessGrantedSound, cardReader.transform, 0.5f, 1f);
                     yield return accessText.text = "Access Granted";
                     StartCoroutine(FadeText(accessText));
+                    SoundFXManager.Instance.PlaySoundFxClip(doubleDoorOpenSound, _leftCardDoor.transform, 1f, 1f);
                     yield return StartCoroutine(OpenCardDoors());
                     isInteracting = false;
                 }
                 else
                 {
+                    SoundFXManager.Instance.PlaySoundFxClip(accessDeniedSound, cardReader.transform, 0.5f, 1f);
                     yield return accessText.text = "Access Denied";
                     yield return StartCoroutine(FadeText(accessText));
                 }
@@ -969,6 +1056,7 @@ namespace FPC
             if (_isLadderOnHover)
             {
                 characterController.enabled = false;
+                SoundFXManager.Instance.PlaySoundFxClip(climbLadderAudio, player.transform, 1f, 0f);
                 Vector3 worldTransform = _isOnUpperFloor
                     ? _ladder.transform.TransformPoint(_bottomPoint.localPosition)
                     : _ladder.transform.TransformPoint(_upPoint.localPosition);
@@ -981,23 +1069,26 @@ namespace FPC
         
         private IEnumerator OpenDoorWithKey()
         {
-            if (_isKeyLockedDoorOnHover)
+            if (!_isKeyLockedDoorOnHover) yield break;
+            if (_currentDoorPivot.transform.rotation == _currentKeyDoorOpenPivot.transform.rotation) yield break;
+            //Debug.Log($"Door status: {keysPicked[_doorIdInt]}");
+            if (keysPicked[_doorIdInt])
             {
-                //Debug.Log($"Door status: {keysPicked[_doorIdInt]}");
-                if (keysPicked[_doorIdInt])
-                {
-                    isInteracting = true;
-                    lockedText.text = $"Key{_idInt} was used";
-                    StartCoroutine(FadeText(lockedText));
-                    yield return StartCoroutine(OpenKeyDoor());
-                    isInteracting = false;
+                isInteracting = true;
+                SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, _currentKeyDoor.transform, 1f, 1f);
+                yield return new WaitForSeconds(0.5f);
+                lockedText.text = $"Key{_idInt} was used";
+                StartCoroutine(FadeText(lockedText));
+                SoundFXManager.Instance.PlaySoundFxClip(doorCreakSound, _currentKeyDoor.transform, 1f, 1f);
+                yield return StartCoroutine(OpenKeyDoor());
+                isInteracting = false;
                     
-                }
-                else
-                {
-                    lockedText.text = $"Locked\nKey{_doorIdInt} is needed";
-                    yield return StartCoroutine(FadeText(lockedText));
-                }
+            }
+            else
+            {
+                lockedText.text = $"Locked\nKey{_doorIdInt} is needed";
+                SoundFXManager.Instance.PlaySoundFxClip(doorLockedSound, _currentKeyDoor.transform, 1f, 1f);
+                yield return StartCoroutine(FadeText(lockedText));
             }
         }
         
@@ -1007,6 +1098,7 @@ namespace FPC
             {
                 isInteracting = true;
                 _isDoorOpening = true;
+                SoundFXManager.Instance.PlaySoundFxClip(doorOpeningSound, _currentSimpleDoor.transform,1f, 1f);
                 yield return StartCoroutine(ToggleSimpleDoor());
                 _isDoorOpening = false;
                 isInteracting = false;
@@ -1019,6 +1111,7 @@ namespace FPC
                 isInteracting= true;
                 player.transform.position = _currentHideCameraPoint.transform.position;
                 player.transform.rotation = _currentHideCameraPoint.transform.rotation;
+                SoundFXManager.Instance.PlaySoundFxClip(lockerDoorOpenSound, _currentLockerDoor.transform, 1f, 1f);
                 yield return StartCoroutine(ToggleDoor());
                 yield return StartCoroutine(SmoothTransitionCoroutine());
                 yield return characterController.enabled = true;
@@ -1028,6 +1121,7 @@ namespace FPC
                 playerMesh.SetActive(true);
                 hands.SetActive(true);
                 yield return StartCoroutine(ToggleDoor());
+                SoundFXManager.Instance.PlaySoundFxClip(lockerDoorCloseSound, _currentLockerDoor.transform, 1f, 1f);
                 yield return FirstPersonController.Instance.isHidden = false;
                 yield return isInteracting = false;
             }
@@ -1058,11 +1152,14 @@ namespace FPC
                 hands.SetActive(false);
                 player.transform.position = currentFrontOfTheLockerPoint.transform.position;
                 player.transform.rotation = currentFrontOfTheLockerPoint.transform.rotation;
+                
+                SoundFXManager.Instance.PlaySoundFxClip(lockerDoorOpenSound, _currentLockerDoor.transform, 1f, 1f);
                 yield return StartCoroutine(ToggleDoor());
 
                 yield return StartCoroutine(SmoothTransitionCoroutine());
 
                 yield return StartCoroutine(ToggleDoor());
+                SoundFXManager.Instance.PlaySoundFxClip(lockerDoorCloseSound, _currentLockerDoor.transform, 1f, 1f);
                 yield return FirstPersonController.Instance.isHidden = true;
                 yield return isInteracting= false;
                 FirstPersonController.Instance.inputActions.Enable();
@@ -1139,6 +1236,7 @@ namespace FPC
         {
             if (_batteryOnHover)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(pickBatteryAndKeyCardSound, player.transform, 1f, 0f);
                 nrOfBatteries++;
                 batteryText.text = nrOfBatteries + "/5";
                 Destroy(_battery);
@@ -1149,6 +1247,7 @@ namespace FPC
         {
             if (_flashlightAndCameraController.isCameraOn)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(cameraShotSound, player.transform, 1f, 0f);
                 if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
                 {
                     AddGameObject(_currentCorpse);
@@ -1184,11 +1283,7 @@ namespace FPC
         }
         public IEnumerator FadeText(TMP_Text text)
         {
-            if (text.gameObject.activeSelf)
-            {
-                yield return StartCoroutine(Fade(1f, 0f, text));
-                text.gameObject.SetActive(false);
-            }
+            if (text.gameObject.activeSelf) yield break;
             text.gameObject.SetActive(true);
             yield return StartCoroutine(Fade(0f, 1f, text));
             yield return new WaitForSeconds(2.0f);

@@ -28,6 +28,13 @@ public class SafePuzzleScript : MonoBehaviour
     [Header("Codes")] 
     [SerializeField] private TMP_Text[] codesText;
     private int _randomIndex;
+
+    [Header("Audio")] 
+    [SerializeField] private AudioClip numberPressSound;
+    [SerializeField] private AudioClip correctCodeSound;
+    [SerializeField] private AudioClip wrongCodeSound;
+    [SerializeField] private AudioClip handleTwistSound;
+    [SerializeField] private AudioClip safeDoorSound;
     private void Awake()
     {
         if (Instance == null) { Instance = this; }
@@ -50,12 +57,14 @@ public class SafePuzzleScript : MonoBehaviour
                 _characterCounter++;
             }
         }
+        SoundFXManager.Instance.PlaySoundFxClip(numberPressSound, InteractController.Instance.player.transform , 1f, 0f);
     }
 
     public void ClearTextField()
     {
         textField.text = "";
         _characterCounter = 0;
+        SoundFXManager.Instance.PlaySoundFxClip(numberPressSound, InteractController.Instance.player.transform , 1f, 0f);
     }
 
     public void ConfirmCode()
@@ -68,22 +77,27 @@ public class SafePuzzleScript : MonoBehaviour
 
         if (correctCode == _introducedIntCode)
         {
+            SoundFXManager.Instance.PlaySoundFxClip(correctCodeSound, InteractController.Instance.player.transform , 1f, 0f);
             StartCoroutine(OpenSafe());
             InteractController.Instance.isSafeOpen = true;
         }
         else
         {
+            SoundFXManager.Instance.PlaySoundFxClip(wrongCodeSound, InteractController.Instance.player.transform , 1f, 0f);
             ClearTextField();
             GameManager.Instance.CloseSafeCodePicker();
             StartCoroutine(InteractController.Instance.FadeText(inccorectPasswordText));
         }
+        
     }
 
     private IEnumerator OpenSafe()
     {
         ClearTextField();
         GameManager.Instance.CloseSafeCodePicker();
+        SoundFXManager.Instance.PlaySoundFxClip(handleTwistSound, handlePivot , 1f, 1f);
         yield return StartCoroutine(TwistHandle());
+        SoundFXManager.Instance.PlaySoundFxClip(safeDoorSound, safeDoorPivot , 1f, 1f);
         yield return StartCoroutine(OpenSafeDoor());
     }
     
