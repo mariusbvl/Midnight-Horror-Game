@@ -3,10 +3,9 @@ using UnityEngine;
 
 public class Flashback_01 : MonoBehaviour
 {
-    public GameObject[] elementsToActivate;
     public GameObject flashbackFade;
     public GameObject flashbackFadeOut;
-    public GameObject camera;
+    public GameObject flashbackCamera;
     public GameObject flashbackVolume;
     public GameObject oldVolume;
     public GameObject playerHUD;
@@ -31,7 +30,7 @@ public class Flashback_01 : MonoBehaviour
     {
         flashbackBuildup.Play();
         flashbackFade.SetActive(true);
-        camera.SetActive(true);
+        flashbackCamera.SetActive(true);
         oldVolume.SetActive(false);
         flashbackVolume.SetActive(true);
         playerHUD.SetActive(false);
@@ -39,7 +38,7 @@ public class Flashback_01 : MonoBehaviour
         camHolder.SetActive(false);
         patient.SetActive(true);
         enemy.SetActive(true);
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
 
         scaredBreathing.Play();
         doorBang.Play();
@@ -57,7 +56,7 @@ public class Flashback_01 : MonoBehaviour
         yield return new WaitForSeconds(3);
         scaredBreathing.Stop();
         flashbackFade.SetActive(false);
-        camera.SetActive(false);
+        flashbackCamera.SetActive(false);
         oldVolume.SetActive(true);
         flashbackVolume.SetActive(false);
         playerHUD.SetActive(true);
