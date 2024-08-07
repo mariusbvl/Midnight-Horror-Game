@@ -134,12 +134,10 @@ namespace FPC
 
         private void ChangeFlashlightBool()
         {
-            if (handFlashlight.activeSelf && modelFlashlight.activeSelf)
-            {
-                SoundFXManager.Instance.PlaySoundFxClip(isFlashlightOn ? flashlightOnSound : flashlightOffSound,
-                    flashlight.transform, 1f, 0f);
-                isFlashlightOn = !isFlashlightOn;
-            }
+            if (!handFlashlight.activeSelf || !modelFlashlight.activeSelf) return;
+            SoundFXManager.Instance.PlaySoundFxClip(isFlashlightOn ? flashlightOnSound : flashlightOffSound,
+                flashlight.transform, 1f, 0f);
+            isFlashlightOn = !isFlashlightOn;
         }
 
         private void RayCastDistanceController()

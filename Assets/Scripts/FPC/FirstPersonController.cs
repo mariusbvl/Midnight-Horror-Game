@@ -29,6 +29,7 @@ namespace FPC
         [Header("Sprint")]
         [SerializeField] private float sprintSpeed;
         [SerializeField] public bool isSprinting;
+        private float _sprintTime;
         [Header("Crouch")]
         [SerializeField]private Transform playerMesh;
         [SerializeField] private Transform cameraTransform;
@@ -42,6 +43,14 @@ namespace FPC
         [Header("Hide")] 
         [SerializeField] public bool isHidden;
 
+        [Header("Audio")] 
+        [SerializeField] private AudioClip footSteps;
+        [SerializeField] private AudioClip breath;
+        private float _footstepTimer;
+        private float _footstepInterval;
+        private AudioSource _breathAudioSource;
+        private bool _isBreathCoroutineRunning;
+        
         private void Awake()
         {
             if (Instance == null)
@@ -49,6 +58,8 @@ namespace FPC
                 Instance = this;
             }
             moveSpeed = walkSpeed;
+            _footstepInterval = 0.5f;
+            _footstepTimer = _footstepInterval;
             inputActions = new GameInputActions();
             _characterController = GetComponent<CharacterController>();
             inputActions.Player.Sprint.performed += _ => SprintPressed();
@@ -63,6 +74,8 @@ namespace FPC
             Sprint();
             Jump();
             Crouch();
+            HandleFootsteps();
+            HandleBreathSound();
         }
 
         private void Gravity()
@@ -84,7 +97,20 @@ namespace FPC
             movement = (move.y * transform1.forward) + (move.x * transform1.right);
             _characterController.Move(movement * (moveSpeed * Time.deltaTime));
         }
-
+        
+        private void HandleFootsteps()
+        {
+            if (isGrounded && movement.magnitude > 0)
+            {
+                _footstepTimer -= Time.deltaTime;
+                if (_footstepTimer <= 0)
+                {
+                    SoundFXManager.Instance.PlaySoundFxClip(footSteps, transform, 0.25f, 0f);
+                    _footstepTimer = _footstepInterval;
+                }
+            }
+        }
+        
         private void Jump()
         {
             if (move.y > 0 || !inputActions.Player.Move.inProgress)
@@ -117,23 +143,62 @@ namespace FPC
                 if (isSprinting && isGrounded)
                 {
                     moveSpeed = sprintSpeed;
+                    _footstepInterval = 0.3f;
                     headBob.amplitude = 0.0032f;
                     headBob.frequency = 20f;
+                    _sprintTime += Time.deltaTime;
                 }
                 else if (!isSprinting && isGrounded)
                 {
                     moveSpeed = walkSpeed;
+                    _footstepInterval = 0.5f;
                     headBob.amplitude = 0.0016f;
                     headBob.frequency = 10f;
+                    _sprintTime = 0;
                 }
             }
             else
             {
-                //_moveSpeed = walkSpeed;
-                //isSprinting = false;
+                _sprintTime = 0;
             }
         }
-
+        
+        private void HandleBreathSound()
+        {
+            if (isSprinting && _sprintTime >= 5f)
+            {
+                if (_breathAudioSource == null || !_breathAudioSource.isPlaying)
+                {
+                    _breathAudioSource = new GameObject("BreathAudioSource").AddComponent<AudioSource>();
+                    _breathAudioSource.transform.position = transform.position;
+                    _breathAudioSource.clip = breath;
+                    _breathAudioSource.volume = 1f;
+                    _breathAudioSource.spatialBlend = 0f;
+                    _breathAudioSource.loop = true;
+                    _breathAudioSource.Play();
+                }
+            }
+            else if (_breathAudioSource != null && _breathAudioSource.isPlaying)
+            {
+                if (!_isBreathCoroutineRunning)
+                {
+                    StartCoroutine(StopBreathSoundAfterDelay(10f));
+                }
+            }
+        }
+        
+        private IEnumerator StopBreathSoundAfterDelay(float delay)
+        {
+            _isBreathCoroutineRunning = true;
+            yield return new WaitForSeconds(delay);
+            if (_breathAudioSource != null)
+            {
+                _breathAudioSource.Stop();
+                Destroy(_breathAudioSource.gameObject);
+                _breathAudioSource = null;
+            }
+            _isBreathCoroutineRunning = false;
+        }
         private void Crouch()
         {
             if (!isHidden)
@@ -222,7 +287,6 @@ namespace FPC
 
         public void CrouchPressed()
         {
-            Debug.Log("Crouch presseds");
             if (!isHidden)
             {
                 isCrouching = !isCrouching;

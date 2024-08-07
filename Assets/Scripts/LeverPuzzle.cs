@@ -23,6 +23,12 @@ public class LeverPuzzle : MonoBehaviour
     [SerializeField] private Transform drawerPivot;
     [SerializeField] private Transform drawerOpenPivot;
     [SerializeField] private float drawerOpenDuration;
+
+    [Header("Audio")] 
+    [SerializeField] private AudioClip leverUpSound;
+    [SerializeField] private AudioClip leverDownSound;
+    [SerializeField] private AudioClip drawerOpenSound;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -54,6 +60,7 @@ public class LeverPuzzle : MonoBehaviour
         if (IsPuzzleComplete())
         {
             isPuzzleComplete = true;
+            SoundFXManager.Instance.PlaySoundFxClip(drawerOpenSound, drawerPivot, 1f,1f);
             yield return StartCoroutine(OpenDrawer());
         }
     }
@@ -74,6 +81,8 @@ public class LeverPuzzle : MonoBehaviour
             : leverHandleDownPivot.rotation;
         Material targetMaterial =
             leversBool[IndexOfCurrentLever(currentHandle)] ? leverMaterials[0] : leverMaterials[1];
+        
+        SoundFXManager.Instance.PlaySoundFxClip(leversBool[IndexOfCurrentLever(currentHandle)] ? leverDownSound : leverUpSound, leverHandlePivot, 1f,1f);
         
         float timeElapsed = 0;
         while (timeElapsed < leverRotationDuration)
@@ -130,7 +139,7 @@ public class LeverPuzzle : MonoBehaviour
     private IEnumerator SwitchRandomLevers()
     {
         int leversToSwitch = Random.Range(1, 3);
-        Debug.Log($"Amestecat de{leversToSwitch} ori");
+        Debug.Log($"Amestecat de {leversToSwitch} ori");
         for (int i = 0; i < leversToSwitch; i++)
         {
             int currentIndex = Random.Range(0,5);

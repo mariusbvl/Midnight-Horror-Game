@@ -207,6 +207,7 @@ namespace FPC
 
         [Header("AudioClips")] 
         [SerializeField] private AudioClip doorOpeningSound;
+        [SerializeField] private AudioClip doorClosingSound;
         [SerializeField] private AudioClip cameraShotSound;
         [SerializeField] private AudioClip pickBatteryAndKeyCardSound;
         [SerializeField] private AudioClip pickKeySound;
@@ -317,6 +318,7 @@ namespace FPC
                 _isKeyLockedDoorOnHover = false;
 
                 _isFrontDoorOnHover = false;
+                _isExitDoorOnHover = false;
                 
                 _isLadderOnHover = false;
                     
@@ -726,7 +728,7 @@ namespace FPC
             generatorFillSlider.gameObject.SetActive(false);
             _isGeneratorFilled = true;
             generatorCameraLight.SetActive(true);
-            SoundFXManager.Instance.PlaySoundFxClip(generatorSound, _generator.transform, 0.75f,1f, true, 3600);
+            SoundFXManager.Instance.PlaySoundFxClip(generatorSound, _generator.transform, 0.3f,1f, true, 3600);
         }
 
         private bool CancelFilling()
@@ -1098,7 +1100,6 @@ namespace FPC
             {
                 isInteracting = true;
                 _isDoorOpening = true;
-                SoundFXManager.Instance.PlaySoundFxClip(doorOpeningSound, _currentSimpleDoor.transform,1f, 1f);
                 yield return StartCoroutine(ToggleSimpleDoor());
                 _isDoorOpening = false;
                 isInteracting = false;
@@ -1205,6 +1206,7 @@ namespace FPC
         {
             if (_currentDoorPivot != null)
             {
+                SoundFXManager.Instance.PlaySoundFxClip(_isSimpleDoorOpen ? doorClosingSound : doorOpeningSound, _currentSimpleDoor.transform, 1f,1f);
                 yield return StartCoroutine(RotateDoor(_isSimpleDoorOpen ? _simpleDoorCloseRotation : _simpleDoorOpenRotation));
                 _isSimpleDoorOpen = !_isSimpleDoorOpen;
             }
