@@ -105,8 +105,8 @@ Material:
     - _EnvMatrixRotation: {r: 0, g: 0, b: 0, a: 0}
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _GlowColor: {r: 0, g: 1, b: 0, a: 0.5}
-    - _LightDirection: {r: -0.7912748, g: -0.16902517, b: -0.58763564, a: 0}
-    - _LightPosition: {r: -89.21425, g: -2.232761, b: -58.911255, a: 0}
+    - _LightDirection: {r: -0.99044925, g: -0.13755803, b: 0.0093741845, a: 0}
+    - _LightPosition: {r: -84.947716, g: 3.1276166, b: -33.59295, a: 0}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _MyColor: {r: 1, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
