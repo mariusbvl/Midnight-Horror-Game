@@ -876,7 +876,7 @@ namespace FPC
             {
                 SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, player.transform, 1f, 0f);
                 GameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas");
-                GameManager.Instance.loadingManagerMainMenu.LoadScene(3);
+                GameManager.Instance.loadingManagerMainMenu.LoadScene(4);
             }else
             {
                 SoundFXManager.Instance.PlaySoundFxClip(doorLockedSound, player.transform, 1f, 0f);
@@ -890,7 +890,7 @@ namespace FPC
                 {
                     SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, player.transform, 1f, 0f);
                     OutsideGameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas").gameObject;
-                    OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(mainGameSceneId);
+                    OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(3);
                 }
                 else
                 {

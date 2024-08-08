@@ -25,6 +25,22 @@ public class OutsideGameManager : MonoBehaviour
     [SerializeField] private TMP_Text[] collectedKeysTxtArray;
     public bool[] collectedKeysBoolArray;
     [SerializeField] private GameObject noKeyFoundText;
+    
+    [Header("PausePanel")]
+    [SerializeField] private GameObject mainObjectsPanel;
+    [SerializeField] private Button settingsButton;
+    [SerializeField] private GameObject optionsPanel;
+    [SerializeField] private Slider cameraSensitivitySlider;
+    [SerializeField] private Button exitButton;
+    [SerializeField] private GameObject confirmationPanel;
+    [SerializeField] private Button noButton;
+    [SerializeField] private GameObject showControlsPanel;
+    [SerializeField] private Button showControlsButton;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _togglePausePanelCallback;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeExitConfirmationPanelCallback;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeSettingsPanelCallback;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeShowControlsPanelCallback;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -35,7 +51,11 @@ public class OutsideGameManager : MonoBehaviour
         _cameraController = FindObjectOfType<FPC.CameraController>().GetComponentInChildren<FPC.CameraController>();
         _interactController = FindObjectOfType<InteractController>().GetComponent<InteractController>();
         _flashlightAndCameraController = FindObjectOfType<FlashlightAndCameraController>().GetComponent<FlashlightAndCameraController>();
-        _inputActions.Player.Pause.performed += _ => TogglePausePanel();
+        _togglePausePanelCallback = _ => TogglePausePanel();
+        _closeExitConfirmationPanelCallback = _ => CloseExitConfirmationPanel();
+        _closeSettingsPanelCallback = _ => CloseOptionsPanel();
+        _closeShowControlsPanelCallback = _ => CloseShowControlsPanel();
+        _inputActions.Player.Pause.performed += _togglePausePanelCallback;
     }
 
     private void Update()
@@ -49,6 +69,61 @@ public class OutsideGameManager : MonoBehaviour
         ChangeObjective();
         StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
     }
+    
+    public void OpenShowControlsPanel()
+    {
+        optionsPanel.SetActive(false);
+        showControlsPanel.SetActive(true);
+        _inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
+        _inputActions.Player.Pause.performed += _closeShowControlsPanelCallback;
+    }
+
+    public void CloseShowControlsPanel()
+    {
+        optionsPanel.SetActive(true);
+        showControlsPanel.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(showControlsButton.gameObject);
+        _inputActions.Player.Pause.performed -= _closeShowControlsPanelCallback;
+        _inputActions.Player.Pause.performed += _closeSettingsPanelCallback;
+    }
+    
+    public void OpenExitConfirmationPanel()
+    {
+        mainObjectsPanel.SetActive(false);
+        confirmationPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(noButton.gameObject);
+        _inputActions.Player.Pause.performed -= _togglePausePanelCallback;
+        _inputActions.Player.Pause.performed += _closeExitConfirmationPanelCallback;
+    }
+    
+    public void CloseExitConfirmationPanel()
+    {
+        mainObjectsPanel.SetActive(true);
+        confirmationPanel.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(exitButton.gameObject);
+        _inputActions.Player.Pause.performed -= _closeExitConfirmationPanelCallback;
+        _inputActions.Player.Pause.performed += _togglePausePanelCallback;
+    }
+    
+    public void OpenOptionsPanel()
+    {
+        mainObjectsPanel.SetActive(false);
+        optionsPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(cameraSensitivitySlider.gameObject);
+        _inputActions.Player.Pause.performed -= _togglePausePanelCallback;
+        _inputActions.Player.Pause.performed += _closeSettingsPanelCallback;
+    }
+    
+    public void CloseOptionsPanel()
+    {
+        optionsPanel.SetActive(false);
+        mainObjectsPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
+        _inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
+        _inputActions.Player.Pause.performed += _togglePausePanelCallback;
+    }
+    
+    
     
     private void CombineKeys()
     {

@@ -13,7 +13,7 @@ public class FadeScreenHelper : MonoBehaviour
     private void Start()
     {
         _sceneIndex = SceneManager.GetActiveScene().buildIndex;
-        if(_sceneIndex != 0) ThePlayer.GetComponent<FirstPersonController>().enabled = false;
+        //if(_sceneIndex != 0) ThePlayer.GetComponent<FirstPersonController>().enabled = false;
         StartCoroutine(FadeScreen());
     }
 
@@ -21,10 +21,8 @@ public class FadeScreenHelper : MonoBehaviour
     {
         yield return new WaitForSeconds(1.5f);
         FadeScreenIn.SetActive(false);
-        if (_sceneIndex != 0)
-        {
-            PlayerCanvas.SetActive(true);
-            ThePlayer.GetComponent<FirstPersonController>().enabled = true;
-        }
+        if (_sceneIndex == 0) yield break;
+        PlayerCanvas.SetActive(true);
+        //ThePlayer.GetComponent<FirstPersonController>().enabled = true;
     }
 }

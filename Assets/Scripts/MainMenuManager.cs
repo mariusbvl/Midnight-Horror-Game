@@ -14,11 +14,22 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Slider cameraSensitivitySlider;
     [SerializeField] private GameObject confirmationPanel;
     [SerializeField] private Button noButton;
-    [SerializeField] private Button yesButton;
+    [SerializeField] private GameObject showControlsPanel;
+    [SerializeField] private Button showControlsButton;
+    private System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> _openExitConfirmationPanelCallback;
+    private System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeExitConfirmationPanelCallback;
+    private System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeSettingsPanelCallback;
+    private System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeShowControlsPanelCallback;
     private void Awake()
     {
         _inputActions = new GameInputActions();
         EventSystem.current.SetSelectedGameObject(startButton.gameObject);
+
+        _openExitConfirmationPanelCallback = _ => OpenExitConfirmationPanel();
+        _closeExitConfirmationPanelCallback = _ => CloseExitConfirmationPanel();
+        _closeSettingsPanelCallback = _ => CloseOptionsPanel();
+        _closeShowControlsPanelCallback = _ => CloseShowControlsPanel();
+        _inputActions.Player.Pause.performed += _openExitConfirmationPanelCallback;
     }
 
     public void OpenExitConfirmationPanel()
@@ -27,6 +38,8 @@ public class MainMenuManager : MonoBehaviour
         confirmationPanel.SetActive(true);
         blurredPanel.SetActive(true);
         EventSystem.current.SetSelectedGameObject(noButton.gameObject);
+        _inputActions.Player.Pause.performed -= _openExitConfirmationPanelCallback;
+        _inputActions.Player.Pause.performed += _closeExitConfirmationPanelCallback;
     }
     
     public void CloseExitConfirmationPanel()
@@ -35,6 +48,8 @@ public class MainMenuManager : MonoBehaviour
         confirmationPanel.SetActive(false);
         blurredPanel.SetActive(false);
         EventSystem.current.SetSelectedGameObject(exitButton.gameObject);
+        _inputActions.Player.Pause.performed -= _closeExitConfirmationPanelCallback;
+        _inputActions.Player.Pause.performed += _openExitConfirmationPanelCallback;
     }
     public void ExitGame()
     {
@@ -48,6 +63,8 @@ public class MainMenuManager : MonoBehaviour
         optionsPanel.SetActive(true);
         blurredPanel.SetActive(true);
         EventSystem.current.SetSelectedGameObject(cameraSensitivitySlider.gameObject);
+        _inputActions.Player.Pause.performed -= _openExitConfirmationPanelCallback;
+        _inputActions.Player.Pause.performed += _closeSettingsPanelCallback;
     }
     
     public void CloseOptionsPanel()
@@ -56,8 +73,27 @@ public class MainMenuManager : MonoBehaviour
         blurredPanel.SetActive(false);
         mainObjectsPanel.SetActive(true);
         EventSystem.current.SetSelectedGameObject(optionsButton.gameObject);
+        _inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
+        _inputActions.Player.Pause.performed += _openExitConfirmationPanelCallback;
     }
-    
+
+
+    public void OpenShowControlsPanel()
+    {
+        optionsPanel.SetActive(false);
+        showControlsPanel.SetActive(true);
+        _inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
+        _inputActions.Player.Pause.performed += _closeShowControlsPanelCallback;
+    }
+
+    public void CloseShowControlsPanel()
+    {
+        optionsPanel.SetActive(true);
+        showControlsPanel.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(showControlsButton.gameObject);
+        _inputActions.Player.Pause.performed -= _closeShowControlsPanelCallback;
+        _inputActions.Player.Pause.performed += _closeSettingsPanelCallback;
+    }
     private void OnEnable()
     {
         _inputActions.Enable();
