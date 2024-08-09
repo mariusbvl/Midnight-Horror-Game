@@ -28032,6 +28032,8 @@ MonoBehaviour:
   player: {fileID: 1067681487}
   hands: {fileID: 1161526351}
   camHolder: {fileID: 1124256327}
+  cameraController: {fileID: 0}
+  characterController: {fileID: 0}
   currentFrontOfTheLockerPoint: {fileID: 0}
   doorOpeningDuration: 0.5
   transitionDuration: 1
@@ -28042,12 +28044,78 @@ MonoBehaviour:
   lastPickedKey: {fileID: 0}
   mainGameSceneId: 0
   isKeyCardPicked: 0
+  cardReader: {fileID: 0}
   cardDoorOpeningDuration: 2
   accessText: {fileID: 848539196}
   timeToPassWallCrack: 1.5
   canCallPolice: 0
   wasPoliceCalled: 0
+  puzzleCanvasBlur: {fileID: 0}
+  safeCodeImage: {fileID: 0}
+  safeButtonToSelectOnStart: {fileID: 0}
+  isSafeCodeActive: 0
+  isSafeOpen: 0
+  book: {fileID: 0}
+  bookPivot: {fileID: 0}
+  bookParent: {fileID: 0}
+  bookInitialPivot: {fileID: 0}
+  bookTargetPivot: {fileID: 0}
+  electricBoxPuzzlePosition: {fileID: 0}
+  electricBoxPanel: {fileID: 0}
+  electricTimerText: {fileID: 0}
+  isElectricBoxActive: 0
+  switchButton: {fileID: 0}
+  redButton: {fileID: 0}
+  isLittleElectricBoxOpen: 0
+  throwForce: 0
+  torqueAmount: 0
+  handForCanister: {fileID: 0}
+  canister: {fileID: 0}
+  canisterInHandTransform: {fileID: 0}
+  generatorPuzzleGameObject: {fileID: 0}
+  canisterInWorldTransform: {fileID: 0}
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  generatorFillSlider: {fileID: 0}
+  timeToFill: 0
+  generatorCameraLight: {fileID: 0}
+  generatorText: {fileID: 0}
+  leverText: {fileID: 0}
+  handlePivot: {fileID: 0}
+  handleDraggedPivot: {fileID: 0}
+  switchDoorPivot: {fileID: 0}
+  switchDoorOpenPivot: {fileID: 0}
+  handleDragTime: 0
+  switchDoorOpenTime: 0
+  isLeverRotating: 0
+  electricLever: {fileID: 0}
   objInfoText: {fileID: 2009501477}
+  doorOpeningSound: {fileID: 0}
+  doorClosingSound: {fileID: 0}
+  cameraShotSound: {fileID: 0}
+  pickBatteryAndKeyCardSound: {fileID: 0}
+  pickKeySound: {fileID: 0}
+  lockerDoorOpenSound: {fileID: 0}
+  lockerDoorCloseSound: {fileID: 0}
+  keyRotateSound: {fileID: 0}
+  doorCreakSound: {fileID: 0}
+  doorLockedSound: {fileID: 0}
+  climbLadderAudio: {fileID: 0}
+  accessDeniedSound: {fileID: 0}
+  accessGrantedSound: {fileID: 0}
+  doubleDoorOpenSound: {fileID: 0}
+  climbRopeAudio: {fileID: 0}
+  wallCrackSound: {fileID: 0}
+  phoneRingingSound: {fileID: 0}
+  grabCanisterSound: {fileID: 0}
+  dropCanisterSound: {fileID: 0}
+  pouringFuelSound: {fileID: 0}
+  noFuelGeneratorSound: {fileID: 0}
+  generatorSound: {fileID: 0}
+  dragLeverSound: {fileID: 0}
+  leverDoorSound: {fileID: 0}
+  leverHandleDeniedSound: {fileID: 0}
 --- !u!114 &1067681489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28074,6 +28142,10 @@ MonoBehaviour:
   defaultRayCastDistance: 2
   cameraRayCastDistance: 6
   isCameraOn: 0
+  flashlightOnSound: {fileID: 0}
+  flashlightOffSound: {fileID: 0}
+  cameraClickOpen: {fileID: 0}
+  cameraClickClose: {fileID: 0}
 --- !u!114 &1067681490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28167,6 +28239,8 @@ MonoBehaviour:
   standingCenter: {x: 0, y: 0, z: 0.2}
   isCrouching: 0
   isHidden: 0
+  footSteps: {fileID: 0}
+  breath: {fileID: 0}
 --- !u!143 &1067681494
 CharacterController:
   m_ObjectHideFlags: 0
