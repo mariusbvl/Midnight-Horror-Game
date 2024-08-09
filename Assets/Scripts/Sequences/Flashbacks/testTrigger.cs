@@ -25,5 +25,9 @@ public class testTrigger : MonoBehaviour
         {
             flashbackManager.PlayFlashback(3);
         }
+        else if (Input.GetKeyDown(KeyCode.Y))
+        {
+            flashbackManager.PlayFlashback(4);
+        }
     }
 }
