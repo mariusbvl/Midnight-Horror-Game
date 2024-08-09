@@ -57,8 +57,8 @@ public class LoadingManager : MonoBehaviour
 
     IEnumerator AnimateTextAndImage()
     {
-        float frequency = 2f; // Adjust this value to control the speed of the blinking
-        float offset = 0.5f; // Adjust this value to control the phase of the blinking
+        float frequency = 2f;
+        float offset = 0.5f;
 
         while (true)
         {
