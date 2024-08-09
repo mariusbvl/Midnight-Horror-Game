@@ -20,6 +20,8 @@ public class Flashback_01 : MonoBehaviour
     public AudioSource flashbackBuildup;
     public AudioSource scaredBreathing;
 
+    public int delayTime;
+
 
     public void PlayFlashback()
     {
@@ -28,6 +30,7 @@ public class Flashback_01 : MonoBehaviour
 
     IEnumerator ActivateActors()
     {
+        yield return new WaitForSeconds(delayTime);
         flashbackBuildup.Play();
         flashbackFade.SetActive(true);
         flashbackCamera.SetActive(true);
