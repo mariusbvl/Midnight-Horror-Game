@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 namespace FPC
 {
     public class FlashlightAndCameraController : MonoBehaviour
@@ -14,10 +15,15 @@ namespace FPC
         [SerializeField] public GameObject flashlight;
         [SerializeField] private Slider consumeSlider;
         [SerializeField] private float consumeValue;
+        [SerializeField] private TMP_Text lowBatteryText;
+        [SerializeField] private float fadeDuration;
+        [SerializeField] private float blinkInterval;
         [HideInInspector]public bool isFlashlightOn;
         [HideInInspector]public bool canConsumeBattery;
+        private bool _isLowBattery;
         private bool _isConsumingBattery;
         private Coroutine _batteryCoroutine;
+        private Coroutine _blinkTextCoroutine;
         [Header("Camera")] 
         [SerializeField] private GameObject handCamera;
         [SerializeField] private GameObject modelCamera;
@@ -81,6 +87,7 @@ namespace FPC
         public void ConsumeBattery()
         {
             CheckIfHasBattery();
+            CheckIfLowBattery();
             if (flashlight.activeSelf && canConsumeBattery)
             {
                 if (_isConsumingBattery) return;
@@ -102,6 +109,30 @@ namespace FPC
                 yield return new WaitForSeconds(1f);
                 consumeSlider.value -= consumeValue;
                 yield return new WaitForSeconds(1f);
+            }
+        }
+
+        private void CheckIfLowBattery()
+        {
+            if (InteractController.Instance.nrOfBatteries == 0 && _isConsumingBattery && consumeSlider.value < 10f)
+            {
+                _isLowBattery = true;
+            }
+            else
+            {
+                _isLowBattery = false;
+            }
+
+            if (_isLowBattery)
+            {
+                _blinkTextCoroutine ??= StartCoroutine(BlinkText(lowBatteryText));
+            }
+            else
+            {
+                if (_blinkTextCoroutine == null) return;
+                StopCoroutine(_blinkTextCoroutine);
+                lowBatteryText.gameObject.SetActive(false);
+                _blinkTextCoroutine = null;
             }
         }
          private void ScrollCameraAndFlashlight()
@@ -154,15 +185,47 @@ namespace FPC
                 recordingImage.SetActive(isCameraOn);
             }
         }
+
         private void ChangeCameraBool()
         {
             if (modelCamera.activeSelf)
             {
                 SoundFXManager.Instance.PlaySoundFxClip(isCameraOn ? cameraClickOpen : cameraClickClose,
-                    modelCamera.transform, 1f, 0f); 
+                    modelCamera.transform, 1f, 0f);
                 isCameraOn = !isCameraOn;
             }
         }
+
+        public IEnumerator BlinkText(TMP_Text text)
+        {
+            if (text.gameObject.activeSelf) yield break;
+            text.gameObject.SetActive(true);
+            while (_isLowBattery)
+            {   
+                yield return StartCoroutine(Fade(0f, 1f, text));
+                yield return new WaitForSeconds(blinkInterval);
+                yield return StartCoroutine(Fade(1f, 0f, text));
+            }
+            text.gameObject.SetActive(false);
+        }
+
+        private IEnumerator Fade(float startAlpha, float endAlpha, TMP_Text text)
+        {
+            float elapsedTime = 0f;
+            Color color = text.color;
+            while (elapsedTime < fadeDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(startAlpha, endAlpha, elapsedTime / fadeDuration);
+                color.a = alpha;
+                text.color = color;
+                yield return null;
+            }
+            
+            color.a = endAlpha;
+            text.color = color;
+        }
+
         private void OnEnable()
         {
             _inputActions.Enable();

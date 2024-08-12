@@ -139,7 +139,6 @@ public class LeverPuzzle : MonoBehaviour
     private IEnumerator SwitchRandomLevers()
     {
         int leversToSwitch = Random.Range(1, 3);
-        Debug.Log($"Amestecat de {leversToSwitch} ori");
         for (int i = 0; i < leversToSwitch; i++)
         {
             int currentIndex = Random.Range(0,5);
