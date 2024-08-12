@@ -12,8 +12,12 @@ public class MonsterShootingScene : MonoBehaviour
     public GameObject enemy;
     public GameObject playerMesh;
     public GameObject camHolder;
-    public GameObject fog;
     public GameObject monsterBlood;
+    public GameObject newspaper;
+    public GameObject newspaperBase;
+
+    public GameObject cursor;
+    public GameObject batteryIcon;
 
     public GameObject camera_01;
     public GameObject camera_02;
@@ -47,7 +51,6 @@ public class MonsterShootingScene : MonoBehaviour
         playerHUD.SetActive(false);
         playerMesh.SetActive(false);
         camHolder.SetActive(false);
-        fog.SetActive(false);
 
         camera_01.SetActive(true);
         fadeOut.SetActive(true);
@@ -145,14 +148,29 @@ public class MonsterShootingScene : MonoBehaviour
         camera_05.GetComponent<Animation>().Play("DeathSceneAnim");
         yield return new WaitForSeconds(10);
         wolfSound.Play();
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(2);
         fadeIn.SetActive(true);
-        yield return new WaitForSeconds(3.5f);
-        music.Stop();
+        yield return new WaitForSeconds(2);
+        fadeIn.SetActive(false);
 
+        playerHUD.SetActive(true);
+        cursor.SetActive(false);
+        batteryIcon.SetActive(false);
+        newspaperBase.SetActive(true);
+        newspaper.SetActive(true);
+        newspaper.GetComponent<Animation>().Play("RotatingNewspaper");
+        yield return new WaitForSeconds(25);
+        fadeIn.SetActive(true);
+        yield return new WaitForSeconds(2);
+
+        fadeIn.SetActive(false);
+        newspaper.SetActive(false);
+        newspaperBase.SetActive(false);
         warAmbience.Stop();
         fadeIn.SetActive(false);
         playerHUD.SetActive(true);
+        cursor.SetActive(true);
+        batteryIcon.SetActive(false);
         playerMesh.SetActive(true);
         camHolder.SetActive(true);
         camera_01.SetActive(false);
@@ -160,7 +178,6 @@ public class MonsterShootingScene : MonoBehaviour
         camera_03.SetActive(false);
         camera_04.SetActive(false);
         camera_05.SetActive(false);
-        fog.SetActive(true);
         player.GetComponent<FirstPersonController>().enabled = true;
     }
 }
