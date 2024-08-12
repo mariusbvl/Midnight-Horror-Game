@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using EnemyScripts;
 using FPC;
 using TMPro;
@@ -15,9 +16,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] public LoadingManager loadingManagerMainMenu;
     [Header("General")] 
     [HideInInspector]public GameInputActions inputActions;
-    public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> pausePerformedHandler;
-    public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeSafeCodePickerHandler;
-    public System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeElectricBoxHandler;
+    public Action<UnityEngine.InputSystem.InputAction.CallbackContext> pausePerformedHandler;
+    public Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeSafeCodePickerHandler;
+    public Action<UnityEngine.InputSystem.InputAction.CallbackContext> closeElectricBoxHandler;
     public bool isMainGame;
     public bool isEnemyOn;
     [Header("Objective")] 
@@ -42,6 +43,21 @@ public class GameManager : MonoBehaviour
 
     [Header("ExitHospital")] 
     public bool canExitHospital;
+    
+    [Header("PausePanel")]
+    [SerializeField] private GameObject mainObjectsPanel;
+    [SerializeField] private Button settingsButton;
+    [SerializeField] private GameObject optionsPanel;
+    [SerializeField] private Slider cameraSensitivitySlider;
+    [SerializeField] private Button exitButton;
+    [SerializeField] private GameObject confirmationPanel;
+    [SerializeField] private Button noButton;
+    [SerializeField] private GameObject showControlsPanel;
+    [SerializeField] private Button showControlsButton;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeExitConfirmationPanelCallback;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeSettingsPanelCallback;
+    private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeShowControlsPanelCallback;
+    
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -84,7 +100,11 @@ public class GameManager : MonoBehaviour
         pausePerformedHandler = _ => TogglePausePanel();
         closeSafeCodePickerHandler = _ => CloseSafeCodePicker();
         closeElectricBoxHandler = _ => CloseElectricBoxPuzzle();
+        _closeExitConfirmationPanelCallback = _ => CloseExitConfirmationPanel();
+        _closeSettingsPanelCallback = _ => CloseOptionsPanel();
+        _closeShowControlsPanelCallback = _ => CloseShowControlsPanel();
         inputActions.Player.Pause.performed  += pausePerformedHandler;
+        
     }
 
     private void Start()
@@ -106,6 +126,59 @@ public class GameManager : MonoBehaviour
         {
             KeysCollectedController();
         }
+    }
+    
+    public void OpenShowControlsPanel()
+    {
+        optionsPanel.SetActive(false);
+        showControlsPanel.SetActive(true);
+        inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
+        inputActions.Player.Pause.performed += _closeShowControlsPanelCallback;
+    }
+
+    public void CloseShowControlsPanel()
+    {
+        optionsPanel.SetActive(true);
+        showControlsPanel.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(showControlsButton.gameObject);
+        inputActions.Player.Pause.performed -= _closeShowControlsPanelCallback;
+        inputActions.Player.Pause.performed += _closeSettingsPanelCallback;
+    }
+    
+    public void OpenExitConfirmationPanel()
+    {
+        mainObjectsPanel.SetActive(false);
+        confirmationPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(noButton.gameObject);
+        inputActions.Player.Pause.performed -= pausePerformedHandler;
+        inputActions.Player.Pause.performed += _closeExitConfirmationPanelCallback;
+    }
+    
+    public void CloseExitConfirmationPanel()
+    {
+        mainObjectsPanel.SetActive(true);
+        confirmationPanel.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(exitButton.gameObject);
+        inputActions.Player.Pause.performed -= _closeExitConfirmationPanelCallback;
+        inputActions.Player.Pause.performed += pausePerformedHandler;
+    }
+    
+    public void OpenOptionsPanel()
+    {
+        mainObjectsPanel.SetActive(false);
+        optionsPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(cameraSensitivitySlider.gameObject);
+        inputActions.Player.Pause.performed -= pausePerformedHandler;
+        inputActions.Player.Pause.performed += _closeSettingsPanelCallback;
+    }
+    
+    public void CloseOptionsPanel()
+    {
+        optionsPanel.SetActive(false);
+        mainObjectsPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
+        inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
+        inputActions.Player.Pause.performed += pausePerformedHandler;
     }
     
     public void CloseElectricBoxPuzzle()
