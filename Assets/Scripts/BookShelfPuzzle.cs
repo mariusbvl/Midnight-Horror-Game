@@ -1,5 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using FPC;
+using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -29,6 +32,10 @@ public class BookShelfPuzzle : MonoBehaviour
    [SerializeField] private Transform topBookShelfPivot;
    [SerializeField] private float bookShelfMoveDuration;
 
+   [Header("CodePositions")] 
+   [SerializeField] private TMP_Text[] combinationPositionsArray;
+   private int _randomPosIndex;
+   
    [Header("Audio")] 
    [SerializeField] private AudioClip rotateBookAudio;
    [SerializeField] private AudioClip bookShelfMoveSound;
@@ -48,8 +55,30 @@ public class BookShelfPuzzle : MonoBehaviour
       correctBooks[1] = secondRowBooks[_secondRowRandomIndex];
       correctBooks[2] = thirdRowBooks[_thirdRowRandomIndex];
       correctBooks[3] = fourthRowBooks[_fourthRowRandomIndex];
+      ActivateRandomCombinationPositions();
    }
 
+   private void ActivateRandomCombinationPositions()
+   {
+      List<int> availableIndices = Enumerable.Range(0, combinationPositionsArray.Length).ToList();
+      for (int i = 0; i < 4; i++)
+      {
+         int randomIndex = Random.Range(0, availableIndices.Count);
+         int selectedPosIndex = availableIndices[randomIndex];
+         availableIndices.RemoveAt(randomIndex);
+        
+         combinationPositionsArray[selectedPosIndex].gameObject.SetActive(true);
+         combinationPositionsArray[selectedPosIndex].text = i switch
+         {
+            0 => (_firstRowRandomIndex + 1).ToString(),
+            1 => (_secondRowRandomIndex + 1).ToString(),
+            2 => (_thirdRowRandomIndex + 1).ToString(),
+            3 => (_fourthRowRandomIndex + 1).ToString(),
+            _ => combinationPositionsArray[selectedPosIndex].text
+         };
+      }
+   }
+   
    public IEnumerator InteractWithBook()
    {
       if(!canTryBook) yield break;
