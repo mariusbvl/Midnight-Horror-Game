@@ -27,6 +27,8 @@ TagManager:
   - Generator
   - LeverSwitch
   - ElectricLever
+  - RopePile
+  - ThrowArea
   layers:
   - Default
   - TransparentFX

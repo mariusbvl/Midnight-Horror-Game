@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -107,6 +108,7 @@ namespace FPC
         private Transform _leftCardDoorOpenPoint;
         private Transform _rightCardDoorOpenPoint;
         [Header("Rope")] 
+        [SerializeField] private GameObject ropeParent;
         private bool _isRopeOnHover;
         private bool _isInPit;
         private GameObject _rope;
@@ -114,6 +116,15 @@ namespace FPC
         private Transform _pitBottomPoint;
         private BoxCollider _pitBottomArea;
         private BoxCollider _pitTopArea;
+        [Header("RopePile")] 
+        [SerializeField] private GameObject ropePileImage;
+        private bool _isRopePileOnHover;
+        private GameObject _ropePile;
+        private bool _isRopePilePicked;
+        [Header("ThrowArea")]
+        private bool _isThrowAreaOnHover;
+        [SerializeField]private GameObject throwArea;
+        private bool _isRopeThrown;
         [Header("WallCrack")] 
         [SerializeField] private float timeToPassWallCrack;
         private bool _isWallCrackOnHover;
@@ -325,7 +336,9 @@ namespace FPC
                 _isCardReaderOnHover = false;
 
                 _isRopeOnHover = false;
-
+                _isThrowAreaOnHover = false;
+                _isRopePileOnHover = false;
+                
                 _isWallCrackOnHover = false;
                 
                 _objName = "";
@@ -597,6 +610,20 @@ namespace FPC
                     }
                 }
 
+                if (rayCastHit.collider.gameObject.CompareTag("RopePile"))
+                {
+                    _isRopePileOnHover = true;
+                    _ropePile = rayCastHit.collider.gameObject;
+                    _objName = "Rope Pile";
+                }
+
+                if (rayCastHit.collider.gameObject.CompareTag("ThrowArea"))
+                {
+                    _isThrowAreaOnHover = true;
+                    throwArea = rayCastHit.collider.gameObject;
+                    _objName = "Throw Rope";
+                }
+                
                 _isCursorOnObj = true;
             }
             else
@@ -630,6 +657,8 @@ namespace FPC
             StartCoroutine(FillGenerator());
             StartCoroutine(OpenLeverDoor());
             StartCoroutine(SwitchElectricLever());
+            PickRopePile();
+            ThrowRope();
         }
 
         private void AltInteract()
@@ -643,7 +672,25 @@ namespace FPC
         {
             if (_isFillingGenerator) { _isFillingGenerator = false; }
         }
-
+        
+        private void ThrowRope()
+        {
+            if(!_isThrowAreaOnHover) return;
+            if (!_isRopePilePicked) return;
+            _rope.SetActive(true);
+            ropePileImage.SetActive(false);
+            Destroy(throwArea);
+        }
+        
+        private void PickRopePile()
+        {
+            if(!_isRopePileOnHover) return;
+            _isRopePilePicked = true;
+            throwArea.SetActive(true);
+            ropePileImage.SetActive(true);
+            Destroy(_ropePile);
+        }
+        
         private IEnumerator SwitchElectricLever()
         {
             if(!_isElectricLeverOnHover) yield break;
