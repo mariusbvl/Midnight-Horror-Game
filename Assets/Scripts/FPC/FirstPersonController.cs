@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
-
-
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace FPC
 {
@@ -42,10 +42,18 @@ namespace FPC
         [SerializeField] public bool isCrouching;
         [Header("Hide")] 
         [SerializeField] public bool isHidden;
-
+        
+        [Header("Fall Detection")]
+        [SerializeField] private float fallThreshold = 2f;
+        [SerializeField] private Volume globalVolume;
+        private Vignette _vignette;
+        private float _fallTime;
+        private bool _isFalling;
+        
         [Header("Audio")] 
         [SerializeField] private AudioClip footSteps;
         [SerializeField] private AudioClip breath;
+        [SerializeField] private AudioClip fallDamageAudio;
         private float _footstepTimer;
         private float _footstepInterval;
         private AudioSource _breathAudioSource;
@@ -56,6 +64,10 @@ namespace FPC
             if (Instance == null)
             {
                 Instance = this;
+            }
+            if (globalVolume.profile.TryGet(out _vignette))
+            {
+                _vignette.active = true;
             }
             moveSpeed = walkSpeed;
             _footstepInterval = 0.5f;
@@ -76,6 +88,7 @@ namespace FPC
             Crouch();
             HandleFootsteps();
             HandleBreathSound();
+            HandleFallDetection();
         }
 
         private void Gravity()
@@ -96,6 +109,82 @@ namespace FPC
             var transform1 = transform;
             movement = (move.y * transform1.forward) + (move.x * transform1.right);
             _characterController.Move(movement * (moveSpeed * Time.deltaTime));
+        }
+        
+        private void HandleFallDetection()
+        {
+            if (!isGrounded && velocity.y < 0)
+            {
+                if (!_isFalling)
+                {
+                    _isFalling = true;
+                    AnimationController.Instance.animator.SetBool("isFalling", true);
+                    _fallTime = 0;
+                }
+                _fallTime += Time.deltaTime;
+            }
+            else if (isGrounded && _isFalling)
+            {
+                _isFalling = false;
+                AnimationController.Instance.animator.SetBool("isFalling", false);
+                if (_fallTime > fallThreshold)
+                {
+                    OnLongFallLanded();
+                }
+                _fallTime = 0;
+            }
+        }
+
+        private void OnLongFallLanded()
+        {
+            SoundFXManager.Instance.PlaySoundFxClip(fallDamageAudio, transform , 1f , 0f);
+            StartCoroutine(FadeVignette());
+            Debug.Log("Player landed after a long fall!");
+        }
+        
+        private IEnumerator FadeVignette()
+        {
+            float inDuration = 0.5f; 
+            float outDuration = 2.0f; 
+            float waitTime = 10.0f; 
+            
+            float initialIntensity = _vignette.intensity.value;
+            float initialSmoothness = _vignette.smoothness.value;
+            Color initialColor = _vignette.color.value;
+            
+            float targetIntensity = 1.0f;
+            float targetSmoothness = 1.0f;
+            Color targetColor = Color.red;
+            
+            for (float t = 0; t < inDuration; t += Time.deltaTime)
+            {
+                float normalizedTime = t / inDuration;
+                _vignette.intensity.value = Mathf.Lerp(initialIntensity, targetIntensity, normalizedTime);
+                _vignette.smoothness.value = Mathf.Lerp(initialSmoothness, targetSmoothness, normalizedTime);
+                _vignette.color.value = Color.Lerp(Color.black, targetColor, normalizedTime);
+                _vignette.rounded.value = true;
+                yield return null;
+            }
+            
+            _vignette.intensity.value = targetIntensity;
+            _vignette.smoothness.value = targetSmoothness;
+            _vignette.color.value = targetColor;
+            _vignette.rounded.value = true;
+            
+            yield return new WaitForSeconds(waitTime);
+            
+            for (float t = 0; t < outDuration; t += Time.deltaTime)
+            {
+                float normalizedTime = t / outDuration;
+                _vignette.intensity.value = Mathf.Lerp(targetIntensity, initialIntensity, normalizedTime);
+                _vignette.smoothness.value = Mathf.Lerp(targetSmoothness, initialSmoothness, normalizedTime);
+                _vignette.color.value = Color.Lerp(targetColor, initialColor, normalizedTime);
+                yield return null;
+            }
+            _vignette.intensity.value = initialIntensity;
+            _vignette.smoothness.value = initialSmoothness;
+            _vignette.color.value = initialColor;
+            _vignette.rounded.value = false;
         }
         
         private void HandleFootsteps()

@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -112,10 +110,10 @@ namespace FPC
         private bool _isRopeOnHover;
         private bool _isInPit;
         private GameObject _rope;
-        private Transform _pitTopPoint;
-        private Transform _pitBottomPoint;
-        private BoxCollider _pitBottomArea;
-        private BoxCollider _pitTopArea;
+        public Transform _pitTopPoint;
+        public Transform _pitBottomPoint;
+        public BoxCollider _pitBottomArea;
+        public BoxCollider _pitTopArea;
         [Header("RopePile")] 
         [SerializeField] private GameObject ropePileImage;
         private bool _isRopePileOnHover;
@@ -271,8 +269,6 @@ namespace FPC
         {
             try
             {
-                _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
-                _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
                 _inStartPoint = GameObject.Find("InStartPosition").GetComponent<Transform>();
                 _inTargetPoint = GameObject.Find("InTargetPosition").GetComponent<Transform>();
                 _outStartPoint = GameObject.Find("OutStartPosition").GetComponent<Transform>();
@@ -522,6 +518,8 @@ namespace FPC
 
                 if (rayCastHit.collider.gameObject.CompareTag("Rope"))
                 {
+                    _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
+                    _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
                     if (characterController.bounds.Intersects(_pitBottomArea.bounds))
                     {
                         _isInPit = true;
@@ -677,7 +675,8 @@ namespace FPC
         {
             if(!_isThrowAreaOnHover) return;
             if (!_isRopePilePicked) return;
-            _rope.SetActive(true);
+            SoundFXManager.Instance.PlaySoundFxClip(pickBatteryAndKeyCardSound, player.transform, 1f, 0f);
+            ropeParent.SetActive(true);
             ropePileImage.SetActive(false);
             Destroy(throwArea);
         }
@@ -685,6 +684,7 @@ namespace FPC
         private void PickRopePile()
         {
             if(!_isRopePileOnHover) return;
+            SoundFXManager.Instance.PlaySoundFxClip(pickBatteryAndKeyCardSound, player.transform, 1f, 0f);
             _isRopePilePicked = true;
             throwArea.SetActive(true);
             ropePileImage.SetActive(true);
@@ -828,11 +828,12 @@ namespace FPC
             BoxCollider canisterCollider = canister.GetComponent<BoxCollider>();
             while (!_hasCanisterHitObject)
             {
-                Collider[] colliders = Physics.OverlapBox(canisterCollider.bounds.center, canisterCollider.bounds.extents, canister.transform.rotation, collisionLayers);
+                var bounds = canisterCollider.bounds;
+                Collider[] colliders = Physics.OverlapBox(bounds.center, bounds.extents, canister.transform.rotation, collisionLayers);
             
-                foreach (Collider collider in colliders)
+                foreach (Collider collider1 in colliders)
                 {
-                    if (collider.gameObject != canister && collider.gameObject != gameObject)
+                    if (collider1.gameObject != canister && collider1.gameObject != gameObject)
                     {
                         _hasCanisterHitObject = true;
                         break;
