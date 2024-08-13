@@ -9,7 +9,6 @@ using TMPro;
 public class FinalSceneManager : MonoBehaviour
 {
     private GameInputActions _inputActions;
-    [SerializeField] private BoxCollider finalCutSceneTrigger; 
     [SerializeField] private GameObject playerCanvas;
     [SerializeField] private GameObject finalPanel;
     [SerializeField] private Button continueButton;
@@ -17,10 +16,7 @@ public class FinalSceneManager : MonoBehaviour
     private CameraController _cameraController;
     private InteractController _interactController;
     private FlashlightAndCameraController _flashlightAndCameraController;
-    [Header("PausePanel")]
-    [SerializeField]private GameObject pausePanel;
-    [SerializeField] private Button resumeButton;
-    private bool _isPause;
+    
     [Header("Objective")] 
     [SerializeField] private TMP_Text objectiveTextInGame;
     [SerializeField] private TMP_Text objectiveTextPause;
@@ -33,7 +29,6 @@ public class FinalSceneManager : MonoBehaviour
         _flashlightAndCameraController = FindObjectOfType<FlashlightAndCameraController>().GetComponent<FlashlightAndCameraController>();
         _interactController = FindObjectOfType<InteractController>().GetComponent<InteractController>();
         _characterController = FindObjectOfType<CharacterController>().GetComponent<CharacterController>();
-        _inputActions.Player.Pause.performed += _ => TogglePausePanel();
     }
 
     void Start()
@@ -46,22 +41,8 @@ public class FinalSceneManager : MonoBehaviour
 
     private void Update()
     {
-       Win();
     }
     
-    private void Win(){
-        if (_characterController.bounds.Intersects(finalCutSceneTrigger.bounds) && !finalPanel.activeSelf)
-        {
-            Time.timeScale = 0f;
-            _cameraController.enabled = false;
-            _interactController.enabled = false;
-            _flashlightAndCameraController.enabled = false;
-            Cursor.lockState = CursorLockMode.None;
-            playerCanvas.SetActive(false);
-            finalPanel.SetActive(true);
-            EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
-        }
-    }
     
     public void ChangeObjective()
     {
@@ -76,31 +57,6 @@ public class FinalSceneManager : MonoBehaviour
         }
     }
     
-    public void TogglePausePanel()
-    {
-        _isPause = !_isPause;
-        if (_isPause)
-        {
-            Time.timeScale = 0f;
-            _cameraController.enabled = false;
-            _interactController.enabled = false;
-            _flashlightAndCameraController.enabled = false;
-            Cursor.lockState = CursorLockMode.None;
-            playerCanvas.SetActive(false);
-            pausePanel.SetActive(true);
-            EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
-        }
-        else
-        {
-            _cameraController.enabled = true;
-            _interactController.enabled = true;
-            _flashlightAndCameraController.enabled = true;
-            Time.timeScale = 1f;
-            Cursor.lockState = CursorLockMode.Locked;
-            pausePanel.SetActive(false);
-            playerCanvas.SetActive(true);
-        }
-    }
     
     public void LoadMainMenu()
     {

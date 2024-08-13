@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class MonsterShootingScene : MonoBehaviour
 {
+    [SerializeField] private LoadingManager loadingManager;
     public GameObject fadeIn;
     public GameObject fadeOut;
     public GameObject player;
@@ -163,21 +164,6 @@ public class MonsterShootingScene : MonoBehaviour
         fadeIn.SetActive(true);
         yield return new WaitForSeconds(2);
 
-        fadeIn.SetActive(false);
-        newspaper.SetActive(false);
-        newspaperBase.SetActive(false);
-        warAmbience.Stop();
-        fadeIn.SetActive(false);
-        playerHUD.SetActive(true);
-        cursor.SetActive(true);
-        batteryIcon.SetActive(false);
-        playerMesh.SetActive(true);
-        camHolder.SetActive(true);
-        camera_01.SetActive(false);
-        camera_02.SetActive(false);
-        camera_03.SetActive(false);
-        camera_04.SetActive(false);
-        camera_05.SetActive(false);
-        player.GetComponent<FirstPersonController>().enabled = true;
+        loadingManager.LoadScene(0);
     }
 }
