@@ -1327,13 +1327,13 @@ namespace FPC
             {
                 newArray[i] = foundCorpses[i];
             }
-            newArray[foundCorpses.Length] = obj;
+            newArray[foundCorpses.Length] = obj; 
             foundCorpses = newArray;
         }
         public IEnumerator FadeText(TMP_Text text)
         {
             if (text.gameObject.activeSelf) yield break;
-            text.gameObject.SetActive(true);
+            text.gameObject.SetActive(true);  
             yield return StartCoroutine(Fade(0f, 1f, text));
             yield return new WaitForSeconds(2.0f);
             yield return StartCoroutine(Fade(1f, 0f, text));
