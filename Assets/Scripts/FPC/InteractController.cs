@@ -84,7 +84,6 @@ namespace FPC
         [HideInInspector] public GameObject lastPickedKey;
         private GameObject _key;
         [Header("Front Door")] 
-        [SerializeField] private int mainGameSceneId;
         private bool _isFrontDoorOnHover;
         [Header("Ladder")] 
         private bool _isLadderOnHover;
@@ -110,10 +109,10 @@ namespace FPC
         private bool _isRopeOnHover;
         private bool _isInPit;
         private GameObject _rope;
-        public Transform _pitTopPoint;
-        public Transform _pitBottomPoint;
-        public BoxCollider _pitBottomArea;
-        public BoxCollider _pitTopArea;
+        private Transform _pitTopPoint;
+        private Transform _pitBottomPoint;
+        private BoxCollider _pitBottomArea;
+        private BoxCollider _pitTopArea;
         [Header("RopePile")] 
         [SerializeField] private GameObject ropePileImage;
         private bool _isRopePileOnHover;
@@ -261,7 +260,7 @@ namespace FPC
             
             _inputActions.Player.Interact.performed += _ => Interact();
             _inputActions.Player.Interact.canceled += _ => ResetInteraction();
-            _inputActions.Player.AltInteract.performed += _ => AltInteract();
+            _inputActions.Player.Throw.performed += _ => Throw();
             StartCoroutine(RayCastCoroutine());
         }
 
@@ -659,7 +658,7 @@ namespace FPC
             ThrowRope();
         }
 
-        private void AltInteract()
+        private void Throw()
         {
             if (isInteracting) return;
             ThrowCanister();
