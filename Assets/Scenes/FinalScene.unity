@@ -8655,6 +8655,13 @@ MonoBehaviour:
   cardReader: {fileID: 0}
   cardDoorOpeningDuration: 2
   accessText: {fileID: 739432604}
+  ropeParent: {fileID: 0}
+  _pitTopPoint: {fileID: 0}
+  _pitBottomPoint: {fileID: 0}
+  _pitBottomArea: {fileID: 0}
+  _pitTopArea: {fileID: 0}
+  ropePileImage: {fileID: 0}
+  throwArea: {fileID: 0}
   timeToPassWallCrack: 1.5
   canCallPolice: 0
   wasPoliceCalled: 0
@@ -8745,6 +8752,9 @@ MonoBehaviour:
   flashlight: {fileID: 713011810}
   consumeSlider: {fileID: 165839620}
   consumeValue: 2
+  lowBatteryText: {fileID: 0}
+  fadeDuration: 0
+  blinkInterval: 0
   isFlashlightOn: 0
   canConsumeBattery: 0
   handCamera: {fileID: 91681145}
@@ -8851,8 +8861,11 @@ MonoBehaviour:
   standingCenter: {x: 0, y: 0, z: 0.2}
   isCrouching: 0
   isHidden: 0
+  fallThreshold: 2
+  globalVolume: {fileID: 1496375531}
   footSteps: {fileID: 8300000, guid: e9714160ce34f2b4ab63ff8c27bd68e1, type: 3}
   breath: {fileID: 8300000, guid: b781ed97b2877b246b7d58b589544174, type: 3}
+  fallDamageAudio: {fileID: 8300000, guid: c350a17c2cc91aa499c8c75d71443a4f, type: 3}
 --- !u!143 &125760031
 CharacterController:
   m_ObjectHideFlags: 0
@@ -20632,7 +20645,6 @@ MonoBehaviour:
   enemy: {fileID: 346481182}
   playerMesh: {fileID: 440443453}
   camHolder: {fileID: 1771643343}
-  fog: {fileID: 1699571793}
   monsterBlood: {fileID: 6670672048912517688}
   newspaper: {fileID: 1786781335}
   newspaperBase: {fileID: 1998967389}
@@ -52302,12 +52314,6 @@ Transform:
   - {fileID: 1817325575}
   m_Father: {fileID: 86316479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1699571793 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1962030813837595910, guid: afb3efbc25e837e429ff2f3a87c73806,
-    type: 3}
-  m_PrefabInstance: {fileID: 1819273537}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1712015581
 GameObject:
   m_ObjectHideFlags: 0
@@ -53817,7 +53823,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00024414062, y: -0.000030517578}
+  m_AnchoredPosition: {x: -0.00024414062, y: -0.000061035156}
   m_SizeDelta: {x: -802.9999, y: -286.16168}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1786781337

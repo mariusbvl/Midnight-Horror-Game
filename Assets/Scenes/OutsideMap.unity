@@ -19059,6 +19059,13 @@ MonoBehaviour:
   cardReader: {fileID: 0}
   cardDoorOpeningDuration: 2
   accessText: {fileID: 292708458}
+  ropeParent: {fileID: 0}
+  _pitTopPoint: {fileID: 0}
+  _pitBottomPoint: {fileID: 0}
+  _pitBottomArea: {fileID: 0}
+  _pitTopArea: {fileID: 0}
+  ropePileImage: {fileID: 0}
+  throwArea: {fileID: 0}
   timeToPassWallCrack: 1.5
   canCallPolice: 0
   wasPoliceCalled: 0
@@ -19149,6 +19156,9 @@ MonoBehaviour:
   flashlight: {fileID: 234438492}
   consumeSlider: {fileID: 904854102}
   consumeValue: 2
+  lowBatteryText: {fileID: 0}
+  fadeDuration: 0
+  blinkInterval: 0
   isFlashlightOn: 0
   canConsumeBattery: 0
   handCamera: {fileID: 2020754203}
@@ -19255,8 +19265,11 @@ MonoBehaviour:
   standingCenter: {x: 0, y: 0, z: 0.2}
   isCrouching: 0
   isHidden: 0
+  fallThreshold: 2
+  globalVolume: {fileID: 1963562512}
   footSteps: {fileID: 8300000, guid: e9714160ce34f2b4ab63ff8c27bd68e1, type: 3}
   breath: {fileID: 8300000, guid: b781ed97b2877b246b7d58b589544174, type: 3}
+  fallDamageAudio: {fileID: 8300000, guid: c350a17c2cc91aa499c8c75d71443a4f, type: 3}
 --- !u!143 &796677189
 CharacterController:
   m_ObjectHideFlags: 0
