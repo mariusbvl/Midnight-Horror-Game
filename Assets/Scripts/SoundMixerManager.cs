@@ -4,18 +4,19 @@ using UnityEngine.Audio;
 
 public class SoundMixerManager : MonoBehaviour
 {
+    public static SoundMixerManager Instance { get; private set; }
     [SerializeField] private AudioMixer mainMixer;
-
+    
     [Range(0.0001f, 1f)] public float masterVolume;
     [Range(0.0001f, 1f)] public float soundFXVolume;
     [Range(0.0001f, 1f)] public float musicVolume;
 
-
-    private void FixedUpdate()
+    private void Awake()
     {
-        SetMasterVolume(masterVolume);
-        SetSoundFXVolume(soundFXVolume);
-        SetMusicVolume(musicVolume);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
     }
 
     public void SetMasterVolume(float level)

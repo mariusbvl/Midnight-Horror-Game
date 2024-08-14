@@ -49,6 +49,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button settingsButton;
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private Slider cameraSensitivitySlider;
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
     [SerializeField] private Button exitButton;
     [SerializeField] private GameObject confirmationPanel;
     [SerializeField] private Button noButton;
@@ -177,8 +180,17 @@ public class GameManager : MonoBehaviour
         optionsPanel.SetActive(false);
         mainObjectsPanel.SetActive(true);
         EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
+        SetSettings();
         inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
         inputActions.Player.Pause.performed += pausePerformedHandler;
+    }
+
+    private void SetSettings()
+    {
+        CameraController.Instance.cameraSensitivity = cameraSensitivitySlider.value;
+        SoundMixerManager.Instance.SetMasterVolume(masterVolumeSlider.value);
+        SoundMixerManager.Instance.SetSoundFXVolume(sfxVolumeSlider.value);
+        SoundMixerManager.Instance.SetMusicVolume(musicVolumeSlider.value);
     }
     
     public void CloseElectricBoxPuzzle()

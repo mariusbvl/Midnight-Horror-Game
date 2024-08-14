@@ -4,7 +4,8 @@ namespace FPC
 {
     public class CameraController : MonoBehaviour
     {
-        [SerializeField] private float cameraSensitivity;
+        public static CameraController Instance { get; private set; }
+        [SerializeField] public float cameraSensitivity;
         [SerializeField] private Transform playerBody;
         private Vector2 _mouseLook;
         private float _xRotation;
@@ -12,6 +13,10 @@ namespace FPC
         private GameInputActions _inputActions;
         private void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
             _inputActions = new GameInputActions();
             Cursor.lockState = CursorLockMode.Locked;
         }
