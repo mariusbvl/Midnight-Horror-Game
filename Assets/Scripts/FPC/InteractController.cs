@@ -86,6 +86,8 @@ namespace FPC
         [Header("Front Door")] 
         private bool _isFrontDoorOnHover;
         [Header("Ladder")] 
+        [SerializeField] private GameObject fadeInAnimation;
+        [SerializeField] private GameObject fadeOutAnimation;
         private bool _isLadderOnHover;
         private bool _isOnUpperFloor;
         private GameObject _ladder;
@@ -640,10 +642,10 @@ namespace FPC
             PickKey();
             StartCoroutine(OpenDoorWithKey());
             EnterHospital();
-            ClimbGetDownLadder();
+            StartCoroutine(ClimbGetDownLadder());
             PickKeyCard();
             StartCoroutine(ReadCardReader());
-            ClimbGetDownRope();
+            StartCoroutine(ClimbGetDownRope());
             StartCoroutine(PassWallCrack());
             CallPolice();
             ExitHospital();
@@ -1016,20 +1018,6 @@ namespace FPC
             camHolder.transform.rotation = targetRotation;
         }
         
-        private void ClimbGetDownRope()
-        {
-            if (_isRopeOnHover)
-            {
-                characterController.enabled = false;
-                SoundFXManager.Instance.PlaySoundFxClip(climbRopeAudio, player.transform, 1f, 0f);
-                Vector3 worldTransform = _isInPit
-                    ? _rope.transform.TransformPoint(_pitTopPoint.localPosition)
-                    : _rope.transform.TransformPoint(_pitBottomPoint.localPosition);
-                player.transform.position = worldTransform;
-                _isInPit = !_isInPit;
-                characterController.enabled = true;
-            }
-        }
         private void PickKey()
         {
             if (_isKeyOnHover)
@@ -1099,20 +1087,50 @@ namespace FPC
             _rightCardDoor.transform.position = rightCardDoorTargetPosition;
         }
         
-        
-        private void ClimbGetDownLadder()
+        private IEnumerator ClimbGetDownRope()
         {
-            if (_isLadderOnHover)
-            {
-                characterController.enabled = false;
-                SoundFXManager.Instance.PlaySoundFxClip(climbLadderAudio, player.transform, 1f, 0f);
-                Vector3 worldTransform = _isOnUpperFloor
-                    ? _ladder.transform.TransformPoint(_bottomPoint.localPosition)
-                    : _ladder.transform.TransformPoint(_upPoint.localPosition);
-                player.transform.position = worldTransform;
-                _isOnUpperFloor = !_isOnUpperFloor;
-                characterController.enabled = true;
-            }
+            if (!_isRopeOnHover) yield break;
+            isInteracting = true;
+            SoundFXManager.Instance.PlaySoundFxClip(climbRopeAudio, player.transform, 1f, 0f);
+            characterController.enabled = false;
+            _headBobController.enabled = false;
+            fadeInAnimation.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            Vector3 worldTransform = _isInPit
+                ? _rope.transform.TransformPoint(_pitTopPoint.localPosition)
+                : _rope.transform.TransformPoint(_pitBottomPoint.localPosition);
+            player.transform.position = worldTransform;
+            _isInPit = !_isInPit;
+            characterController.enabled = true;
+            _headBobController.enabled = true;
+            fadeInAnimation.SetActive(false);
+            fadeOutAnimation.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            fadeOutAnimation.SetActive(false);
+            isInteracting = false;
+        }
+        
+        private IEnumerator ClimbGetDownLadder()
+        {
+            if (!_isLadderOnHover) yield break;
+            isInteracting = true;
+            SoundFXManager.Instance.PlaySoundFxClip(climbLadderAudio, player.transform, 1f, 0f);
+            characterController.enabled = false;
+            _headBobController.enabled = false;
+            fadeInAnimation.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            Vector3 worldTransform = _isOnUpperFloor
+                ? _ladder.transform.TransformPoint(_bottomPoint.localPosition)
+                : _ladder.transform.TransformPoint(_upPoint.localPosition);
+            player.transform.position = worldTransform;
+            _isOnUpperFloor = !_isOnUpperFloor;
+            characterController.enabled = true;
+            _headBobController.enabled = true;
+            fadeInAnimation.SetActive(false);
+            fadeOutAnimation.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            fadeOutAnimation.SetActive(false);
+            isInteracting = false;
         }
         
         

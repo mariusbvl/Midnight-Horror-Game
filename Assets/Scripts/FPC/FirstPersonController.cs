@@ -112,7 +112,8 @@ namespace FPC
         }
         
         private void HandleFallDetection()
-        {
+        { 
+            if(isCrouching) return;
             if (!isGrounded && velocity.y < 0)
             {
                 if (!_isFalling)
@@ -139,7 +140,6 @@ namespace FPC
         {
             SoundFXManager.Instance.PlaySoundFxClip(fallDamageAudio, transform , 1f , 0f);
             StartCoroutine(FadeVignette());
-            Debug.Log("Player landed after a long fall!");
         }
         
         private IEnumerator FadeVignette()
