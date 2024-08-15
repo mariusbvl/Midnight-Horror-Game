@@ -39,6 +39,7 @@ public class MonsterShootingScene : MonoBehaviour
     public AudioSource shot_03;
     public AudioSource music;
     public AudioSource wolfSound;
+    public AudioSource newspaperSound;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -160,6 +161,7 @@ public class MonsterShootingScene : MonoBehaviour
         newspaperBase.SetActive(true);
         newspaper.SetActive(true);
         newspaper.GetComponent<Animation>().Play("RotatingNewspaper");
+        newspaperSound.Play();
         yield return new WaitForSeconds(25);
         fadeIn.SetActive(true);
         yield return new WaitForSeconds(2);
