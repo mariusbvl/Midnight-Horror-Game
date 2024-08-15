@@ -42,6 +42,16 @@ namespace EnemyScripts
         [FormerlySerializedAs("_headAim")]
         [Header("Rig")] 
         [SerializeField]private MultiAimConstraint headAim;
+
+        [Header("Audio")] 
+        [SerializeField] private AudioClip monsterIdleSound;
+        [SerializeField] private AudioClip monsterStartChaseSound;
+        [SerializeField] private AudioClip monsterChasingPeriodicRoarSound;
+        private AudioSource _monsterIdleAudioSource;
+        private bool _startChaseSoundPlayed;
+        private bool _idleSoundIsPlaying;
+        private bool isRoarCoroutineRunning;
+        private bool isRoarPlaying;
         private void Awake()
         {
             if (Instance == null)
@@ -61,6 +71,7 @@ namespace EnemyScripts
             // FOV
             playerRef = GameObject.FindGameObjectWithTag("Player");
             StartCoroutine(FOVRoutine());
+            PlayIdleRoar();
         }
 
         private void Update()
@@ -76,6 +87,16 @@ namespace EnemyScripts
                 {
                     HandleDestinationReached();
                 }
+            }
+
+            if (isChasing && !isRoarCoroutineRunning)
+            {
+                StartCoroutine(RoarWhileChasing());
+            }
+            else if (!isChasing && isRoarCoroutineRunning)
+            {
+                StopCoroutine(RoarWhileChasing());
+                isRoarCoroutineRunning = false;
             }
         }
 
@@ -109,6 +130,12 @@ namespace EnemyScripts
         {
             if (canSeePlayer)
             {
+                //StopIdleRoar();
+                if (!_startChaseSoundPlayed)
+                {
+                    SoundFXManager.Instance.PlaySoundFxClip(monsterStartChaseSound, gameObject.transform, 1f, 1f);
+                    _startChaseSoundPlayed = true;
+                }
                 isWalking = false;
                 isRunning = true;
                 isChasing = true;
@@ -128,45 +155,40 @@ namespace EnemyScripts
 
         private void Chase()
         {
-            if (isChasing)
+            if (!isChasing) return;
+            var position = playerTransform.position;
+
+            // Attempt to set the destination
+            bool pathSet = aiNavMesh.SetDestination(position);
+
+            if (!pathSet || aiNavMesh.pathStatus == NavMeshPathStatus.PathInvalid)
             {
+                Debug.Log("Invalid path");
 
-                var position = playerTransform.position;
+                // Handle the invalid path scenario, maybe stop chasing or perform other actions
+                headAim.weight = 0f;
 
-                // Attempt to set the destination
-                bool pathSet = aiNavMesh.SetDestination(position);
+                // Set the last known position and stop chasing
+                _lastKnownPosition = FirstPersonController.Instance.isHidden ? 
+                    InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : 
+                    playerTransform.position;
 
-                if (!pathSet || aiNavMesh.pathStatus == NavMeshPathStatus.PathInvalid)
+                if (_returnToLastKnownPositionCoroutine != null)
                 {
-                    Debug.Log("Invalid path");
-
-                    // Handle the invalid path scenario, maybe stop chasing or perform other actions
-                    headAim.weight = 0f;
-
-                    // Set the last known position and stop chasing
-                    _lastKnownPosition = FirstPersonController.Instance.isHidden ? 
-                        InteractController.Instance.currentFrontOfTheLockerPoint.transform.position : 
-                        playerTransform.position;
-
-                    if (_returnToLastKnownPositionCoroutine != null)
-                    {
-                        StopCoroutine(_returnToLastKnownPositionCoroutine);
-                    }
-
-                    _returnToLastKnownPositionCoroutine = StartCoroutine(ReturnToLastKnownPosition());
-                    isChasing = false;
-                    return;
+                    StopCoroutine(_returnToLastKnownPositionCoroutine);
                 }
 
-                // If the path is valid, continue chasing
-                aiNavMesh.speed = runSpeed;
-
-                if (!canSeePlayer)
-                {
-                    headAim.weight = 0f;
-                    _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
-                }
+                _returnToLastKnownPositionCoroutine = StartCoroutine(ReturnToLastKnownPosition());
+                isChasing = false;
+                return;
             }
+
+            // If the path is valid, continue chasing
+            aiNavMesh.speed = runSpeed;
+
+            if (canSeePlayer) return;
+            headAim.weight = 0f;
+            _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
         }
 
         private IEnumerator LostPlayerCoroutine()
@@ -300,6 +322,59 @@ namespace EnemyScripts
             yield return new WaitForSeconds(_idleTime);
             isWalking = true;
             SetNewDestination();
+        }
+        
+
+        private void PlayIdleRoar()
+        {
+            if(_idleSoundIsPlaying) return;
+            SoundFXManager.Instance.PlaySoundFxClip(monsterIdleSound, gameObject.transform, 1f,1f,true,3600);
+            _monsterIdleAudioSource = SoundFXManager.Instance.audioSource;
+            _monsterIdleAudioSource.transform.SetParent(gameObject.transform);
+            _idleSoundIsPlaying = true;
+        }
+
+        private void StopIdleRoar()
+        {
+            if (!(isChasing && _idleSoundIsPlaying)) return;
+            Destroy(_monsterIdleAudioSource.gameObject);
+            _idleSoundIsPlaying = false;
+        }
+        
+        private IEnumerator RoarWhileChasing()
+        {
+            isRoarCoroutineRunning = true;
+
+            while (isChasing)
+            {
+                if (!isRoarPlaying)
+                {
+                    float randomTime = Random.Range(5f, 10f);
+                    yield return new WaitForSeconds(randomTime);
+
+                    if (isChasing)
+                    {
+                        // Play the roar sound once
+                        SoundFXManager.Instance.PlaySoundFxClip(monsterChasingPeriodicRoarSound, transform, 1f, 1f);
+                        isRoarPlaying = true;
+
+                        // Reset the roar flag after a delay to allow another roar
+                        float delayTime = Random.Range(5f, 10f);
+                        yield return new WaitForSeconds(delayTime);
+
+                        // Ensure the coroutine doesn't continue if the chase stops
+                        if (!isChasing) break;
+
+                        isRoarPlaying = false;
+                    }
+                }
+                else
+                {
+                    yield return null; // Wait for the next frame if the sound is playing
+                }
+            }
+
+            isRoarCoroutineRunning = false;
         }
     }
 }

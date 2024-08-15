@@ -76,6 +76,8 @@ public class GameManager : MonoBehaviour
     private bool _jumpScareAnimationAlreadyTriggered;
     [SerializeField]private float gameOverDistance;
     [SerializeField]private GameObject gameOverPanel;
+    [SerializeField] private AudioClip jumpScareSound;
+    private bool _hasJumpScareSoundPlayed;
     public FPC.CameraController cameraController;
     private InteractController _interactController;
     private FlashlightAndCameraController _flashlightAndCameraController;
@@ -348,28 +350,28 @@ public class GameManager : MonoBehaviour
     }
     private void GameOver()
     {
-        if (EnemyAI.Instance.isChasing)
+        if (!EnemyAI.Instance.isChasing) return;
+        if (!(Vector3.Distance(player.transform.position, enemy.transform.position) <= gameOverDistance)) return;
+        FirstPersonController.Instance.inputActions.Disable();
+        FirstPersonController.Instance.velocity = new Vector3(0, 0, 0);
+        FirstPersonController.Instance.moveSpeed = 0f;
+        EnemyAI.Instance.aiNavMesh.speed = 0f;
+        EnemyAI.Instance.aiAnimator.SetBool(IsWalking, false);
+        EnemyAI.Instance.aiAnimator.SetBool(IsRunning, false);
+        playerMesh.SetActive(false);
+        cameraController.enabled = false;
+        _interactController.enabled = false;
+        _flashlightAndCameraController.enabled = false;
+        inGameUi.SetActive(false);
+        hands.SetActive(false);
+        Quaternion enemyLook = Quaternion.LookRotation(player.transform.position - enemy.transform.position);
+        enemy.transform.rotation = enemyLook;
+        if (!_hasJumpScareSoundPlayed)
         {
-            if (Vector3.Distance(player.transform.position, enemy.transform.position) <= gameOverDistance)
-            {
-                //Turn off any interaction
-                FirstPersonController.Instance.inputActions.Disable();
-                FirstPersonController.Instance.velocity = new Vector3(0, 0, 0);
-                FirstPersonController.Instance.moveSpeed = 0f;
-                EnemyAI.Instance.aiNavMesh.speed = 0f;
-                EnemyAI.Instance.aiAnimator.SetBool(IsWalking, false);
-                EnemyAI.Instance.aiAnimator.SetBool(IsRunning, false);
-                playerMesh.SetActive(false);
-                cameraController.enabled = false;
-                _interactController.enabled = false;
-                _flashlightAndCameraController.enabled = false;
-                inGameUi.SetActive(false);
-                hands.SetActive(false);
-                Quaternion enemyLook = Quaternion.LookRotation(player.transform.position - enemy.transform.position);
-                enemy.transform.rotation = enemyLook;
-                StartCoroutine(GameOverCoroutine());
-            }
+            SoundFXManager.Instance.PlaySoundFxClip(jumpScareSound, enemy.transform, 1f, 0f);
+            _hasJumpScareSoundPlayed = true;
         }
+        StartCoroutine(GameOverCoroutine());
     }
 
     private IEnumerator GameOverCoroutine()
