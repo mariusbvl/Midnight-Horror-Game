@@ -298,7 +298,7 @@ namespace FPC
                 _batteryOnHover = false;
                 _battery = null;
                 _corpseOnHover = false;
-                _currentCorpse = null;
+                
                 _lockerDoorOnHover = false;
                 _currentLockerDoor = null;
                 
@@ -635,7 +635,7 @@ namespace FPC
         {
             if (isInteracting) return;
             InteractWithBattery();
-            PhotoCorpse();
+            StartCoroutine(PhotoCorpse());
             StartCoroutine(HideInLocker());
             StartCoroutine(ExitLocker());
             StartCoroutine(OpenCloseSimpleDoor());
@@ -1310,22 +1310,41 @@ namespace FPC
             }
         }
         
-        private void PhotoCorpse()
+        private IEnumerator PhotoCorpse()
         {
-            if (_flashlightAndCameraController.isCameraOn)
+            if (!_flashlightAndCameraController.isCameraOn) yield break;
+            SoundFXManager.Instance.PlaySoundFxClip(cameraShotSound, player.transform, 1f, 0f);
+            if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
             {
-                SoundFXManager.Instance.PlaySoundFxClip(cameraShotSound, player.transform, 1f, 0f);
-                if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
-                {
-                    AddGameObject(_currentCorpse);
-                    nrOfCorpses++;
-                    corpsesFoundText.text = nrOfCorpses + "/5";
-                    StartCoroutine(FadeText(corpsesFoundText));
-                    if (nrOfCorpses != 5) { GameManager.Instance.ChangeObjective();}
-                    GameManager.Instance.CheckForAllCorpses();
-                }
+                AddGameObject(_currentCorpse);
+                nrOfCorpses++;
+                corpsesFoundText.text = nrOfCorpses + "/5";
+                StartCoroutine(FadeText(corpsesFoundText));
+                if (nrOfCorpses != 5) { GameManager.Instance.ChangeObjective();}
+                GameManager.Instance.CheckForAllCorpses();
+                yield return StartCoroutine(PlayFlashBackCoroutine(_currentCorpse));
             }
         }
+
+        private IEnumerator PlayFlashBackCoroutine(GameObject currentCorpse)
+        {
+            float randomTime = Random.Range(2f, 5f);
+            yield return new WaitForSeconds(randomTime);
+            FlashbackManager.Instance.PlayFlashback(FoundCorpseId(currentCorpse));
+        }
+        
+        private int FoundCorpseId(GameObject currentCorpse)
+        {
+            for (int i = 0; i < FlashbackManager.Instance.allCorpses.Length; i++)
+            {
+                if (FlashbackManager.Instance.allCorpses[i] == currentCorpse)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
         private bool IsCorpseAlreadyFound(GameObject corpse)
         {
             foreach (GameObject foundCorpse in foundCorpses)

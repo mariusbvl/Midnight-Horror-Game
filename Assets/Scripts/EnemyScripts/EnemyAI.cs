@@ -48,6 +48,8 @@ namespace EnemyScripts
         [SerializeField] private AudioClip monsterStartChaseSound;
         [SerializeField] private AudioClip monsterChasingPeriodicRoarSound;
         private AudioSource _monsterIdleAudioSource;
+        private AudioSource _monsterStartChaseAudioSource;
+        private AudioSource _monsterChasingRoarAudioSource;
         private bool _startChaseSoundPlayed;
         private bool _idleSoundIsPlaying;
         private bool isRoarCoroutineRunning;
@@ -134,6 +136,8 @@ namespace EnemyScripts
                 if (!_startChaseSoundPlayed)
                 {
                     SoundFXManager.Instance.PlaySoundFxClip(monsterStartChaseSound, gameObject.transform, 1f, 1f);
+                    _monsterStartChaseAudioSource = SoundFXManager.Instance.audioSource;
+                    _monsterStartChaseAudioSource.transform.SetParent(gameObject.transform);
                     _startChaseSoundPlayed = true;
                 }
                 isWalking = false;
@@ -356,6 +360,8 @@ namespace EnemyScripts
                     {
                         // Play the roar sound once
                         SoundFXManager.Instance.PlaySoundFxClip(monsterChasingPeriodicRoarSound, transform, 1f, 1f);
+                        _monsterChasingRoarAudioSource = SoundFXManager.Instance.audioSource;
+                        _monsterChasingRoarAudioSource.transform.SetParent(gameObject.transform);
                         isRoarPlaying = true;
 
                         // Reset the roar flag after a delay to allow another roar

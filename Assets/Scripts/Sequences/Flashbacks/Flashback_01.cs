@@ -46,6 +46,7 @@ public class Flashback_01 : MonoBehaviour
         scaredBreathing.Play();
         doorBang.Play();
         enemy.GetComponent<Animation>().Play("mixamo.com");
+        door.transform.rotation = new Quaternion(-90f, 0f,90f,0f);
         door.GetComponent<Animation>().Play("BashDoorFlashback01Anim");
         patient.GetComponent<Animation>().Play("Walk Backwards 2");
         yield return new WaitForSeconds(2.5f);

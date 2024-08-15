@@ -402,6 +402,7 @@ public class GameManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(1.5f);
+        SoundMixerManager.Instance.SetSoundFXVolume(0f);
         gameOverPanel.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
     }

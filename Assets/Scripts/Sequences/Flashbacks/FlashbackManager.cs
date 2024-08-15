@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,14 @@ using UnityEngine;
 public class FlashbackManager : MonoBehaviour
 {
     public MonoBehaviour[] flashbacks;
+    public GameObject[] allCorpses;
+    public static FlashbackManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (!Instance) { Instance = this; }
+    }
+
 
     public void PlayFlashback(int index)
     {
