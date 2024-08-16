@@ -32,5 +32,6 @@ public class GameOverSequence : MonoBehaviour
         yield return new WaitForSeconds(2f);
         gameOverPanel.SetActive(true);
         EventSystem.current.SetSelectedGameObject(restartButton.gameObject);
+        Cursor.lockState = CursorLockMode.None;
     }
 }
