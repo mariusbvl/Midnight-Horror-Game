@@ -75,12 +75,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject hands;
     private bool _jumpScareAnimationAlreadyTriggered;
     [SerializeField]private float gameOverDistance;
-    [SerializeField]private GameObject gameOverPanel;
+    [SerializeField]private GameObject blackScreenPanel;
     [SerializeField] private AudioClip jumpScareSound;
     private bool _hasJumpScareSoundPlayed;
     public FPC.CameraController cameraController;
     private InteractController _interactController;
     private FlashlightAndCameraController _flashlightAndCameraController;
+    private CharacterController _characterController;
     private static readonly int JumpScare = Animator.StringToHash("jumpScare");
     private static readonly int IsWalking = Animator.StringToHash("isWalking");
     private static readonly int IsRunning = Animator.StringToHash("isRunning");
@@ -96,8 +97,7 @@ public class GameManager : MonoBehaviour
         cameraController = GameObject.Find("Player").GetComponentInChildren<FPC.CameraController>();
         _interactController = GameObject.Find("Player").GetComponent<InteractController>();
         _flashlightAndCameraController = GameObject.Find("Player").GetComponent<FlashlightAndCameraController>();
-        //GameOver
-        gameOverPanel.SetActive(false);
+        _characterController = player.GetComponent<CharacterController>();
         //PausePanel
         pausePanel.SetActive(false);
         playerCanvas.SetActive(true);
@@ -353,11 +353,12 @@ public class GameManager : MonoBehaviour
         if (!EnemyAI.Instance.isChasing) return;
         if (!(Vector3.Distance(player.transform.position, enemy.transform.position) <= gameOverDistance)) return;
         FirstPersonController.Instance.inputActions.Disable();
-        FirstPersonController.Instance.velocity = new Vector3(0, 0, 0);
+        FirstPersonController.Instance.velocity = new Vector3(0f, 0f, 0f);
         FirstPersonController.Instance.moveSpeed = 0f;
         EnemyAI.Instance.aiNavMesh.speed = 0f;
         EnemyAI.Instance.aiAnimator.SetBool(IsWalking, false);
         EnemyAI.Instance.aiAnimator.SetBool(IsRunning, false);
+        //_characterController.enabled = false;
         playerMesh.SetActive(false);
         cameraController.enabled = false;
         _interactController.enabled = false;
@@ -401,10 +402,13 @@ public class GameManager : MonoBehaviour
             _jumpScareAnimationAlreadyTriggered = true;
         }
 
+        StartCoroutine(FirstPersonController.Instance.FadeVignette());
         yield return new WaitForSeconds(1.5f);
-        SoundMixerManager.Instance.SetSoundFXVolume(0f);
-        gameOverPanel.SetActive(true);
-        Cursor.lockState = CursorLockMode.None;
+        SoundMixerManager.Instance.SetMusicVolume(0.001f);
+        SoundMixerManager.Instance.SetSoundFXVolume(0.001f);
+        blackScreenPanel.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        SceneManager.LoadScene(6);
     }
 
 

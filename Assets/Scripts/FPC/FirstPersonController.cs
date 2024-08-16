@@ -142,7 +142,7 @@ namespace FPC
             StartCoroutine(FadeVignette());
         }
         
-        private IEnumerator FadeVignette()
+        public IEnumerator FadeVignette()
         {
             float inDuration = 0.5f; 
             float outDuration = 2.0f; 
