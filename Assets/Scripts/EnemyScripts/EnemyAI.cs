@@ -43,10 +43,21 @@ namespace EnemyScripts
         [Header("Rig")] 
         [SerializeField]private MultiAimConstraint headAim;
 
+        [Header("Doors")] 
+        [SerializeField] private CapsuleCollider enemyCapsuleCollider;
+        [SerializeField] private BoxCollider[] doorColliders;
+        [SerializeField] private float aiDoorOpenDuration;
+        public GameObject currentDoorParent;
+        public Transform currentDoorPivot;
+        public Transform currentDoorClosedPivot;
+        public Transform currentDoorOpenPivot;
+        
+        
         [Header("Audio")] 
         [SerializeField] private AudioClip monsterIdleSound;
         [SerializeField] private AudioClip monsterStartChaseSound;
         [SerializeField] private AudioClip monsterChasingPeriodicRoarSound;
+        [SerializeField] private AudioClip doorOpeningSound;
         private AudioSource _monsterIdleAudioSource;
         private AudioSource _monsterStartChaseAudioSource;
         private AudioSource _monsterChasingRoarAudioSource;
@@ -64,6 +75,13 @@ namespace EnemyScripts
 
         private void Start()
         {
+            GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("AiDoorCollider");
+            doorColliders = new BoxCollider[objectsWithTag.Length];
+            for (int i = 0; i < objectsWithTag.Length; i++)
+            {
+                doorColliders[i] = objectsWithTag[i].GetComponent<BoxCollider>();
+            }
+            
             headAim = GameObject.Find("HeadAim").GetComponent<MultiAimConstraint>();
             aiAnimator = GetComponent<Animator>();
             _destinationsAmount = destinations.Count;
@@ -116,6 +134,7 @@ namespace EnemyScripts
                 Chase();
             }
             
+            AiOpenDoor();
             
         }
 
@@ -348,8 +367,44 @@ namespace EnemyScripts
             isWalking = true;
             SetNewDestination();
         }
-        
 
+
+        private void AiOpenDoor()
+        {
+            foreach (BoxCollider doorColliderObject in doorColliders)
+            {
+                if (enemyCapsuleCollider.bounds.Intersects(doorColliderObject.bounds))
+                { 
+                    Debug.Log("Bounds are intersecting with " + doorColliderObject.name);
+                    currentDoorPivot = doorColliderObject.transform.parent;
+                    currentDoorParent = currentDoorPivot.transform.parent.gameObject;
+                    currentDoorOpenPivot = currentDoorParent.transform.Find("openDoor");
+                    currentDoorClosedPivot = currentDoorParent.transform.Find("closedDoor");
+                    if (currentDoorPivot.rotation == currentDoorClosedPivot.rotation)
+                    {
+                        SoundFXManager.Instance.PlaySoundFxClip(doorOpeningSound, currentDoorPivot, 1f,1f);
+                        StartCoroutine(AiOpenDoorCoroutine(currentDoorPivot, currentDoorOpenPivot));
+                    }
+                }
+            }
+        }
+
+        private IEnumerator AiOpenDoorCoroutine(Transform doorPivot, Transform openPivot)
+        {
+            Quaternion startRotation = doorPivot.rotation;
+            Quaternion targetRotation = openPivot.rotation;
+            float timeElapsed = 0f;
+
+            while (timeElapsed < aiDoorOpenDuration)
+            {
+                doorPivot.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, timeElapsed / aiDoorOpenDuration);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            doorPivot.transform.rotation = targetRotation; 
+        }
+        
         private void PlayIdleRoar()
         {
             if(_idleSoundIsPlaying) return;
