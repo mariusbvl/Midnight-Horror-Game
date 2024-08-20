@@ -64,6 +64,7 @@ namespace FPC
         private Quaternion _simpleDoorCloseRotation;
         private bool _isSimpleDoorOpen;
         private bool _isDoorOpening;
+
         [Header("KeyLockedDoor")] 
         [SerializeField] private TMP_Text lockedText;
         private bool _isKeyLockedDoorOnHover;
@@ -74,6 +75,7 @@ namespace FPC
         private GameObject _currentKeyDoorOpenPivot;
         private Quaternion _keyDoorOpenRotation;
         [Header("Key")] 
+        [SerializeField] private GameObject[] keysGameObjects;
         public bool[] keysPicked;
         private bool _isKeyOnHover;
         private TMP_Text _idTextComponent;
@@ -1144,7 +1146,7 @@ namespace FPC
                 isInteracting = true;
                 SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, _currentKeyDoor.transform, 1f, 1f);
                 yield return new WaitForSeconds(0.5f);
-                lockedText.text = $"Key{_idInt} was used";
+                lockedText.text = $"{keysGameObjects[_idInt].name} was used";
                 StartCoroutine(FadeText(lockedText));
                 SoundFXManager.Instance.PlaySoundFxClip(doorCreakSound, _currentKeyDoor.transform, 1f, 1f);
                 yield return StartCoroutine(OpenKeyDoor());
@@ -1153,7 +1155,7 @@ namespace FPC
             }
             else
             {
-                lockedText.text = $"Locked\nKey{_doorIdInt} is needed";
+                lockedText.text = $"Locked\n{keysGameObjects[_doorIdInt].name} is needed";
                 SoundFXManager.Instance.PlaySoundFxClip(doorLockedSound, _currentKeyDoor.transform, 1f, 1f);
                 yield return StartCoroutine(FadeText(lockedText));
             }
