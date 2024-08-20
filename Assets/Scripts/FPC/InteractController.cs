@@ -115,8 +115,8 @@ namespace FPC
         private GameObject _rope;
         private Transform _pitTopPoint;
         private Transform _pitBottomPoint;
-        private BoxCollider _pitBottomArea;
-        private BoxCollider _pitTopArea;
+        [SerializeField]public BoxCollider pitBottomArea;
+        [SerializeField] private BoxCollider pitTopArea;
         [Header("RopePile")] 
         [SerializeField] private GameObject ropePileImage;
         private bool _isRopePileOnHover;
@@ -521,12 +521,10 @@ namespace FPC
 
                 if (rayCastHit.collider.gameObject.CompareTag("Rope"))
                 {
-                    _pitBottomArea = GameObject.Find("PitBottomArea").GetComponent<BoxCollider>();
-                    _pitTopArea = GameObject.Find("PitTopArea").GetComponent<BoxCollider>();
-                    if (characterController.bounds.Intersects(_pitBottomArea.bounds))
+                    if (characterController.bounds.Intersects(pitBottomArea.bounds))
                     {
                         _isInPit = true;
-                    }else if (characterController.bounds.Intersects(_pitTopArea.bounds))
+                    }else if (characterController.bounds.Intersects(pitTopArea.bounds))
                     {
                         _isInPit = false;
                     }
