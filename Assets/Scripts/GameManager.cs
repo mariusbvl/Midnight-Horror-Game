@@ -60,7 +60,17 @@ public class GameManager : MonoBehaviour
     private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeExitConfirmationPanelCallback;
     private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeSettingsPanelCallback;
     private Action<UnityEngine.InputSystem.InputAction.CallbackContext> _closeShowControlsPanelCallback;
-    
+
+    [Header("Events")]
+    [SerializeField] private BoxCollider[] eventColliders;
+    [SerializeField] private GameObject[] enemies;
+    [SerializeField] private GameObject[] destinations;
+
+    private string _enemyHeadAddress;
+    //TunnelEvent
+    [SerializeField] public GameObject tunnelCorpse;
+    private bool tunnelEventAlreadyActivated;
+    private bool isTunnelEventFinished;
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -93,6 +103,7 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
         inputActions = new GameInputActions();
+        isEnemyOn = false;
         //Components
         cameraController = GameObject.Find("Player").GetComponentInChildren<FPC.CameraController>();
         _interactController = GameObject.Find("Player").GetComponent<InteractController>();
@@ -115,6 +126,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         //Objective
+        _enemyHeadAddress = "Armature/Pelvis/Spine_01/Spine_02/Spine_03/Spine_04/Spine_05/Neck_01/Neck_02/Head";
         _currentObjectiveState = isMainGame ? 1 : 0;
         ChangeObjective();
         StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame)); 
@@ -130,7 +142,64 @@ public class GameManager : MonoBehaviour
         if (isMainGame)
         {
             KeysCollectedController();
+            CheckForEvent();
         }
+    }
+
+    private void CheckForEvent()
+    {
+        TunnelEvent();
+        FinishTunnelEvent();
+    }
+
+    private void TunnelEvent()
+    {
+        if (!_characterController.bounds.Intersects(eventColliders[0].bounds)) return;
+        if(tunnelEventAlreadyActivated) return;
+        if(!(IsTunnelCorpseFound() && InteractController.Instance.keysPicked[4])) return;
+        DisableAllEnemies();
+        destinations[0].SetActive(true);
+        enemies[0].SetActive(true);
+        enemy = enemies[0];
+        enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
+        playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
+        isEnemyOn = true;
+        tunnelEventAlreadyActivated = true;
+    }
+
+    private void FinishTunnelEvent()
+    {
+        if(isTunnelEventFinished) return;
+        if(tunnelEventAlreadyActivated && !EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
+        {
+            DisableAllEnemies();
+            isTunnelEventFinished = true;
+        }
+    }
+    
+    private void DisableAllEnemies()
+    {
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            enemies[i].SetActive(false);
+            destinations[i].SetActive(false);
+        }
+        playerOnJumpScarePoint = null;
+        enemyHeadTransform = null;
+        enemy = null;
+    }
+
+    private bool IsTunnelCorpseFound()
+    {
+        if (InteractController.Instance.foundCorpses == null) return false;
+        for (int i = 0; i < InteractController.Instance.foundCorpses.Length; i++)
+        {
+            if (tunnelCorpse == InteractController.Instance.foundCorpses[i])
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     public void OpenShowControlsPanel()

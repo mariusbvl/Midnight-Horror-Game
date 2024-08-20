@@ -30,6 +30,7 @@ TagManager:
   - RopePile
   - ThrowArea
   - AiDoorCollider
+  - EventCollider
   layers:
   - Default
   - TransparentFX

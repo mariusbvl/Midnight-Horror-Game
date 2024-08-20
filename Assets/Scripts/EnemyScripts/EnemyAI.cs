@@ -25,6 +25,7 @@ namespace EnemyScripts
         private int _randNum;
         private int _destinationsAmount;
         public bool isChasing;
+        public bool isPatrolling;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
         private static readonly int IsRunning = Animator.StringToHash("isRunning");
         [Header("Enemy FOV")]
@@ -130,7 +131,6 @@ namespace EnemyScripts
             //Chase
             if (isChasing && !playerOnInvalidPath)
             {
-                Debug.Log("Chase");
                 Chase();
             }
             
@@ -185,6 +185,7 @@ namespace EnemyScripts
                 isWalking = false;
                 isRunning = true;
                 isChasing = true;
+                isPatrolling = false;
                 headAim.weight = 1f;
             }
         }
@@ -206,7 +207,6 @@ namespace EnemyScripts
 
             if (FirstPersonController.Instance.isHidden)
             {
-                Debug.Log("Player hided in locker");
                 headAim.weight = 0f;
                 _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
             }
@@ -214,7 +214,6 @@ namespace EnemyScripts
 
             if (!canSeePlayer)
             {
-                Debug.Log("Player exited range of chase");
                 headAim.weight = 0f;
                 _lostPlayerCoroutine ??= StartCoroutine(LostPlayerCoroutine());
             }
@@ -226,7 +225,6 @@ namespace EnemyScripts
         
         private IEnumerator LostPlayerCoroutine()
         {
-            Debug.Log("Lost player");
             if (!FirstPersonController.Instance.isHidden && playerOnInvalidPath)
             {
                 yield return new WaitForSeconds(1.5f);
@@ -343,6 +341,7 @@ namespace EnemyScripts
 
         private void HandleDestinationReached()
         {
+            isPatrolling = true;
             int randomChoice = Random.Range(0, 2);
             if (randomChoice == 0)
             {
@@ -360,7 +359,7 @@ namespace EnemyScripts
             }
         }
 
-        private IEnumerator StayIdle()
+        private IEnumerator  StayIdle()
         {
             _idleTime = Random.Range(minIdleTime, maxIdleTime);
             yield return new WaitForSeconds(_idleTime);
@@ -375,7 +374,6 @@ namespace EnemyScripts
             {
                 if (enemyCapsuleCollider.bounds.Intersects(doorColliderObject.bounds))
                 { 
-                    Debug.Log("Bounds are intersecting with " + doorColliderObject.name);
                     currentDoorPivot = doorColliderObject.transform.parent;
                     currentDoorParent = currentDoorPivot.transform.parent.gameObject;
                     currentDoorOpenPivot = currentDoorParent.transform.Find("openDoor");

@@ -28,8 +28,9 @@ public class BookShelfPuzzle : MonoBehaviour
    [SerializeField] private float returnDuration;
 
    [Header("BookShelf's pivots")] 
-   [SerializeField] private Transform bookshelfPivot;
+   [SerializeField] public Transform bookshelfPivot;
    [SerializeField] private Transform topBookShelfPivot;
+   [SerializeField] public Transform downBookshelfPivot;
    [SerializeField] private float bookShelfMoveDuration;
 
    [Header("CodePositions")] 

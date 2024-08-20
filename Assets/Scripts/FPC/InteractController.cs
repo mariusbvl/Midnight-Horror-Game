@@ -1319,6 +1319,7 @@ namespace FPC
             if (_corpseOnHover && !IsCorpseAlreadyFound(_currentCorpse))
             {
                 AddGameObject(_currentCorpse);
+                if (_currentCorpse == GameManager.Instance.tunnelCorpse) { BookShelfPuzzle.Instance.bookshelfPivot.position = BookShelfPuzzle.Instance.downBookshelfPivot.position;}
                 nrOfCorpses++;
                 corpsesFoundText.text = nrOfCorpses + "/5";
                 StartCoroutine(FadeText(corpsesFoundText));
@@ -1330,7 +1331,7 @@ namespace FPC
 
         private IEnumerator PlayFlashBackCoroutine(GameObject currentCorpse)
         {
-            float randomTime = Random.Range(2f, 5f);
+            float randomTime = Random.Range(1f, 3f);
             yield return new WaitForSeconds(randomTime);
             FlashbackManager.Instance.PlayFlashback(FoundCorpseId(currentCorpse));
         }
