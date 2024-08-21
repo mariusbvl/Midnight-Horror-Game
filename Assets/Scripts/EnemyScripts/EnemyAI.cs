@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using FPC;
@@ -26,6 +27,7 @@ namespace EnemyScripts
         private int _destinationsAmount;
         public bool isChasing;
         public bool isPatrolling;
+        private Coroutine fovRoutine;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
         private static readonly int IsRunning = Animator.StringToHash("isRunning");
         [Header("Enemy FOV")]
@@ -69,10 +71,6 @@ namespace EnemyScripts
 
         private void Start()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
             GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("AiDoorCollider");
             doorColliders = new BoxCollider[objectsWithTag.Length];
             for (int i = 0; i < objectsWithTag.Length; i++)
@@ -88,8 +86,6 @@ namespace EnemyScripts
             playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
             // FOV
             playerRef = GameObject.FindGameObjectWithTag("Player");
-            StartCoroutine(FOVRoutine());
-            PlayIdleRoar();
         }
 
         private void Update()
@@ -449,6 +445,26 @@ namespace EnemyScripts
             }
 
             _isRoarCoroutineRunning = false;
+        }
+
+        private void OnEnable()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            fovRoutine = StartCoroutine(FOVRoutine());
+            PlayIdleRoar();
+        }
+
+        private void OnDisable()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+            StopCoroutine(fovRoutine);
+            StopIdleRoar();
         }
     }
 }

@@ -76,6 +76,11 @@ public class GameManager : MonoBehaviour
     [Header("Lift Event")]
     public bool _liftEventAlreadyActivated;
     public bool _isLiftEventFinished;
+
+    [Header("WardEvent")] 
+    [SerializeField] private GameObject wardCorpse;
+    public bool wardEventAlreadyActivated;
+    public bool isWardEventFinished;
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -156,11 +161,43 @@ public class GameManager : MonoBehaviour
         
         TunnelEvent();
         LiftEvent();
+        WardEvent();
         if(EnemyAI.Instance == null) return;
         FinishTunnelEvent();
         FinishLiftEvent();
+        FinishWardEvent();
     }
 
+    private void WardEvent()
+    {
+        if (!_characterController.bounds.Intersects(eventColliders[3].bounds)) return;
+        if(wardEventAlreadyActivated) return;
+        DisableAllEnemies();
+        destinations[2].SetActive(true);
+        enemies[2].SetActive(true);
+        enemy = enemies[2];
+        enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
+        playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
+        isEnemyOn = true;
+        wardEventAlreadyActivated = true;
+        isWardEventFinished = false;
+    }
+
+    private void FinishWardEvent()
+    {
+        if(isWardEventFinished) return;
+        if (_characterController.bounds.Intersects(eventColliders[4].bounds) && IsCorpseFound(wardCorpse) && !EnemyAI.Instance.isChasing)
+        {
+            DisableAllEnemies();
+            isWardEventFinished = true;
+        }
+        else if (_characterController.bounds.Intersects(eventColliders[4].bounds) && !IsCorpseFound(wardCorpse))
+        {
+            DisableAllEnemies();
+            wardEventAlreadyActivated = false;
+        }
+    }
+    
     private void LiftEvent()
     {
         if (!_characterController.bounds.Intersects(eventColliders[1].bounds)) return;
@@ -189,7 +226,7 @@ public class GameManager : MonoBehaviour
     {
         if (!_characterController.bounds.Intersects(eventColliders[0].bounds)) return;
         if(_tunnelEventAlreadyActivated) return;
-        if(!(IsTunnelCorpseFound() && InteractController.Instance.keysPicked[4])) return;
+        if(!(IsCorpseFound(tunnelCorpse) && InteractController.Instance.keysPicked[4])) return;
         DisableAllEnemies();
         destinations[0].SetActive(true);
         enemies[0].SetActive(true);
@@ -226,12 +263,12 @@ public class GameManager : MonoBehaviour
         EnemyAI.Instance = null;
     }
 
-    private bool IsTunnelCorpseFound()
+    private bool IsCorpseFound(GameObject corpse)
     {
         if (InteractController.Instance.foundCorpses == null) return false;
         for (int i = 0; i < InteractController.Instance.foundCorpses.Length; i++)
         {
-            if (tunnelCorpse == InteractController.Instance.foundCorpses[i])
+            if (corpse == InteractController.Instance.foundCorpses[i])
             {
                 return true;
             }
