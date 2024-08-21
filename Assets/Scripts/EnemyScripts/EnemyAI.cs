@@ -11,7 +11,7 @@ namespace EnemyScripts
 {
     public class EnemyAI : MonoBehaviour
     {
-        public static EnemyAI Instance { get; private set; }
+        public static EnemyAI Instance { get; set; }
         public NavMeshAgent aiNavMesh;
         public List<Transform> destinations;
         public Animator aiAnimator;
@@ -66,16 +66,13 @@ namespace EnemyScripts
         private bool _idleSoundIsPlaying;
         private bool _isRoarCoroutineRunning;
         private bool _isRoarPlaying;
-        private void Awake()
+
+        private void Start()
         {
             if (Instance == null)
             {
                 Instance = this;
             }
-        }
-
-        private void Start()
-        {
             GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("AiDoorCollider");
             doorColliders = new BoxCollider[objectsWithTag.Length];
             for (int i = 0; i < objectsWithTag.Length; i++)

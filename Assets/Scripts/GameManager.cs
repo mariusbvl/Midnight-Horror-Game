@@ -69,12 +69,13 @@ public class GameManager : MonoBehaviour
     
     [Header("TunnelEvent")]
     [SerializeField] public GameObject tunnelCorpse;
-    private bool _tunnelEventAlreadyActivated;
-    private bool _isTunnelEventFinished;
+    public bool _tunnelEventAlreadyActivated;
+    public bool _isTunnelEventFinished;
     
     //Lift Event
-    private bool _liftEventAlreadyActivated;
-    private bool _isLiftEventFinished;
+    [Header("Lift Event")]
+    public bool _liftEventAlreadyActivated;
+    public bool _isLiftEventFinished;
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -152,9 +153,11 @@ public class GameManager : MonoBehaviour
 
     private void CheckForEvent()
     {
+        
         TunnelEvent();
-        FinishTunnelEvent();
         LiftEvent();
+        if(EnemyAI.Instance == null) return;
+        FinishTunnelEvent();
         FinishLiftEvent();
     }
 
@@ -195,12 +198,14 @@ public class GameManager : MonoBehaviour
         playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
         isEnemyOn = true;
         _tunnelEventAlreadyActivated = true;
+        
     }
 
     private void FinishTunnelEvent()
     {
+        if(!_tunnelEventAlreadyActivated) return;
         if(_isTunnelEventFinished) return;
-        if(_tunnelEventAlreadyActivated && !EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
+        if(!EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
         {
             DisableAllEnemies();
             _isTunnelEventFinished = true;
@@ -218,6 +223,7 @@ public class GameManager : MonoBehaviour
         enemyHeadTransform = null;
         enemy = null;
         isEnemyOn = false;
+        EnemyAI.Instance = null;
     }
 
     private bool IsTunnelCorpseFound()

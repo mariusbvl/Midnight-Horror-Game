@@ -189,6 +189,7 @@ namespace FPC
         
         private void HandleFootsteps()
         {
+            if(!_characterController.enabled) return;
             if (isGrounded && movement.magnitude > 0)
             {
                 _footstepTimer -= Time.deltaTime;
