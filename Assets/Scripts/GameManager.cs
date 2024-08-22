@@ -81,6 +81,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject wardCorpse;
     public bool wardEventAlreadyActivated;
     public bool isWardEventFinished;
+
+    [Header("HallwayEvent")] 
+    public bool hallwayEventAlreadyActivated;
+    public bool isHallwayEventFinished;
+    
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -162,12 +167,40 @@ public class GameManager : MonoBehaviour
         TunnelEvent();
         LiftEvent();
         WardEvent();
+        HallwayEvent();
         if(EnemyAI.Instance == null) return;
         FinishTunnelEvent();
         FinishLiftEvent();
         FinishWardEvent();
+        FinishHallwayEvent();
     }
 
+    private void HallwayEvent()
+    {
+        if (!_characterController.bounds.Intersects(eventColliders[5].bounds)) return;
+        if(wardEventAlreadyActivated) return;
+        if(!InteractController.Instance.keysPicked[0]) return;
+        DisableAllEnemies();
+        destinations[3].SetActive(true);
+        enemies[3].SetActive(true);
+        enemy = enemies[3];
+        enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
+        playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
+        isEnemyOn = true;
+        wardEventAlreadyActivated = true;
+    }
+    
+    private void FinishHallwayEvent()
+    {
+        if(!wardEventAlreadyActivated) return;
+        if(isWardEventFinished) return;
+        if(!EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
+        {
+            DisableAllEnemies();
+            isWardEventFinished = true;
+        }
+    }
+    
     private void WardEvent()
     {
         if (!_characterController.bounds.Intersects(eventColliders[3].bounds)) return;
