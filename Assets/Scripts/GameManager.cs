@@ -119,6 +119,10 @@ public class GameManager : MonoBehaviour
     private static readonly int IsWalking = Animator.StringToHash("isWalking");
     private static readonly int IsRunning = Animator.StringToHash("isRunning");
 
+    [Header("Audio")]
+    [SerializeField] public AudioSource ambienceMusicAudioSource;
+    [SerializeField] public AudioSource chasingMusicAudioSource;
+
     private void Awake()
     {
         if (Instance == null)
@@ -143,6 +147,7 @@ public class GameManager : MonoBehaviour
         _closeSettingsPanelCallback = _ => CloseOptionsPanel();
         _closeShowControlsPanelCallback = _ => CloseShowControlsPanel();
         inputActions.Player.Pause.performed  += pausePerformedHandler;
+        PlayAmbienceMusic();
         
     }
 
@@ -169,6 +174,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void PlayAmbienceMusic()
+    {
+        if(ambienceMusicAudioSource.gameObject.activeSelf) return;
+        chasingMusicAudioSource.gameObject.SetActive(false);
+        ambienceMusicAudioSource.gameObject.SetActive(true);
+        ambienceMusicAudioSource.Play();
+    }
+    
+    public void PlayChasingMusic()
+    {
+        if(chasingMusicAudioSource.gameObject.activeSelf) return;
+        ambienceMusicAudioSource.gameObject.SetActive(false);
+        chasingMusicAudioSource.gameObject.SetActive(true);
+        chasingMusicAudioSource.Play();
+    }
+    
     private void CheckForEvent()
     {
         

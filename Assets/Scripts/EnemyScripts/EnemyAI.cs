@@ -178,6 +178,7 @@ namespace EnemyScripts
                 isChasing = true;
                 isPatrolling = false;
                 headAim.weight = 1f;
+                GameManager.Instance.PlayChasingMusic();
             }
         }
 
@@ -355,6 +356,7 @@ namespace EnemyScripts
             _idleTime = Random.Range(minIdleTime, maxIdleTime);
             yield return new WaitForSeconds(_idleTime);
             isWalking = true;
+            GameManager.Instance.PlayAmbienceMusic();
             SetNewDestination();
         }
 
