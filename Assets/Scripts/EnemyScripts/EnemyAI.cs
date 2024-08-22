@@ -65,7 +65,7 @@ namespace EnemyScripts
         private AudioSource _monsterStartChaseAudioSource;
         private AudioSource _monsterChasingRoarAudioSource;
         private bool _startChaseSoundPlayed;
-        private bool _idleSoundIsPlaying;
+        public bool _idleSoundIsPlaying;
         private bool _isRoarCoroutineRunning;
         private bool _isRoarPlaying;
 
@@ -403,12 +403,16 @@ namespace EnemyScripts
             _monsterIdleAudioSource = SoundFXManager.Instance.audioSource;
             _monsterIdleAudioSource.transform.SetParent(gameObject.transform);
             _idleSoundIsPlaying = true;
+            Debug.Log($"Audio Source is playing {_monsterIdleAudioSource.isPlaying}");
         }
-
+        
         private void StopIdleRoar()
         {
-            if (!(isChasing && _idleSoundIsPlaying)) return;
-            Destroy(_monsterIdleAudioSource.gameObject);
+            if (!_idleSoundIsPlaying) return;
+            if (_monsterIdleAudioSource.gameObject != null)
+            {
+                Destroy(_monsterIdleAudioSource.gameObject);
+            }
             _idleSoundIsPlaying = false;
         }
         
@@ -459,12 +463,13 @@ namespace EnemyScripts
 
         private void OnDisable()
         {
+            StopCoroutine(fovRoutine);
+            StopIdleRoar();
             if (Instance == this)
             {
                 Instance = null;
             }
-            StopCoroutine(fovRoutine);
-            StopIdleRoar();
+            
         }
     }
 }

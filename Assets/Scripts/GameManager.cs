@@ -178,7 +178,7 @@ public class GameManager : MonoBehaviour
     private void HallwayEvent()
     {
         if (!_characterController.bounds.Intersects(eventColliders[5].bounds)) return;
-        if(wardEventAlreadyActivated) return;
+        if(hallwayEventAlreadyActivated) return;
         if(!InteractController.Instance.keysPicked[0]) return;
         DisableAllEnemies();
         destinations[3].SetActive(true);
@@ -187,17 +187,17 @@ public class GameManager : MonoBehaviour
         enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
         playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
         isEnemyOn = true;
-        wardEventAlreadyActivated = true;
+        hallwayEventAlreadyActivated = true;
     }
     
     private void FinishHallwayEvent()
     {
-        if(!wardEventAlreadyActivated) return;
-        if(isWardEventFinished) return;
+        if(!hallwayEventAlreadyActivated) return;
+        if(isHallwayEventFinished) return;
         if(!EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
         {
             DisableAllEnemies();
-            isWardEventFinished = true;
+            isHallwayEventFinished = true;
         }
     }
     
