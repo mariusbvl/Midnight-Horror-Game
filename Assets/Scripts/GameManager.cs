@@ -69,13 +69,13 @@ public class GameManager : MonoBehaviour
     
     [Header("TunnelEvent")]
     [SerializeField] public GameObject tunnelCorpse;
-    public bool _tunnelEventAlreadyActivated;
-    public bool _isTunnelEventFinished;
+    public bool tunnelEventAlreadyActivated;
+    public bool isTunnelEventFinished;
     
     //Lift Event
     [Header("Lift Event")]
-    public bool _liftEventAlreadyActivated;
-    public bool _isLiftEventFinished;
+    public bool liftEventAlreadyActivated;
+    public bool isLiftEventFinished;
 
     [Header("WardEvent")] 
     [SerializeField] private GameObject wardCorpse;
@@ -85,7 +85,10 @@ public class GameManager : MonoBehaviour
     [Header("HallwayEvent")] 
     public bool hallwayEventAlreadyActivated;
     public bool isHallwayEventFinished;
-    
+
+    [Header("PhoneRoomEvent")]
+    public bool phoneRoomEventAlreadyActivated;
+    public bool isRoomEventFinished;
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -234,7 +237,7 @@ public class GameManager : MonoBehaviour
     private void LiftEvent()
     {
         if (!_characterController.bounds.Intersects(eventColliders[1].bounds)) return;
-        if(_liftEventAlreadyActivated) return;
+        if(liftEventAlreadyActivated) return;
         DisableAllEnemies();
         destinations[1].SetActive(true);
         enemies[1].SetActive(true);
@@ -242,23 +245,23 @@ public class GameManager : MonoBehaviour
         enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
         playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
         isEnemyOn = true;
-        _liftEventAlreadyActivated = true;
+        liftEventAlreadyActivated = true;
     }
 
     private void FinishLiftEvent()
     {
-        if(_isLiftEventFinished) return;
+        if(isLiftEventFinished) return;
         if (_characterController.bounds.Intersects(InteractController.Instance.pitBottomArea.bounds))
         {
             DisableAllEnemies();
-            _isLiftEventFinished = true;
+            isLiftEventFinished = true;
         }
     }
     
     private void TunnelEvent()
     {
         if (!_characterController.bounds.Intersects(eventColliders[0].bounds)) return;
-        if(_tunnelEventAlreadyActivated) return;
+        if(tunnelEventAlreadyActivated) return;
         if(!(IsCorpseFound(tunnelCorpse) && InteractController.Instance.keysPicked[4])) return;
         DisableAllEnemies();
         destinations[0].SetActive(true);
@@ -267,18 +270,18 @@ public class GameManager : MonoBehaviour
         enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
         playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
         isEnemyOn = true;
-        _tunnelEventAlreadyActivated = true;
+        tunnelEventAlreadyActivated = true;
         
     }
 
     private void FinishTunnelEvent()
     {
-        if(!_tunnelEventAlreadyActivated) return;
-        if(_isTunnelEventFinished) return;
+        if(!tunnelEventAlreadyActivated) return;
+        if(isTunnelEventFinished) return;
         if(!EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
         {
             DisableAllEnemies();
-            _isTunnelEventFinished = true;
+            isTunnelEventFinished = true;
         }
     }
     

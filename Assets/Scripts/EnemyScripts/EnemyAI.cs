@@ -1,11 +1,9 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using FPC;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace EnemyScripts
@@ -27,7 +25,7 @@ namespace EnemyScripts
         private int _destinationsAmount;
         public bool isChasing;
         public bool isPatrolling;
-        private Coroutine fovRoutine;
+        private Coroutine _fovRoutine;
         private static readonly int IsWalking = Animator.StringToHash("isWalking");
         private static readonly int IsRunning = Animator.StringToHash("isRunning");
         [Header("Enemy FOV")]
@@ -65,7 +63,7 @@ namespace EnemyScripts
         private AudioSource _monsterStartChaseAudioSource;
         private AudioSource _monsterChasingRoarAudioSource;
         private bool _startChaseSoundPlayed;
-        public bool _idleSoundIsPlaying;
+        private bool _idleSoundIsPlaying;
         private bool _isRoarCoroutineRunning;
         private bool _isRoarPlaying;
 
@@ -403,7 +401,6 @@ namespace EnemyScripts
             _monsterIdleAudioSource = SoundFXManager.Instance.audioSource;
             _monsterIdleAudioSource.transform.SetParent(gameObject.transform);
             _idleSoundIsPlaying = true;
-            Debug.Log($"Audio Source is playing {_monsterIdleAudioSource.isPlaying}");
         }
         
         private void StopIdleRoar()
@@ -457,13 +454,13 @@ namespace EnemyScripts
             {
                 Instance = this;
             }
-            fovRoutine = StartCoroutine(FOVRoutine());
+            _fovRoutine = StartCoroutine(FOVRoutine());
             PlayIdleRoar();
         }
 
         private void OnDisable()
         {
-            StopCoroutine(fovRoutine);
+            StopCoroutine(_fovRoutine);
             StopIdleRoar();
             if (Instance == this)
             {
