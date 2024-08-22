@@ -88,7 +88,12 @@ public class GameManager : MonoBehaviour
 
     [Header("PhoneRoomEvent")]
     public bool phoneRoomEventAlreadyActivated;
-    public bool isRoomEventFinished;
+    public bool isPhoneRoomEventFinished;
+
+    [Header("FinalChaseEvent")]
+    public bool finalChaseEventAlreadyActivated;
+    public bool isFinalChaseEventFinished;
+    
     
     [Header("GameOver")] 
     [SerializeField] private GameObject camHolder;
@@ -171,13 +176,69 @@ public class GameManager : MonoBehaviour
         LiftEvent();
         WardEvent();
         HallwayEvent();
+        PhoneRoomEvent();
+        FinalChaseEvent();
         if(EnemyAI.Instance == null) return;
         FinishTunnelEvent();
         FinishLiftEvent();
         FinishWardEvent();
         FinishHallwayEvent();
+        FinishPhoneRoomEvent();
+        FinishFinalChaseEvent();
     }
 
+    private void FinalChaseEvent()
+    {
+        if (!_characterController.bounds.Intersects(eventColliders[7].bounds)) return;
+        if(finalChaseEventAlreadyActivated) return;
+        if(!InteractController.Instance.wasPoliceCalled && isPhoneRoomEventFinished) return;
+        DisableAllEnemies();
+        destinations[5].SetActive(true);
+        enemies[5].SetActive(true);
+        enemy = enemies[5];
+        enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
+        playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
+        isEnemyOn = true;
+        finalChaseEventAlreadyActivated = true;
+    }
+
+    private void FinishFinalChaseEvent()
+    {
+        if(!finalChaseEventAlreadyActivated) return;
+        if(isFinalChaseEventFinished) return;
+        if(!EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
+        {
+            DisableAllEnemies();
+            isFinalChaseEventFinished = true;
+        }
+    }
+    
+    private void PhoneRoomEvent()
+    {
+        if (!_characterController.bounds.Intersects(eventColliders[6].bounds)) return;
+        if(phoneRoomEventAlreadyActivated) return;
+        if(!InteractController.Instance.wasPoliceCalled) return;
+        DisableAllEnemies();
+        destinations[4].SetActive(true);
+        enemies[4].SetActive(true);
+        enemy = enemies[4];
+        enemyHeadTransform = enemy.transform.Find(_enemyHeadAddress);
+        playerOnJumpScarePoint = enemy.transform.Find("PlayerOnJumpscarePoint");
+        isEnemyOn = true;
+        phoneRoomEventAlreadyActivated = true;
+    }
+
+    private void FinishPhoneRoomEvent()
+    {
+        if(!phoneRoomEventAlreadyActivated) return;
+        if(isPhoneRoomEventFinished) return;
+        if(!EnemyAI.Instance.isChasing && EnemyAI.Instance.isPatrolling)
+        {
+            DisableAllEnemies();
+            isPhoneRoomEventFinished = true;
+        }
+    }
+    
     private void HallwayEvent()
     {
         if (!_characterController.bounds.Intersects(eventColliders[5].bounds)) return;
