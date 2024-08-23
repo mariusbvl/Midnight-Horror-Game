@@ -9,6 +9,9 @@ public class LightsJumpscare : MonoBehaviour
     public GameObject light_03;
     public GameObject light_04;
     public GameObject light_05;
+
+    public AudioSource lightsFlickering;
+
     public int flickerCount = 10;
 
     private void OnTriggerEnter(Collider other)
@@ -19,6 +22,7 @@ public class LightsJumpscare : MonoBehaviour
 
     IEnumerator FlickerLights()
     {
+        lightsFlickering.Play();
         for (int i = 0; i < flickerCount; i++)
         {
             light_01.SetActive(false);
@@ -42,5 +46,6 @@ public class LightsJumpscare : MonoBehaviour
         light_03.SetActive(false);
         light_04.SetActive(false);
         light_05.SetActive(false);
+        lightsFlickering.Stop();
     }
 }
