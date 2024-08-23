@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -52,7 +53,11 @@ namespace FPC
             _inputActions.Player.ChangeItem.performed += _ => ScrollCameraAndFlashlight();
         }
 
-       
+        private void Start()
+        {
+            InteractController.Instance.batteryText.text = InteractController.Instance.nrOfBatteries + "/5";
+        }
+
         void Update()
         {
             SwitchFlashlight();

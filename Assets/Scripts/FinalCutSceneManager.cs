@@ -9,6 +9,9 @@ public class FinalCutSceneManager : MonoBehaviour
 
     private void Start()
     {
+        SoundMixerManager.Instance.SetMasterVolume(SaveManager.Instance.masterVolumeValue);
+        SoundMixerManager.Instance.SetMusicVolume(SaveManager.Instance.musicVolumeValue);
+        SoundMixerManager.Instance.SetSoundFXVolume(SaveManager.Instance.sfxVolumeValue);
         StartCoroutine(WaitForTimeLineToEnd());
     }
 

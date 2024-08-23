@@ -62,6 +62,20 @@ public class SaveManager : MonoBehaviour
       bf.Serialize(file, data);
       file.Close();
    }
+
+   public void SaveBatteries()
+   {
+      if (InteractController.Instance != null)
+      {
+         nrOfBatteries = InteractController.Instance.nrOfBatteries;
+      }
+      
+      if (FlashlightAndCameraController.Instance != null)
+      {
+         batterySliderValue = FlashlightAndCameraController.Instance.consumeSlider.value;
+      }
+      Save();
+   }
 }
 
 [Serializable]

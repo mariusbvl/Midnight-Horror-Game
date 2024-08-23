@@ -66,7 +66,7 @@ Material:
     - _GlowPower: 0.75
     - _GradientScale: 6
     - _LightAngle: 56.530807
-    - _LightEnabled: 0
+    - _LightEnabled: 1
     - _MaskSoftnessX: 0
     - _MaskSoftnessY: 0
     - _Metallic: 0
@@ -105,8 +105,8 @@ Material:
     - _EnvMatrixRotation: {r: 0, g: 0, b: 0, a: 0}
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _GlowColor: {r: 0, g: 1, b: 0, a: 0.5}
-    - _LightDirection: {r: -0.35493502, g: -0.08421152, b: 0.93109053, a: 0}
-    - _LightPosition: {r: -182.19753, g: -35.587036, b: 2.3885665, a: 0}
+    - _LightDirection: {r: -0.86228335, g: -0.15610775, b: -0.48176554, a: 0}
+    - _LightPosition: {r: -102.60639, g: 3.1367483, b: -34.472256, a: 0}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _MyColor: {r: 1, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}

@@ -153,6 +153,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        LoadSettings();
+        SaveSettings();
         //Objective
         _enemyHeadAddress = "Armature/Pelvis/Spine_01/Spine_02/Spine_03/Spine_04/Spine_05/Neck_01/Neck_02/Head";
         _currentObjectiveState = isMainGame ? 1 : 0;
@@ -443,12 +445,26 @@ public class GameManager : MonoBehaviour
     {
         optionsPanel.SetActive(false);
         mainObjectsPanel.SetActive(true);
-        EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
         SaveSettings();
+        EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
         inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
         inputActions.Player.Pause.performed += pausePerformedHandler;
     }
 
+    private void LoadSettings()
+    {
+        FlashlightAndCameraController.Instance.consumeSlider.value = SaveManager.Instance.batterySliderValue;
+        InteractController.Instance.nrOfBatteries = SaveManager.Instance.nrOfBatteries;
+        cameraSensitivitySlider.value = SaveManager.Instance.cameraSensitivityValue;
+        masterVolumeSlider.value = SaveManager.Instance.masterVolumeValue;
+        musicVolumeSlider.value = SaveManager.Instance.musicVolumeValue;
+        sfxVolumeSlider.value = SaveManager.Instance.sfxVolumeValue;
+        CameraController.Instance.cameraSensitivity = cameraSensitivitySlider.value;
+        SoundMixerManager.Instance.SetMasterVolume(masterVolumeSlider.value);
+        SoundMixerManager.Instance.SetSoundFXVolume(sfxVolumeSlider.value);
+        SoundMixerManager.Instance.SetMusicVolume(musicVolumeSlider.value);
+    }
+    
     private void SaveSettings()
     {
         CameraController.Instance.cameraSensitivity = cameraSensitivitySlider.value;

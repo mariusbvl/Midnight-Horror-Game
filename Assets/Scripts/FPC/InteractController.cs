@@ -21,7 +21,7 @@ namespace FPC
         [SerializeField] public TMP_Text batteryText;
         private GameObject _battery;
         private bool _batteryOnHover;
-        [HideInInspector] public float nrOfBatteries;
+        [HideInInspector] public int nrOfBatteries;
         [Header("Corpse")] 
         [SerializeField]public TMP_Text corpsesFoundText;
         private GameObject _currentCorpse;
@@ -924,6 +924,8 @@ namespace FPC
             if (GameManager.Instance.canExitHospital)
             {
                 SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, player.transform, 1f, 0f);
+                SaveManager.Instance.SaveBatteries();
+                _inputActions.Disable();
                 GameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas");
                 GameManager.Instance.loadingManagerMainMenu.LoadScene(4);
             }else
@@ -938,6 +940,8 @@ namespace FPC
                 if (keysPicked[0])
                 {
                     SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, player.transform, 1f, 0f);
+                    SaveManager.Instance.SaveBatteries();
+                    _inputActions.Disable();
                     OutsideGameManager.Instance.loadingManagerMainMenu.canvasToDisable = GameObject.Find("PlayerCanvas").gameObject;
                     OutsideGameManager.Instance.loadingManagerMainMenu.LoadScene(3);
                 }
@@ -1301,13 +1305,12 @@ namespace FPC
         }
         private void InteractWithBattery()
         {
-            if (_batteryOnHover)
-            {
-                SoundFXManager.Instance.PlaySoundFxClip(pickBatteryAndKeyCardSound, player.transform, 1f, 0f);
-                nrOfBatteries++;
-                batteryText.text = nrOfBatteries + "/5";
-                Destroy(_battery);
-            }
+            if (!_batteryOnHover) return;
+            if(nrOfBatteries == 5) return;
+            SoundFXManager.Instance.PlaySoundFxClip(pickBatteryAndKeyCardSound, player.transform, 1f, 0f);
+            nrOfBatteries++;
+            batteryText.text = nrOfBatteries + "/5";
+            Destroy(_battery);
         }
         
         private IEnumerator PhotoCorpse()

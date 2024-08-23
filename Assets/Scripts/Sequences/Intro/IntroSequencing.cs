@@ -49,6 +49,9 @@ public class IntroSequencing : MonoBehaviour
         _cutSceneResetSliderCallback = _ => ResetSkippingSlider();
         _inputActions.UI.Submit.performed += _skipCutSceneCallback;
         _inputActions.UI.Submit.canceled += _cutSceneResetSliderCallback;
+        SoundMixerManager.Instance.SetMasterVolume(SaveManager.Instance.masterVolumeValue);
+        SoundMixerManager.Instance.SetMusicVolume(SaveManager.Instance.musicVolumeValue);
+        SoundMixerManager.Instance.SetSoundFXVolume(SaveManager.Instance.sfxVolumeValue);
     }
 
     private void Start()
@@ -76,6 +79,7 @@ public class IntroSequencing : MonoBehaviour
         while (elapsedTime < timeToSkip)
         {
             if(!_isSkipping) yield break;
+            if(skipSlider == null) yield break;
             elapsedTime += Time.deltaTime;
             skipSlider.value = Mathf.Lerp(0f, 100f, elapsedTime / timeToSkip);
             yield return null;

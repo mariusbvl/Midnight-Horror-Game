@@ -9779,6 +9779,9 @@ MonoBehaviour:
   settingsButton: {fileID: 150336863}
   optionsPanel: {fileID: 2044853843}
   cameraSensitivitySlider: {fileID: 1880979803}
+  masterVolumeSlider: {fileID: 1925044748}
+  sfxVolumeSlider: {fileID: 849277210}
+  musicVolumeSlider: {fileID: 1965970582}
   exitButton: {fileID: 116132851}
   confirmationPanel: {fileID: 2099949493}
   noButton: {fileID: 1998119665}
@@ -19162,7 +19165,8 @@ AudioSource:
   m_GameObject: {fileID: 721902714}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6317325237834529197, guid: 0c7a33f0a64a4e5448c679a5ab721a9f,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: 338857e9205fc6142a4021eaacfca393, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -20518,6 +20522,7 @@ MonoBehaviour:
   doorOpeningDuration: 0.7
   transitionDuration: 1
   lockedText: {fileID: 665589928}
+  keysGameObjects: []
   keysPicked: 0000000000
   aKeyWasPicked: 0
   canAddKey: 0
@@ -20529,6 +20534,8 @@ MonoBehaviour:
   cardDoorOpeningDuration: 2
   accessText: {fileID: 292708458}
   ropeParent: {fileID: 0}
+  pitBottomArea: {fileID: 0}
+  pitTopArea: {fileID: 0}
   ropePileImage: {fileID: 0}
   throwArea: {fileID: 0}
   timeToPassWallCrack: 1.5
@@ -32357,9 +32364,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainMixer: {fileID: 24100000, guid: 0c7a33f0a64a4e5448c679a5ab721a9f, type: 2}
-  masterVolume: 1
-  soundFXVolume: 0.5
-  musicVolume: 0.5
 --- !u!4 &1535350617
 Transform:
   m_ObjectHideFlags: 0
@@ -41558,7 +41562,8 @@ AudioSource:
   m_GameObject: {fileID: 2127346755}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6317325237834529197, guid: 0c7a33f0a64a4e5448c679a5ab721a9f,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: 77b4db68498b8ff4e91eee1d5fe79c70, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.3
@@ -43060,7 +43065,8 @@ AudioSource:
   m_GameObject: {fileID: 1785732584735924645}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6317325237834529197, guid: 0c7a33f0a64a4e5448c679a5ab721a9f,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: f70ab487c91899646b95210d61e81355, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.6
@@ -47127,7 +47133,8 @@ AudioSource:
   m_GameObject: {fileID: 2857390887003009808}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6317325237834529197, guid: 0c7a33f0a64a4e5448c679a5ab721a9f,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: 2aca2a55a1f1523439b9d3ad7f2b192c, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -47263,7 +47270,8 @@ AudioSource:
   m_GameObject: {fileID: 1384749306721324487}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6317325237834529197, guid: 0c7a33f0a64a4e5448c679a5ab721a9f,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: 5d2ecbd30a2775e4cbb2be5a83bbd611, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.6
@@ -47723,7 +47731,8 @@ AudioSource:
   m_GameObject: {fileID: 5112951228409014103}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 6317325237834529197, guid: 0c7a33f0a64a4e5448c679a5ab721a9f,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: f5dd7e5d405ae2442a21b5d17bf0ea86, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.6

@@ -33,12 +33,23 @@ public class FinalSceneManager : MonoBehaviour
 
     void Start()
     {
+        LoadSettings();
         _currentObjectiveState = 5;
         ChangeObjective();
         StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
     }
 
-
+    private void LoadSettings()
+    {
+        FlashlightAndCameraController.Instance.consumeSlider.value = SaveManager.Instance.batterySliderValue;
+        InteractController.Instance.nrOfBatteries = SaveManager.Instance.nrOfBatteries;
+        CameraController.Instance.cameraSensitivity = SaveManager.Instance.cameraSensitivityValue;
+        SoundMixerManager.Instance.SetMasterVolume(SaveManager.Instance.masterVolumeValue);
+        SoundMixerManager.Instance.SetSoundFXVolume(SaveManager.Instance.sfxVolumeValue);
+        SoundMixerManager.Instance.SetMusicVolume(SaveManager.Instance.musicVolumeValue);
+    }
+    
+    
     private void Update()
     {
     }

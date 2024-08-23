@@ -31,6 +31,9 @@ public class OutsideGameManager : MonoBehaviour
     [SerializeField] private Button settingsButton;
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private Slider cameraSensitivitySlider;
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
     [SerializeField] private Button exitButton;
     [SerializeField] private GameObject confirmationPanel;
     [SerializeField] private Button noButton;
@@ -68,6 +71,37 @@ public class OutsideGameManager : MonoBehaviour
         _currentObjectiveState = 0;
         ChangeObjective();
         StartCoroutine(InteractController.Instance.FadeText(objectiveTextInGame));
+        LoadSettings();
+        SaveSettings();
+    }
+
+    private void LoadSettings()
+    {
+        SaveManager.Instance.nrOfBatteries = 2;
+        SaveManager.Instance.batterySliderValue = 100f;
+        FlashlightAndCameraController.Instance.consumeSlider.value = SaveManager.Instance.batterySliderValue;
+        InteractController.Instance.nrOfBatteries = SaveManager.Instance.nrOfBatteries;
+        cameraSensitivitySlider.value = SaveManager.Instance.cameraSensitivityValue;
+        masterVolumeSlider.value = SaveManager.Instance.masterVolumeValue;
+        musicVolumeSlider.value = SaveManager.Instance.musicVolumeValue;
+        sfxVolumeSlider.value = SaveManager.Instance.sfxVolumeValue;
+        CameraController.Instance.cameraSensitivity = cameraSensitivitySlider.value;
+        SoundMixerManager.Instance.SetMasterVolume(masterVolumeSlider.value);
+        SoundMixerManager.Instance.SetSoundFXVolume(sfxVolumeSlider.value);
+        SoundMixerManager.Instance.SetMusicVolume(musicVolumeSlider.value);
+    }
+    
+    private void SaveSettings()
+    {
+        CameraController.Instance.cameraSensitivity = cameraSensitivitySlider.value;
+        SoundMixerManager.Instance.SetMasterVolume(masterVolumeSlider.value);
+        SoundMixerManager.Instance.SetSoundFXVolume(sfxVolumeSlider.value);
+        SoundMixerManager.Instance.SetMusicVolume(musicVolumeSlider.value);
+        SaveManager.Instance.cameraSensitivityValue = cameraSensitivitySlider.value;
+        SaveManager.Instance.masterVolumeValue = masterVolumeSlider.value;
+        SaveManager.Instance.musicVolumeValue = musicVolumeSlider.value;
+        SaveManager.Instance.sfxVolumeValue = sfxVolumeSlider.value;
+        SaveManager.Instance.Save();
     }
     
     public void OpenShowControlsPanel()
@@ -118,6 +152,7 @@ public class OutsideGameManager : MonoBehaviour
     {
         optionsPanel.SetActive(false);
         mainObjectsPanel.SetActive(true);
+        SaveSettings();
         EventSystem.current.SetSelectedGameObject(settingsButton.gameObject);
         _inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
         _inputActions.Player.Pause.performed += _togglePausePanelCallback;
