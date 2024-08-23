@@ -106,7 +106,7 @@ Material:
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _GlowColor: {r: 0, g: 1, b: 0, a: 0.5}
     - _LightDirection: {r: 0, g: 0, b: 1, a: 0}
-    - _LightPosition: {r: -134.062, g: -1.4650002, b: -45.85, a: 0}
+    - _LightPosition: {r: -172.562, g: 7.535, b: -8.849999, a: 0}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _MyColor: {r: 1, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
