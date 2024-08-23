@@ -116,7 +116,7 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _LightAngle: 56.530807
-    - _LightEnabled: 1
+    - _LightEnabled: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -135,8 +135,8 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _LightDirection: {r: -1.0000001, g: 0, b: -0.00000011920929, a: 0}
-    - _LightPosition: {r: -80.102, g: 3.5350006, b: -32.89, a: 0}
+    - _LightDirection: {r: -0.35493502, g: -0.08421152, b: 0.93109053, a: 0}
+    - _LightPosition: {r: -182.19753, g: -35.587036, b: 2.3885665, a: 0}
     - _MyColor: {r: 0.009433985, g: 0.009433985, b: 0.009433985, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
