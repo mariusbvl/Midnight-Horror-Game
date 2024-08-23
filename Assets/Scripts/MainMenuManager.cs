@@ -1,3 +1,5 @@
+using System;
+using FPC;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -12,6 +14,9 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private GameObject blurredPanel;
     [SerializeField] private GameObject mainObjectsPanel;
     [SerializeField] private Slider cameraSensitivitySlider;
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
     [SerializeField] private GameObject confirmationPanel;
     [SerializeField] private Button noButton;
     [SerializeField] private GameObject showControlsPanel;
@@ -32,6 +37,36 @@ public class MainMenuManager : MonoBehaviour
         _inputActions.Player.Pause.performed += _openExitConfirmationPanelCallback;
     }
 
+    private void Start()
+    {
+        LoadSettings();
+        SaveSettings();
+    }
+
+    private void LoadSettings()
+    {
+        cameraSensitivitySlider.value = SaveManager.Instance.cameraSensitivityValue;
+        masterVolumeSlider.value = SaveManager.Instance.masterVolumeValue;
+        musicVolumeSlider.value = SaveManager.Instance.musicVolumeValue;
+        sfxVolumeSlider.value = SaveManager.Instance.sfxVolumeValue;
+    }
+    
+    private void SaveSettings()
+    {
+        if (CameraController.Instance != null)
+        {
+            CameraController.Instance.cameraSensitivity = cameraSensitivitySlider.value;
+        }
+        SoundMixerManager.Instance.SetMasterVolume(masterVolumeSlider.value);
+        SoundMixerManager.Instance.SetSoundFXVolume(sfxVolumeSlider.value);
+        SoundMixerManager.Instance.SetMusicVolume(musicVolumeSlider.value);
+        SaveManager.Instance.cameraSensitivityValue = cameraSensitivitySlider.value;
+        SaveManager.Instance.masterVolumeValue = masterVolumeSlider.value;
+        SaveManager.Instance.musicVolumeValue = musicVolumeSlider.value;
+        SaveManager.Instance.sfxVolumeValue = sfxVolumeSlider.value;
+        SaveManager.Instance.Save();
+    }
+    
     public void OpenExitConfirmationPanel()
     {
         mainObjectsPanel.SetActive(false);
@@ -75,6 +110,7 @@ public class MainMenuManager : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(optionsButton.gameObject);
         _inputActions.Player.Pause.performed -= _closeSettingsPanelCallback;
         _inputActions.Player.Pause.performed += _openExitConfirmationPanelCallback;
+        SaveSettings();
     }
 
 

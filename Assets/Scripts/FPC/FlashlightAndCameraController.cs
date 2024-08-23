@@ -13,7 +13,7 @@ namespace FPC
         [SerializeField] private GameObject handFlashlight;
         [SerializeField] private GameObject modelFlashlight;
         [SerializeField] public GameObject flashlight;
-        [SerializeField] private Slider consumeSlider;
+        [SerializeField] public Slider consumeSlider;
         [SerializeField] private float consumeValue;
         [SerializeField] private TMP_Text lowBatteryText;
         [SerializeField] private float fadeDuration;
@@ -45,7 +45,6 @@ namespace FPC
                 Instance = this;
             }
             _inputActions = new GameInputActions();
-            consumeSlider.value = 100f;
             isFlashlightOn = false;
             isCameraOn = false;
             _inputActions.Player.AltInteract.performed += _ => ChangeFlashlightBool();
