@@ -286,11 +286,33 @@
                 },
                 {
                     "name": "",
+                    "id": "91bb7cad-53e8-48fc-96fa-a57e9957e10a",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "NintendoController",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "09127664-ab63-4b9b-acf3-f76cdedd14b0",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
+                    "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e8efb46e-f414-41ca-aeb1-237b7c74f48f",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "NintendoController",
                     "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -319,11 +341,33 @@
                 },
                 {
                     "name": "",
+                    "id": "bc1b63bf-7469-4c2b-9dc4-155d5b38124f",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "984e625c-a2e1-4088-b6b9-3ce9dac5dc34",
                     "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
+                    "action": "AltInteract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a0f5dfe2-0d8c-47ef-94ad-12a61719ca0a",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "NintendoController",
                     "action": "AltInteract",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -363,6 +407,28 @@
                 },
                 {
                     "name": "",
+                    "id": "145bf795-34bb-45d1-8167-b3cec10fe74a",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "NintendoController",
+                    "action": "ChangeItem",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8119e7fb-a1c4-4b26-af02-f1143c1641b5",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "NintendoController",
+                    "action": "ChangeItem",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "354efd0c-9d2e-48e6-8881-10d6f1a4cb0e",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
@@ -390,6 +456,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a0525cc3-a91c-4b83-9cbc-f9450a236aa5",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "NintendoController",
                     "action": "Throw",
                     "isComposite": false,
                     "isPartOfComposite": false

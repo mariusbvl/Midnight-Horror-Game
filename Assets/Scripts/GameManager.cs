@@ -212,7 +212,7 @@ public class GameManager : MonoBehaviour
     {
         if (!_characterController.bounds.Intersects(eventColliders[7].bounds)) return;
         if(finalChaseEventAlreadyActivated) return;
-        if(!InteractController.Instance.wasPoliceCalled && isPhoneRoomEventFinished) return;
+        if(!(InteractController.Instance.wasPoliceCalled && isPhoneRoomEventFinished)) return;
         DisableAllEnemies();
         destinations[5].SetActive(true);
         enemies[5].SetActive(true);
@@ -336,6 +336,7 @@ public class GameManager : MonoBehaviour
         if (_characterController.bounds.Intersects(InteractController.Instance.pitBottomArea.bounds))
         {
             DisableAllEnemies();
+            PlayAmbienceMusic();
             isLiftEventFinished = true;
         }
     }
