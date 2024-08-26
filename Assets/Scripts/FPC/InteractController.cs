@@ -1148,7 +1148,7 @@ namespace FPC
                 isInteracting = true;
                 SoundFXManager.Instance.PlaySoundFxClip(keyRotateSound, _currentKeyDoor.transform, 1f, 1f);
                 yield return new WaitForSeconds(0.5f);
-                lockedText.text = $"{keysGameObjects[_idInt].name} was used";
+                lockedText.text = $"{keysGameObjects[_doorIdInt].name} was used";
                 StartCoroutine(FadeText(lockedText));
                 SoundFXManager.Instance.PlaySoundFxClip(doorCreakSound, _currentKeyDoor.transform, 1f, 1f);
                 yield return StartCoroutine(OpenKeyDoor());
