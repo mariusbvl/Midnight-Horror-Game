@@ -215,6 +215,7 @@ public class MonsterShootingScene : MonoBehaviour
         fadeIn.SetActive(true);
         yield return new WaitForSeconds(2);
 
+        Cursor.lockState = CursorLockMode.None;
         loadingManager.LoadScene(0);
     }
 }
