@@ -341,6 +341,12 @@ public class GameManager : MonoBehaviour
             PlayAmbienceMusic();
             isLiftEventFinished = true;
         }
+        else if (_characterController.bounds.Intersects(eventColliders[2].bounds) && !isLiftEventFinished)
+        {
+            DisableAllEnemies();
+            liftEventAlreadyActivated = false;
+            Debug.Log("Lift event finished");
+        }
     }
     
     private void TunnelEvent()
