@@ -89,6 +89,7 @@ public class MonsterShootingScene : MonoBehaviour
         gun_01.SetActive(false);
         gun_01_anim.SetActive(true);
         yield return new WaitForSeconds(2);
+        camera_01.SetActive(false);
         camera_02.SetActive(true);
 
         swat_01.GetComponent<Animation>().Play("Shooting");
@@ -106,6 +107,7 @@ public class MonsterShootingScene : MonoBehaviour
         gunshot_01.SetActive(false);
         yield return new WaitForSeconds(1);
 
+        camera_02.SetActive(false);
         camera_03.SetActive(true);
         warAmbience.Play();
 
@@ -174,7 +176,8 @@ public class MonsterShootingScene : MonoBehaviour
         gunshot_04.SetActive(false);
 
         // End Shoot Scene
-
+        
+        camera_03.SetActive(false);
         camera_04.SetActive(true);
         yield return new WaitForSeconds(0.5f);
         
@@ -184,7 +187,8 @@ public class MonsterShootingScene : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         gunshot_01.SetActive(false);
         yield return new WaitForSeconds(1);
-
+        
+        camera_04.SetActive(false);
         camera_05.SetActive(true);
         warAmbience.Stop();
         monsterDieScream.Play();
