@@ -233,16 +233,16 @@ namespace FPC
                 if (isSprinting && isGrounded)
                 {
                     moveSpeed = sprintSpeed;
-                    _footstepInterval = 0.3f;
-                    headBob.amplitude = 0.0032f;
+                    _footstepInterval = 0.4f;
+                    headBob.amplitude = 0.0050f;
                     headBob.frequency = 20f;
                     _sprintTime += Time.deltaTime;
                 }
                 else if (!isSprinting && isGrounded)
                 {
                     moveSpeed = walkSpeed;
-                    _footstepInterval = 0.5f;
-                    headBob.amplitude = 0.0016f;
+                    _footstepInterval = 0.7f;
+                    headBob.amplitude = 0.0025f;
                     headBob.frequency = 10f;
                     _sprintTime = 0;
                 }
