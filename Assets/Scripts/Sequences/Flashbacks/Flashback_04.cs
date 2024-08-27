@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using FPC;
 using UnityEngine;
 
 public class Flashback_04 : MonoBehaviour
@@ -32,6 +33,7 @@ public class Flashback_04 : MonoBehaviour
     IEnumerator ActivateActors()
     {
         yield return new WaitForSeconds(delayTime);
+        InteractController.Instance.characterController.enabled = false;
         bathroomBody.SetActive(false);
         flashbackBuildup.Play();
         flashbackFade.SetActive(true);
@@ -71,5 +73,6 @@ public class Flashback_04 : MonoBehaviour
         camHolder.SetActive(true);
         flashbackFadeOut.SetActive(false);
         bathroomBody.SetActive(true);
+        InteractController.Instance.characterController.enabled = true;
     }
 }
