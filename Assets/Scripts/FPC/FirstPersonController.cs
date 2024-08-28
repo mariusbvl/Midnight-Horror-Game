@@ -51,9 +51,10 @@ namespace FPC
         private bool _isFalling;
         
         [Header("Audio")] 
-        [SerializeField] private AudioClip footSteps;
+        [SerializeField] private AudioClip[] footSteps;
         [SerializeField] private AudioClip breath;
         [SerializeField] private AudioClip fallDamageAudio;
+        private int _currentFootstepIndex; 
         private float _footstepTimer;
         private float _footstepInterval;
         private AudioSource _breathAudioSource;
@@ -195,8 +196,10 @@ namespace FPC
                 _footstepTimer -= Time.deltaTime;
                 if (_footstepTimer <= 0)
                 {
-                    SoundFXManager.Instance.PlaySoundFxClip(footSteps, transform, 0.25f, 0f);
+                    SoundFXManager.Instance.PlaySoundFxClip(footSteps[_currentFootstepIndex], transform, 0.25f, 0f);
                     _footstepTimer = _footstepInterval;
+                    
+                    _currentFootstepIndex = (_currentFootstepIndex + 1) % footSteps.Length;
                 }
             }
         }

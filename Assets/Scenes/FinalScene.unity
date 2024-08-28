@@ -8844,7 +8844,11 @@ MonoBehaviour:
   isHidden: 0
   fallThreshold: 2
   globalVolume: {fileID: 1496375531}
-  footSteps: {fileID: 8300000, guid: e9714160ce34f2b4ab63ff8c27bd68e1, type: 3}
+  footSteps:
+  - {fileID: 8300000, guid: 42e65e088b3f4374e851b8dbd38f3df9, type: 3}
+  - {fileID: 8300000, guid: 8bc94ec6ed537e743b481638bdcd503d, type: 3}
+  - {fileID: 8300000, guid: 5a9383dda6cabc047b7a297602e93eb4, type: 3}
+  - {fileID: 8300000, guid: e9714160ce34f2b4ab63ff8c27bd68e1, type: 3}
   breath: {fileID: 8300000, guid: b781ed97b2877b246b7d58b589544174, type: 3}
   fallDamageAudio: {fileID: 8300000, guid: c350a17c2cc91aa499c8c75d71443a4f, type: 3}
 --- !u!143 &125760031
