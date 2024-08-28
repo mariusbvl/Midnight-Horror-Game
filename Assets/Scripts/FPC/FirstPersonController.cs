@@ -263,12 +263,14 @@ namespace FPC
                 if (_breathAudioSource == null || !_breathAudioSource.isPlaying)
                 {
                     _breathAudioSource = new GameObject("BreathAudioSource").AddComponent<AudioSource>();
+                    _breathAudioSource.outputAudioMixerGroup = SoundFXManager.Instance.soundFXObject.outputAudioMixerGroup;
                     _breathAudioSource.transform.position = transform.position;
                     _breathAudioSource.clip = breath;
                     _breathAudioSource.volume = 1f;
                     _breathAudioSource.spatialBlend = 0f;
                     _breathAudioSource.loop = true;
                     _breathAudioSource.Play();
+                    _breathAudioSource.transform.SetParent(playerMesh.transform);
                 }
             }
             else if (_breathAudioSource != null && _breathAudioSource.isPlaying)

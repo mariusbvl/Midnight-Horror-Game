@@ -3,7 +3,7 @@ using UnityEngine;
 public class SoundFXManager : MonoBehaviour
 {
     public static SoundFXManager Instance { get; private set; }
-    [SerializeField] private AudioSource soundFXObject;
+    [SerializeField] public AudioSource soundFXObject;
     [SerializeField, HideInInspector]public AudioSource audioSource;
     private void Awake()
     {
