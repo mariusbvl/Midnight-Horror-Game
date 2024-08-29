@@ -77,7 +77,7 @@ public class OutsideGameManager : MonoBehaviour
 
     private void LoadSettings()
     {
-        SaveManager.Instance.nrOfBatteries = 2;
+        SaveManager.Instance.nrOfBatteries = 4;
         SaveManager.Instance.batterySliderValue = 100f;
         FlashlightAndCameraController.Instance.consumeSlider.value = SaveManager.Instance.batterySliderValue;
         InteractController.Instance.nrOfBatteries = SaveManager.Instance.nrOfBatteries;

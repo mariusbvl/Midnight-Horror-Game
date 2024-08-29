@@ -9,7 +9,7 @@ public class SaveManager : MonoBehaviour
 {
    public static SaveManager Instance { get; private set; }
 
-   public int nrOfBatteries = 2;
+   public int nrOfBatteries = 4;
    public float batterySliderValue = 100f;
    public float cameraSensitivityValue = 0.1f;
    public float masterVolumeValue = 1f;
